@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador Premium - El Chavo</title>
+    <style>
+        /* === VARIABLES DE DISEÑO PROFESIONAL === */
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f59e0b; 
+            --accent-hover: #d97706;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1e2f 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* === CABECERA === */
+        header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            /* Quitamos el pegamento (sticky) para que no estorbe en celulares */
+            position: relative; 
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            background-image: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        /* === NUEVO BUSCADOR CON BOTÓN === */
+        .search-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 700px;
+            margin: 0 auto;
+            flex-direction: column; /* En celular se apilan */
+        }
+
+        @media (min-width: 600px) {
+            .search-wrapper {
+                flex-direction: row; /* En PC se ponen lado a lado */
+            }
+        }
+
+        .search-box {
+            flex-grow: 1;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent);
+        }
+
+        .search-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* === GRILLA === */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            padding-top: 56.25%;
+            overflow: hidden;
+        }
+
+        .card img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        .duration-badge {
+            position: absolute;
+            bottom: 8px; right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin: 0 0 8px 0;
+            color: white;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+
+        .btn-play {
+            background: var(--accent);
+            color: #000;
+            text-align: center;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Buscador del Chavo</h1>
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-box" placeholder="Ej: San Valentín, ratero, don ramon..." autocomplete="off">
+                <button id="searchBtn" class="search-btn">Buscar</button>
+            </div>
+            <div id="stats" class="stats">Presiona "Buscar" para iniciar.</div>
+        </header>
+
+        <main id="resultsGrid" class="grid">
+            </main>
+    </div>
+
+    <script>
+        // =========================================================================================
+        // 👇👇👇 ZONA DE DATOS: AQUÍ DEBES PEGAR TU CÓDIGO COMPLETO 👇👇👇
+        // =========================================================================================
+        
+        const baseDeDatos = [
+  {
+    "id": "4603965",
+    "title": "EP. 1 - Las travesuras del Chavo",
+    "description": "Los Caquitos intentarán robar una casa. En La Vecindad, La Chilindrina y Quico presumirán sus globos entre ellos, sin embargo, El Chavo sorprenderá a todos haciendo algunas travesuras sin querer.",
+    "duration": "00:25:57",
+    "link": "https://vix.com/video/video-4603965",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603965/ef7a31e7911ae61600b7768be079f4fc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603968",
+    "title": "EP. 2 - El Mozo Revoltoso",
+    "description": "El Mil Caras se fuga de la cárcel; una criada y Chespirito sospechan que está entre ellos. Don Ramón se ofrece a pintar la vecindad a cambio de las rentas que debe, pero los niños provocarán un desastre jugando a los pintores.",
+    "duration": "00:24:30",
+    "link": "https://vix.com/video/video-4603968",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603968/3b451f505ae9c02b9bb390913264cfc5?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603971",
+    "title": "EP. 3 - La enfermedad de la Chilindrina",
+    "description": "La Chilindrina le hará una broma al Chavo. Los Caquitos son acusados de robar un bebé. Los niños le juegan una broma a Cleotilde. Don Ramón tendrá que aguantar los berrinches de La Chilindrina, al no querer tomar su medicina.",
+    "duration": "00:26:48",
+    "link": "https://vix.com/video/video-4603971",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603971/8d365f21ad526782caf5f3d9451d3584?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603974",
+    "title": "EP. 4 - Sarampión",
+    "description": "Chespirito, el Metichito, desenmascara sin querer a Shory frente a sus dos novias. Para evitar pagar el alquiler, Don Ramón inventa que la Chilindrina tiene sarampión, pero por mentiroso, todos los inquilinos pagarán las consecuencias.",
+    "duration": "00:24:17",
+    "link": "https://vix.com/video/video-4603974",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603974/fdc966dd7d4a322e050a9c195189710b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603977",
+    "title": "EP. 5 - Dinero perdido",
+    "description": "Algunos mendigos discuten con Chespirito. Don Ramón le advierte a Chilindrina que se la llevará el ropavejero por desobediente. Quico pierde un peso, Chavo lo encuentra y Chilindrina menciona que es suyo; los tres tratan de quedarse con el dinero.",
+    "duration": "00:26:00",
+    "link": "https://vix.com/video/video-4603977",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603977/52f574aae9a12a9cb23384c7da2c0b7c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603978",
+    "title": "EP. 6 - El enfermo Buena vecindad",
+    "description": "Chapatín le hará ver su suerte a un marido mandilón. En la fiesta de la buena vecindad, todos comentarán sus propósitos para pasarla bien. Sin embargo, el Chavo sin querer molestará a la Chilindrina y todos terminarán discutiendo.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4603978",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603978/4314c25fee0bf9127a44dac6dd703217?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603980",
+    "title": "EP. 7 - El incumplido de don Ramón",
+    "description": "Chespirito inventará que ve un platillo volador para hacer maldades con la comida. Chapatín atenderá a dos boxeadores en su consultorio. Don Ramón no sabe dónde guardó un sobre con dinero para pagar la renta, Chavo y Chilindrina lo ayudarán.",
+    "duration": "00:22:27",
+    "link": "https://vix.com/video/video-4603980",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603980/bae2a009643c33e48b1563b013864f34?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603982",
+    "title": "EP. 8 - Ensuciar a Quico",
+    "description": "Chespirito solicita el trabajo de asistente trilingüe. La Chilindrina y el Chavo están decididos a ensuciar a Quico porque no quiere jugar con ellos ya que irá a una fiesta; el Chavo piensa que ha hecho demasiadas travesuras y se irá de la vecindad.",
+    "duration": "00:20:59",
+    "link": "https://vix.com/video/video-4603982",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603982/3c6d7ddfa05d5a23fe43f6f1f90594d6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603985",
+    "title": "EP. 9 - El Chavo y don Ramón se enamoran",
+    "description": "Chapatín, sin querer, estropea el plan de unos malhechores y ayuda a una mujer necesitada. Don Ramón y El Chavo se enamorarán de las nuevas vecinas y la Chilindrina se pondrá celosa de su comportamiento.",
+    "duration": "00:28:25",
+    "link": "https://vix.com/video/video-4603985",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603985/9491f0ffafc2d9d3c4ff41211b98a1fc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603987",
+    "title": "EP. 10 - El Chavo se enamora",
+    "description": "Chapatín ayuda a un hombre con indigestión. Chespirito intenta matar un mosquito para poder dormir. El Chavo se enamora de Paty y Don Ramón de su tía, ambos se desmayan cuando los besan; por celos, la Chilindrina provoca una guerra de agua.",
+    "duration": "00:21:27",
+    "link": "https://vix.com/video/video-4603987",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603987/3e0ca0484a42c9438b22419534bcb7cd?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603989",
+    "title": "EP. 11 - Cerbatanas y Chochitos",
+    "description": "Los Caquitos roban una caja fuerte. Don Ramón trabaja como carpintero, pero sufre un accidente y acude a que lo curen, por lo que los niños jugarán a ser carpinteros. La Chilindrina hará travesuras con una cerbatana, pero Quico y El Chavo se vengarán.",
+    "duration": "00:21:04",
+    "link": "https://vix.com/video/video-4603989",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603989/f3d8b9a731afbf9d503151f9213082be?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603991",
+    "title": "EP. 12 - El gato y los peces",
+    "description": "Chespirito se confunde al escuchar que quieren liquidarlo. Ramón se queja del gato de Doña Florinda porque, según él, se come sus peces. Después de matar al gato, siguen comiéndose a los peces, pero nadie sabe de la travesura del Chavo.",
+    "duration": "00:24:36",
+    "link": "https://vix.com/video/video-4603991",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603991/801a6e73b2c8904076bc4f62bcbf57c5?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603993",
+    "title": "EP. 13 - El jardinero",
+    "description": "Los Caquitos intentan robar en una casa pero la dueña los sorprende. A Don Ramón le regalan un árbol de chirimoya y lo trasplanta. La Chilindrina le propone al Chavo que jueguen a los jardineros, pero él hará algunas travesuras.",
+    "duration": "00:22:26",
+    "link": "https://vix.com/video/video-4603993",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603993/3b53059b99e6bec8ee9ea5c14e10a3bc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603995",
+    "title": "EP. 14 - Las coplas rancheras, las preguntas, el tendedero",
+    "description": "Rubén y Roberto cantan algunas coplas peleando por el amor de Toña. El Chavo y la Chilindrina estudian sobre el tema de la Independencia. En la vecindad, se pelean por el tendedero; la Chilindrina mandará al Chavo a hacer una travesura.",
+    "duration": "00:29:44",
+    "link": "https://vix.com/video/video-4603995",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603995/743bbb0c902cd4d8e03ebd782f1cef55?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4603998",
+    "title": "EP. 15 - Caja fuerte",
+    "description": "El Chavo y Quico se retan. Los Caquitos intentan abrir una caja fuerte pero se llevan una sorpresa. El Chavo, Chilindrina y Quico, jugarán a la escuela en el patio de la vecindad y ya que pintan las paredes, los pondrán a limpiarlas.",
+    "duration": "00:28:19",
+    "link": "https://vix.com/video/video-4603998",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4603998/7118efe90fbe02dc148d000fc6b2e614?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604000",
+    "title": "EP. 16 - El desayuno",
+    "description": "Don Ramón invita al Chavo a desayunar pero la Chilindrina rompe los huevos y la manda a comprar más. A Quico le regalan unas raquetas de Ping Pong e invita al Chavo a jugar. Debido a esto, harán una travesura con los huevos que compró la Chilindrina.",
+    "duration": "00:24:05",
+    "link": "https://vix.com/video/video-4604000",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604000/0709e1184ee6cbf6c0f1197c80163c6a?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604002",
+    "title": "EP. 17 - El lechero",
+    "description": "Los Caquitos y el Cuajinais discuten sobre quién será el jefe de la banda. En La Vecindad, Don Ramón trabajará como lechero. El Chavo y la Chilindrina quieren alimentar a unos cachorros y sin querer arruinan la venta de Don Ramón.",
+    "duration": "00:26:00",
+    "link": "https://vix.com/video/video-4604002",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604002/5be637ff4eb878b23f06de2868cc7fbe?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604005",
+    "title": "EP. 18 - El bolero y el peluquero",
+    "description": "Don Ramón trabaja como fígaro en una peluquería y el Chavo, como está de vacaciones, trabajará como bolero y ofrecerá sus servicios en la peluquería. Sin querer, el Chavo les jugará algunas travesuras al señor Barriga y a Quico.",
+    "duration": "00:25:24",
+    "link": "https://vix.com/video/video-4604005",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604005/2afd261c42cb12983be10ebff6a6d294?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604007",
+    "title": "EP. 19 - Faltando a clases en domingo",
+    "description": "El Peterete le enseñará a Chompiras a ser mendigo. La Chilindrina, El Chavo y Quico, no fueron a la escuela y planean decir que al Chavo le dio la garrotera para que no los regañen. Sin embargo, Don Ramón les dirá la razón por la que no fueron.",
+    "duration": "00:27:49",
+    "link": "https://vix.com/video/video-4604007",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604007/71e13b51eb84af35b85e5702570cf98c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604009",
+    "title": "EP. 20 - Por jugar con el agua",
+    "description": "Peterete y Chómpiras entran a robar a una casa, pero una viejecita los espanta con una pistola. Los niños juegan con una tina de agua y barquitos, pero se pelean por envidiosos y provocan un conflicto entre Don Ramón y Doña Florinda.",
+    "duration": "00:25:52",
+    "link": "https://vix.com/video/video-4604009",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604009/568062535c16c38c9fbb3919d472be93?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604011",
+    "title": "EP. 21 - El mareo, los sustos",
+    "description": "Chespirito, el Marinero, sin darse cuenta, toma pastillas con licor, así que molestará a los tripulantes. Al Chavo y a la Chilindrina se les ocurrirá jugar a los fantasmas y espantar a Quico. Sin embargo, asustarán a doña Florinda y a don Ramón.",
+    "duration": "00:27:53",
+    "link": "https://vix.com/video/video-4604011",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604011/66ad8374b0f184f977ad461a114243d2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604013",
+    "title": "EP. 22 - El traje",
+    "description": "La Chilindrina piensa que su papá se casará con doña Eduviges, por tal motivo llora desconsolada. Por otro lado, fallece un tío de don Ramón y le hereda un traje que le queda enorme. Sin embargo, los niños lo utilizarán para jugar.",
+    "duration": "00:22:17",
+    "link": "https://vix.com/video/video-4604013",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604013/341273948aa5caf5f0a6b6f75cdaac23?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604015",
+    "title": "EP. 23 - La fiesta de la vecindad",
+    "description": "Para la fiesta de la buena vecindad, todos los inquilinos cooperan para pasarla bien. El Chavo recitará, el Perro Arrepentido, Quico, un poema a la Madre y la Chilindrina, las Aventuras del Charro Valiente, pero al final, todo terminará en un caos.",
+    "duration": "00:27:17",
+    "link": "https://vix.com/video/video-4604015",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604015/c1bd601abf44440672ae30895292eed7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604018",
+    "title": "EP. 24 - El robachicos",
+    "description": "En la vecindad, hay un letrero que dice que están prohibidos los animales y los niños chiquitos, así que doña Cleotilde esconde a su sobrina en una canasta. A causa de una confusión creada por el Chavo, piensan que don Ramón es un robachicos.",
+    "duration": "00:26:26",
+    "link": "https://vix.com/video/video-4604018",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604018/cbc33398ee9c28297fc0c273c9b4be04?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604020",
+    "title": "EP. 25 - El patio sucio depués de la fiesta",
+    "description": "Florinda se queja por tanta basura que quedó después de la fiesta de Independencia, en la vecindad; el Chavo se ofrecerá a barrer por un peso. Mientras limpia, Quico le propone jugar a la guerra; la Chilindrina les hará una broma con unos tronadores.",
+    "duration": "00:25:29",
+    "link": "https://vix.com/video/video-4604020",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604020/8143c47cbf3f33c37d4da471dfeea060?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604022",
+    "title": "EP. 26 - Los insectos",
+    "description": "El Chavo juega con insectos y los baña con gasolina. Después, los meterá a una bolsa de palomitas que traía Quico. Todos confunden las palomitas con los insectos y se los comen. Don Ramón provocará un accidente, al tomar según él, un refresco.",
+    "duration": "00:22:30",
+    "link": "https://vix.com/video/video-4604022",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604022/bd80da91720f4de45a310da5c56f26ea?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604024",
+    "title": "EP. 27 - Grupo musical",
+    "description": "El Chompiras vende una pistola pero un señor cree que lo asaltará. El Chavo, la Chilindrina y Quico juegan a la orquesta. Sin embargo, don Ramón trata de callarlos, el profesor Jirafales impide que los reprima. Así que, los niños se pondrán a tocar.",
+    "duration": "00:23:01",
+    "link": "https://vix.com/video/video-4604024",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604024/b78d6ad359f6251f7e35e8867fd0160f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604027",
+    "title": "EP. 28 - El perro",
+    "description": "El Chavo y Quico creen que la varita de doña Cleotilde es mágica, pero realmente es con la que jugaba su perrito Satanás. Sin embargo, piensan que la bruja del 71 hace hechizos y, creerán que le ha hecho uno a don Ramón.",
+    "duration": "00:25:07",
+    "link": "https://vix.com/video/video-4604027",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604027/91754de3f7762e74e75e1e7bab8dcc50?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604029",
+    "title": "EP. 29 - El zapatero",
+    "description": "Don Ramón trabaja como zapatero en el patio de la vecindad, debido a esto, el Chavo acude con él para aprender el oficio. Después, al Chavo y a Quico se les ocurre jugar con las herramientas de don Ramón y harán algunas travesuras.",
+    "duration": "00:26:45",
+    "link": "https://vix.com/video/video-4604029",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604029/e84a1bf8ee9ceca4dfd67f866f2c02bd?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604031",
+    "title": "EP. 30 - El fútbol callejero",
+    "description": "El Chavo y Quico juegan fútbol en la vecindad pero como no pueden jugar allí, deciden jugar a los atropellados. En la vecindad, creen que el Chavo fue atropellado, sin embargo, a don Ramón y al Sr. Barriga les pasará una tragedia.",
+    "duration": "00:20:10",
+    "link": "https://vix.com/video/video-4604031",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604031/b6d3ef793a19aea6fac4c7b3d47e9e25?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604033",
+    "title": "EP. 31 - Los atropellados",
+    "description": "El Chavo y Quico juegan a los atropellados. Luego, se enteran que a don Ramón le llevan de comer porque lo atropellaron, así que, inventan que el Chavo fue atropellado para que le den comida; todos creerán que él murió y, don Ramón hará una colecta.",
+    "duration": "00:26:14",
+    "link": "https://vix.com/video/video-4604033",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604033/176baa28376a134833c32bbf7297e4b8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604035",
+    "title": "EP. 32 - La posada de la vecindad",
+    "description": "En la vecindad se preparan para una posada, así que Quico y el Chavo hacen piñatas; no obstante, ambos hacen travesuras y las rompen. En plena posada, doña Florinda se vengará de todo lo que le ha hecho don Ramón a Quico.",
+    "duration": "00:25:52",
+    "link": "https://vix.com/video/video-4604035",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604035/8ea4af705ec9d9ed281fed973b21469d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604037",
+    "title": "EP. 33 - Los pasteleros",
+    "description": "Doña Florinda pide a Quico que vaya por un pastel para Jirafales; doña Cleotilde manda al Chavo a que le deje uno a don Ramón. El Sr. Barriga piensa que Florinda le mandó un pastel y que está enamorada de él. Quico y el Chavo jugarán a los pasteleros.",
+    "duration": "00:24:29",
+    "link": "https://vix.com/video/video-4604037",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604037/48429c7524de0147e8482578a2b5c6f6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604039",
+    "title": "EP. 34 - La alcancía",
+    "description": "El Chavo le pide dinero a don Ramón porque lo ve llegar con una alcancía, sin embargo, él, le aconseja que junte cajas de refrescos para obtener lo que quiere. Quico presume su nueva alcancía, al ver eso, don Ramón sorprenderá al Chavo.",
+    "duration": "00:24:09",
+    "link": "https://vix.com/video/video-4604039",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604039/fb5ec81ee4b7e0c18c1781e88c5f5546?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604041",
+    "title": "EP. 35 - El yoyo",
+    "description": "Don Ramón invita a expertos en el yoyo para dar una demostración, a fuera de la vecindad. Quico y el Chavo se retan en hacer trucos con el yoyo pero al querer hacer un truco con un cigarro el cual se lo proporciona don Ramón, habrá malos entendidos.",
+    "duration": "00:22:58",
+    "link": "https://vix.com/video/video-4604041",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604041/e64dd3072cdee1a192faf0d6e90734e8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604043",
+    "title": "EP. 36 - El Billete de Lotería",
+    "description": "El Chavo llora porque no pudo vender un billete de Lotería y, tendrá que pagar 120 pesos a un señor. No obstante, don Ramón le quita el billete y según ve en el periódico que le pegó al gordo. Sin embargo, el Chavo le dará una mala noticia.",
+    "duration": "00:22:15",
+    "link": "https://vix.com/video/video-4604043",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604043/de4a4ae9f340e48066d4ac2329edf919?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604045",
+    "title": "EP. 37 - El sonámbulo",
+    "description": "Don Ramón se intriga al ver que desaparecen sus platos, también el Chavo se extraña al ver que unos platos aparecen en su barril. Cleotilde piensa que los espíritus chocarreros se llevan los platos de don Ramón y Florinda supone que él, es sonámbulo.",
+    "duration": "00:26:30",
+    "link": "https://vix.com/video/video-4604045",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604045/2a4664607ba666e0ed8d7b7019760fd8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604048",
+    "title": "EP. 38 - El misterio de los platos",
+    "description": "El Chavo y Quico tratan de averiguar de dónde salen los platos que están en el barril. En la noche, descubren que todos son sonámbulos. Doña Cleotilde está aferrada con los espíritus chocarreros y hará una sesión de espiritismo, en su casa.",
+    "duration": "00:27:12",
+    "link": "https://vix.com/video/video-4604048",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604048/2e2d59efaed2cefc2be7cc068890a579?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604050",
+    "title": "EP. 39 - La declaración de amor",
+    "description": "Don Ramón aconseja al profesor Jirafales, cómo declararle su amor a doña Florinda. Sin embargo, el Chavo y Quico los ven y malinterpretan las cosas. Quico le confiesa a su mamá lo que vio y, el profesor Jirafales se desquitará con don Ramón.",
+    "duration": "00:27:01",
+    "link": "https://vix.com/video/video-4604050",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604050/1ab18a43157c71d0bbc0e17ed39c9972?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604052",
+    "title": "EP. 40 - La enfermedad de Quico",
+    "description": "Doña Florinda pide a Ramón que vaya a comprar las medicinas de Quico. El Chavo busca a Quico para jugar y él, le pide que tire sus medicinas por la ventana pero le caen en la cara a don Ramón. Sin embargo, descubrirán que eran los análisis de Quico.",
+    "duration": "00:22:39",
+    "link": "https://vix.com/video/video-4604052",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604052/3cff8d58b6d3cd95991b6b93ce4e1ec2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604054",
+    "title": "EP. 41 - El duelo",
+    "description": "Por error, Ramón agarrará el sombrero de su jefe. En la vecindad, se encuentra con Jirafales pero como él ofende a Florinda, se enfrentan a un duelo; ambos se quitan los sombreros y se los encargan al Chavo, quien sin querer, les hará una travesura.",
+    "duration": "00:22:16",
+    "link": "https://vix.com/video/video-4604054",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604054/bb9208e6103962ec267c92396f2945ce?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604057",
+    "title": "EP. 42 - El loco",
+    "description": "El Chavo y Quico juegan a la Cruz Roja. Debido a esto, don Ramón piensa que se hacen los locos. Así que decide hacerse el loco para no pagar la renta. Los niños deciden curar a don Ramón con baños de agua fría, pero terminarán haciendo travesuras.",
+    "duration": "00:23:00",
+    "link": "https://vix.com/video/video-4604057",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604057/ed3c722e9a48560b53f2638bc0e530af?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604059",
+    "title": "EP. 43 - Los globos",
+    "description": "Doña Cleotilde le dice a don Ramón que se deben hacer favores los unos a los otros, el Chavo escucha eso y se lo comenta a Quico. Para jugar avioncito con el Chavo, Quico amarra a una canasta sus globos, pero se sorprenden al ver que ésta, desaparece.",
+    "duration": "00:25:45",
+    "link": "https://vix.com/video/video-4604059",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604059/47ec4869268d5e6424a3d5e298872a44?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604061",
+    "title": "EP. 44 - La cuenta y el tendedero",
+    "description": "Chómpiras y el Peterete hacen un escándalo en un restaurante para no pagar la cuenta. Florinda y don Ramón discuten por la ropa que hay en el tendedero; ella, obsequia al Chavo un pantalón de don Ramón así que él, se vengará con la ropa de Quico.",
+    "duration": "00:23:23",
+    "link": "https://vix.com/video/video-4604061",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604061/6db0e4f963c0ed43ee9b5f497a81b0d6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604063",
+    "title": "EP. 45 - El ladrón del señor Hurtado",
+    "description": "El Sr. Hurtado roba pertenencias de los inquilinos de la vecindad; todos creen que el Chavo es el ratero, así que decide irse. A su regreso, el Chavo le dice a Quico que rezó por el ladrón; el Sr. Hurtado escuchará y reflexionará el mal que ha hecho.",
+    "duration": "00:23:16",
+    "link": "https://vix.com/video/video-4604063",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604063/7ca0cefd805208cba6ce98b0162df607?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604065",
+    "title": "EP. 46 - Llegando tarde a la escuela",
+    "description": "El Chavo, Quico y la Popis se van juntos a la escuela; el Sr. Barriga pide a don Ramón que lleve a Ñoño pero llegan tarde. Jirafales hace preguntas sobre los Animales, sin embargo, los niños contestan mal. Doña Florinda dará una sorpresa al maestro.",
+    "duration": "00:23:37",
+    "link": "https://vix.com/video/video-4604065",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604065/5ccb7a37035bc91af2cf8b55f62d9be2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604067",
+    "title": "EP. 47 - La invisibilidad",
+    "description": "Don Ramón le da al Chavo y a Quico una supuesta fórmula para hacerse invisibles. Después, el Chavo cree que una pintura hace invisibles las cosas y, pinta a Quico. Luego, al ver que el hombre invisible ataca al Sr. Barriga, lo bañará de pintura.",
+    "duration": "00:23:35",
+    "link": "https://vix.com/video/video-4604067",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604067/02f3224132090ab1c8948c4161289b91?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604070",
+    "title": "EP. 48 - La lagartija",
+    "description": "El Chavo atrapa una lagartija y asusta a Malicha, la ahijada de don Ramón, a doña Cleotilde y a doña Florinda. Malicha hace algunas travesuras y ofende a doña Cleotilde. Debido a esto, don Ramón anunciará un infortunio que ha llegado a la vecindad.",
+    "duration": "00:19:13",
+    "link": "https://vix.com/video/video-4604070",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604070/57684c26394923ef7b75da3cb3c3cce1?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604072",
+    "title": "EP. 49 - Harina para polvorear",
+    "description": "Quico va a ir a una fiesta y no quiere ensuciar su ropa; el Chavo y Malicha deciden echarle talco, sin embargo, ensucian a todos los de la vecindad. Doña Florinda le quita el talco al Chavo para que no siga haciendo travesuras pero ella hará una.",
+    "duration": "00:20:03",
+    "link": "https://vix.com/video/video-4604072",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604072/5bb589656f250fdb57ca9821bb7e4ebf?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604074",
+    "title": "EP. 50 - La casita del Chavo",
+    "description": "Chómpiras y Peterete planean sus vacaciones a las Islas Marías. El Chavo acepta que Ñoño y Quico jueguen a la casita con él. Por otro lado, el Sr. Barriga le cobra la renta a don Ramón, pero como no tiene para pagar, no le permitirá dormir en su casa.",
+    "duration": "00:26:58",
+    "link": "https://vix.com/video/video-4604074",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604074/cc333eb7c0a74ef83c6cb3d3ce803574?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604076",
+    "title": "EP. 51 - Las corbatas de don Ramón",
+    "description": "Don Ramón deja sus corbatas en el tendedero pero Quico, el Chavo y la Popis las agarran para jugar. Quico propone al Chavo bañar a su perro Ramoncito, sin embargo, al hacer algunas travesuras, don Ramón los castigará con sus corbatas.",
+    "duration": "00:24:51",
+    "link": "https://vix.com/video/video-4604076",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604076/ec92cb81a06a4c650346dc091b0e9487?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604078",
+    "title": "EP. 52 - El perrito de Quico",
+    "description": "Doña Florinda le regresa a Jirafales el perro que le regaló a Quico, ya que en la vecindad está prohibido tener mascotas. Los niños piensan que doña Cleotilde convirtió el perro en regadera pero después, el Chavo le confiesa a Quico algo que escuchó.",
+    "duration": "00:23:17",
+    "link": "https://vix.com/video/video-4604078",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604078/df22008713ce1b87c5b80a8b1572400f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604081",
+    "title": "EP. 53 - El ratón",
+    "description": "Quico mete una rata en una bolsa para hacer maldades; doña Cleotilde le da una bolsa con azúcar para que se la dé a doña Florinda, al confundirse de bolsas genera algunos conflictos. El Chavo pretende matar a la rata pero provocará una confusión.",
+    "duration": "00:20:03",
+    "link": "https://vix.com/video/video-4604081",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604081/f1f8ced0d22703e4680a5dcd6eaf80e1?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604083",
+    "title": "EP. 54 - Falta de agua",
+    "description": "En la vecindad tienen escasez de agua y, al Chavo y a Quico los mandan con cubetas a la vecindad de enfrente para conseguir, sin embargo, al llegar con las cubetas llenas, hay algunas discusiones, debido a esto, terminarán empapados.",
+    "duration": "00:22:56",
+    "link": "https://vix.com/video/video-4604083",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604083/867f94aa0204362a29e4e002afbbe86d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604085",
+    "title": "EP. 55 - Intento de robo, Los Caquitos, La Carpintería",
+    "description": "Chómpiras muestra a Peterete un aparato que sirve para quitar cristales. El Chavo, Quico y Ñoño juegan a los carpinteros con las herramientas de don Ramón, él los regaña y, doña Florinda le dará su merecido al saber que quemó a Quico con la cola.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4604085",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604085/2ac0e77a9095a7d81cc5b87698448d06?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604087",
+    "title": "EP. 56 - Las aguas frescas Parte 1",
+    "description": "El Chavo vende aguas frescas, de pronto, el Sr. Barriga llega a cobrar la renta a don Ramón, pero él se esconde para no pagar. Aprovechando esa situación, el Chavo los chantajea para vender sus aguas, sin embargo, uno de ellos le quita su puesto.",
+    "duration": "00:20:32",
+    "link": "https://vix.com/video/video-4604087",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604087/7da67b8ac9ec5afbe92f2edc1d33a7c7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604090",
+    "title": "EP. 57 - Las aguas frescas Parte 2",
+    "description": "Don Ramón tiene insomnio, debido a esto, doña Cleotilde le manda con el Chavo un jarabe, no obstante, él creé que lo quiere embrujar. Sin querer, Quico tira el jarabe en las aguas que vende el Chavo; ambos quedarán sorprendidos con los clientes.",
+    "duration": "00:23:34",
+    "link": "https://vix.com/video/video-4604090",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604090/f7799d385b897a776bb318aca63700c7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604092",
+    "title": "EP. 58 - La casa de la viejita El béisbol",
+    "description": "Los Caquitos intentan robar en la casa de una viejita, pero ella los acosará. El Chavo, Quico y Ñoño juegan béisbol en el patio de la vecindad. Sin querer, le pegan al Sr. Barriga y a don Ramón, quienes al verse, discuten por el pago de la renta.",
+    "duration": "00:25:31",
+    "link": "https://vix.com/video/video-4604092",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604092/06ec300ece1978092cb17080e6d9939b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604094",
+    "title": "EP. 59 - Estampitas",
+    "description": "Ñoño presume su álbum de estampitas de billetes. Luego, el Sr. Barriga pierde un fajo de billetes, pero para su suerte, el Chavo lo encuentra, sin embargo, don Ramón pretende quitárselo. Después, el Sr. Barriga recompensará al Chavo por su honradez.",
+    "duration": "00:24:09",
+    "link": "https://vix.com/video/video-4604094",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604094/84f048bf2a717e8342cfd6cd9d131923?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604096",
+    "title": "EP. 60 - El inquilino boxeador",
+    "description": "Don Ramón tiene que abandonar la vecindad, ya que debe quince meses de renta. Al ayudar a empacar sus cosas, Quico y el Chavo encuentran un álbum en donde don Ramón era boxeador. Al ver la foto, el Sr. Barriga sorprenderá a don Ramón con su decisión.",
+    "duration": "00:21:56",
+    "link": "https://vix.com/video/video-4604096",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604096/b42d91f9b77a3eaf26e8e4a5bf765e61?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604098",
+    "title": "EP. 61 - Clases de box",
+    "description": "El Chavo golpea a Quico, debido a esto, don Ramón ve la oportunidad de ser su manager y ganar mucho dinero; así que le da clases de box. Sin embargo, el profesor Jirafales le reclamará a don Ramón por haber enseñado al Chavo, un deporte para salvajes.",
+    "duration": "00:23:55",
+    "link": "https://vix.com/video/video-4604098",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604098/18ef6693927724686278db513c698675?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604100",
+    "title": "EP. 62 - Disgusto amoroso",
+    "description": "El profesor Jirafales y doña Florinda tienen un disgusto. Don Ramón quiere ganarse cien pesos, así que tratará de reconciliar al par de enamorados. Por su parte, Doña Cleotilde aconsejará a doña Florinda para que se reconcilie con el profesor.",
+    "duration": "00:27:09",
+    "link": "https://vix.com/video/video-4604100",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604100/f0f3e979fdd5c606f07bfcd4db1006bf?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604103",
+    "title": "EP. 63 - Los yeseros",
+    "description": "El Sr. Barriga propone a don Ramón enyesar algunas paredes de la vecindad a cambio de algunos meses de renta que debe. Los niños juegan con la mezcla de yeso y, arruinan el trabajo de don Ramón, no obstante, doña Florinda se desmaya al ver a su hijo.",
+    "duration": "00:28:06",
+    "link": "https://vix.com/video/video-4604103",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604103/c6eb9585287e291b665df1d0f5218051?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604105",
+    "title": "EP. 64 - Cyrano de Bergerac, Perdonar a los enemigos",
+    "description": "Cyrano de Bergerac no es completamente feliz porque Roxana, su prima, está enamorada de otro hombre. El Sr. Barriga felicita a don Ramón por soportar lo que le hace doña Florinda. Todos en la vecindad, se dan una lección para perdonar a los enemigos.",
+    "duration": "00:29:22",
+    "link": "https://vix.com/video/video-4604105",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604105/a33d8f1a48d95a6ff937b3ac9789457f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604107",
+    "title": "EP. 65 - El Quijote de la mancha Torta de jamón",
+    "description": "Quijote y Sancho llegan a una posada pero al no tener dinero, los corren. Quico y el Chavo le explican al profesor, unos dibujos que hicieron. Luego, Jirafales les pregunta quién hizo un dibujo de él en forma de longaniza. Quico sobornará al Chavo.",
+    "duration": "00:28:04",
+    "link": "https://vix.com/video/video-4604107",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604107/26c7a90633324da9d9152117237762b3?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604109",
+    "title": "EP. 66 - El callo",
+    "description": "Chespirito se cree Napoleón y alucina que está en el campo de batalla. El Chavo le pega sin querer al Sr. Barriga en un callo. Después, don Ramón tropieza con una caja que dejó el Chavo, esto le provoca que también a él, le salga un callo en el pie.",
+    "duration": "00:25:51",
+    "link": "https://vix.com/video/video-4604109",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604109/f07a5e60111d351a5a286e639b5dca18?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604111",
+    "title": "EP. 67 - Los platillos voladores, sí existen",
+    "description": "Don Ramón le pide al Chavo que le avise cuando llegue el Sr. Barriga, su clave es, ahí viene el platillo volador, sin embargo, él y Quico juegan con la clave. Debido a una travesura del Chavo, Barriga cree que sí existen los platillos voladores.",
+    "duration": "00:24:39",
+    "link": "https://vix.com/video/video-4604111",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604111/1a55d9d2802bae5ecd1ea3bc7ced270e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604114",
+    "title": "EP. 68 - Carta a Santa Claus",
+    "description": "Los Caquitos planean no pagar la cuenta de un restaurante. El Chavo y Quico escriben una carta para Santa Claus. Los habitantes de la vecindad, celebran la Navidad en casa de doña Florinda, por lo tanto, el Sr. Barriga llevará regalos para todos.",
+    "duration": "00:28:31",
+    "link": "https://vix.com/video/video-4604114",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604114/93a673b0da1e7a0fcc8950d96f20683d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604116",
+    "title": "EP. 69 - El año nuevo",
+    "description": "Los vecinos celebran el año nuevo en casa de Don Ramón, Doña Florinda lleva la cena y cada uno de los inquilinos dirá sus propósitos a cumplir para el año venidero; dejan a un lado sus diferencias, se dan un gran abrazo y cantan el tema, un año más.",
+    "duration": "00:25:43",
+    "link": "https://vix.com/video/video-4604116",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604116/b155a7c588134da79066b82003bc7365?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604118",
+    "title": "EP. 70 - El ropavejero",
+    "description": "Chespirito interpreta, Desconcierto en Fu Re Mol para piano y matracas. Don Ramón trabaja de ropavejero y vende una bola de boliche, el Sr. Barriga creé que tiene dinero para jugar pero no para la renta; lo quiere golpear pero alguien le ganará.",
+    "duration": "00:23:10",
+    "link": "https://vix.com/video/video-4604118",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604118/6c3d1f1377e501fca3c99d9687308be9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604120",
+    "title": "EP. 71 - El primo de don Ramón",
+    "description": "Don Román va a la vecindad por una caja que le regaló su primo don Ramón, pero Quico se esconde ahí. El Chavo y Ñoño creen que doña Cleotilde convirtió a Quico en caja y luego en triciclo. Doña Florinda se vengará de lo que le hicieron a su hijo.",
+    "duration": "00:22:10",
+    "link": "https://vix.com/video/video-4604120",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604120/0b9cc0456e024d7b4ef6c2609b32c22f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604122",
+    "title": "EP. 72 - La guitarra",
+    "description": "Don Ramón le enseña al Chavo cómo tocar la guitarra, así mismo, el profesor Jirafales a Quico; sin embargo, ambos niños, no siguen las indicaciones. Debido a esto, el Chavo y Quico sorprenderán a sus instructores con su actitud.",
+    "duration": "00:22:12",
+    "link": "https://vix.com/video/video-4604122",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604122/10b6d1deb7bf7d57c45601cafca16dab?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604124",
+    "title": "EP. 73 - Pelea de agua",
+    "description": "Para ganarse unas monedas, el Chavo ensucia el carro del Sr. Barriga. Quico ayuda al Chavo a lavar el carro pero al hacer algunas travesuras, hay una pelea de agua entre doña Florinda, Barriga y Quico, esto les provocará una tremenda enfermedad.",
+    "duration": "00:21:36",
+    "link": "https://vix.com/video/video-4604124",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604124/1ac8d57b5e6d36716a3d0a2c21a24aae?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604126",
+    "title": "EP. 74 - Entre fiebre y almohadazos",
+    "description": "Doña Florinda pide a la Chilindrina que vaya por medicamento, ya que Quico está enfermo. El Chavo, Quico y la Chilindrina, juegan a los doctores pero al surgir una discusión se hace una guerra de almohadazos, provocando un accidente a Quico.",
+    "duration": "00:21:14",
+    "link": "https://vix.com/video/video-4604126",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604126/1d077a7c578dff182ad5860d43a34204?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604128",
+    "title": "EP. 75 - El regreso de la Chilindrina",
+    "description": "La Chilindrina le manda una carta a don Ramón para avisarle que regresará a la vecindad; doña Florinda no está muy de acuerdo con su regreso, ya que es muy latosa. Al llegar a la vecindad, la Chilindrina hará travesuras con una cerbatana.",
+    "duration": "00:22:46",
+    "link": "https://vix.com/video/video-4604128",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604128/eba9412b97f404d606ddf28ddf81a5ff?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604130",
+    "title": "EP. 76 - Los bomberos",
+    "description": "El Chavo y Quico juegan a los astronautas y, bajan y suben el switch; don Ramón los reprende porque necesita planchar. Después, los niños deciden jugar a los bomberos y utilizan una manguera para agua, sin embargo, harán muchas travesuras con ésta.",
+    "duration": "00:24:01",
+    "link": "https://vix.com/video/video-4604130",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604130/456febd29734323e8e9b634c2ca9e6ce?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604133",
+    "title": "EP. 77 - El Chavo desvelado",
+    "description": "El Chavo está desvelado, así que se queda dormido en la vecindad. Al despertar, la Chilindrina y Quico lo invitan a jugar a los encantados. Por malos entendidos entre los niños y los adultos, el Sr. Barriga le dará un merecido a don Ramón.",
+    "duration": "00:22:18",
+    "link": "https://vix.com/video/video-4604133",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604133/de43fa154382d52bfaa344a100b11535?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604135",
+    "title": "EP. 78 - Jugando a los pasteleros",
+    "description": "Don Ramón se entera que la Chilindrina y el Chavo le lavaron los dientes a un perrito con su cepillo. La Chilindrina propone a Quico y al Chavo jugar a la comidita y hacen unos pastelitos con espuma de rasurar; Quico y el Chavo harán una travesura.",
+    "duration": "00:21:31",
+    "link": "https://vix.com/video/video-4604135",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604135/16e5ec03a56eb4c136616ac9f7b7364c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604137",
+    "title": "EP. 79 - Cumpleaños de Quico",
+    "description": "Doña Florinda no quiere invitar a la chusma al Cumpleaños de Quico; él, le pide que los invite para que le lleven regalos. El Chavo guarda unos sándwiches para compartirlos con don Ramón. Florinda enseña a Quico a compartir las cosas con los demás.",
+    "duration": "00:21:36",
+    "link": "https://vix.com/video/video-4604137",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604137/ad14e776e9f9c4d1bda8d1d3d5c4b29e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604139",
+    "title": "EP. 80 - La mascota de Quico",
+    "description": "El profesor Jirafales le obsequia a Quico un gato. Sin embargo, Quico le quiere contar un chiste al gato pero se le escapa. El Chavo agarra la bicicleta de don Ramón para salir en busca del gato pero sin querer, lo atropella. El Chavo será enjuiciado.",
+    "duration": "00:21:54",
+    "link": "https://vix.com/video/video-4604139",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604139/7190041161f62aaa9482b7d8f96fd46b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604141",
+    "title": "EP. 81 - El juicio del Chavo",
+    "description": "En casa de doña Florinda, se lleva a cabo el Juicio del Chavo; el profesor Jirafales designa funciones a cada uno de los presentes. El Chavo confiesa lo que realmente pasó y todos quedan sorprendidos cuando el profesor Jirafales da su veredicto final.",
+    "duration": "00:23:29",
+    "link": "https://vix.com/video/video-4604141",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604141/64e1c72f7e059ae5a7f15d1da31e14e4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604144",
+    "title": "EP. 82 - La independencia",
+    "description": "El Chavo estudia el tema de la Independencia y Quico le propone jugar a la Guerra. Doña Cleotilde quiere hacer una confesión a don Ramón pero los niños interrumpen haciendo escándalo; él, quedará impactado al saber lo que desea doña Cleotilde.",
+    "duration": "00:18:27",
+    "link": "https://vix.com/video/video-4604144",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604144/0b095470e1f63b94628e248185baaec2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604146",
+    "title": "EP. 83 - El viejo del costal",
+    "description": "Don Ramón consigue trabajo de ropavejero. Por otro lado, doña Florinda le dice a Quico, que a los niños desobedientes se los lleva el ropavejero, así que, él, le pedirá ayuda al Chavo para que don Ramón no se lo lleve en su costal.",
+    "duration": "00:21:28",
+    "link": "https://vix.com/video/video-4604146",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604146/21821a8dc2f081a0e6f558957391a0fe?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604148",
+    "title": "EP. 84 - La bola de boliche",
+    "description": "Don Ramón le da al Sr. Barriga una bola de boliche, a cambio de cinco meses de renta. El Chavo y Quico rompen unas cosas que don Ramón tenía en su costal, así que el Chavo ayuda a pegarlas, no obstante, se le quedará pegada la bola del Sr. Barriga.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604148",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604148/10fe8f3613d4e4791075f7577e42845f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604151",
+    "title": "EP. 85 - El cumpleaños fúnebre de don Ramón",
+    "description": "Doña Florinda, doña Clotilde, Quico y la Chilindrina preparan una fiesta sorpresa para don Ramón; el Chavo, como no está enterado de los preparativos, mal interpreta lo que escucha y piensa que lo matarán. Sin embargo, don Ramón se sorprende.",
+    "duration": "00:22:31",
+    "link": "https://vix.com/video/video-4604151",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604151/5ed2b6f6e4ac804321f777ec6f3a9d69?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604153",
+    "title": "EP. 86 - La Guerra del Chavo",
+    "description": "Unas solteronas atienden a los Caquitos porque piensan que son príncipes. El Chavo y Quico tiran el tendedero jugando con el yoyo y don Ramón les declara la Guerra, asustándolos con una escopeta pero doña Florinda le da una lección.",
+    "duration": "00:23:30",
+    "link": "https://vix.com/video/video-4604153",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604153/d1502a1360e8daef38d953c61e1a1092?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604155",
+    "title": "EP. 87 - Examen de admisión",
+    "description": "Quico, la Chilindrina y el Chavo, tienen que estudiar para hacer un examen de admisión. El Profesor Jirafales pregunta a sus alumnos sobre el vocabulario de inglés e historia, pero al hacer un comentario, se decepciona de ellos.",
+    "duration": "00:23:15",
+    "link": "https://vix.com/video/video-4604155",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604155/21a2ddb696925d5f2068788ff384fbcf?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604157",
+    "title": "EP. 88 - Jugando Ping Pong",
+    "description": "Don Ramón invita a desayunar al Chavo pero al no tener huevos, manda a la Chilindrina a comprar media docena. Quico le enseña al Chavo cómo jugar Ping Pong pero llega la Chilindrina y ocurre una tragedia con el encargo de su papá.",
+    "duration": "00:23:39",
+    "link": "https://vix.com/video/video-4604157",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604157/616147c86f0ee1326620523c09e8d615?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604159",
+    "title": "EP. 89 - La invitación a desayunar",
+    "description": "El Chavo tiene la esperanza de desayunar en casa de don Ramón. Sin embargo, por querer jugar ping pong en el patio de la vecindad, Quico y la Chilindrina confunden los huevos con pelotas, dejando sin desayuno al Chavo.",
+    "duration": "00:24:08",
+    "link": "https://vix.com/video/video-4604159",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604159/a8a35277c117a54031f8d8b4bbfaa9a9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604162",
+    "title": "EP. 90 - Mujeres y don Ramón",
+    "description": "Don Ramón se enamora de una mujer que busca un lugar para vivir, al no encontrar a nadie que le dé informes decide regresar a la vecindad más tarde. Don Ramón le pide a los niños que le hagan un favor, el cual, causa una confusión entre mujeres.",
+    "duration": "00:24:35",
+    "link": "https://vix.com/video/video-4604162",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604162/4163d54d2e3b388afeb4d193793a735c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604164",
+    "title": "EP. 91 - Las vecinas nuevas",
+    "description": "Los caquitos tratan de robar, pero su torpeza se los impide. Don Ramón tiene atenciones con Gloria, la nueva vecina. Mientras el Chavo lo es con Paty, pues ambos están enamorados de las nuevas vecinas, provocado los celos de los demás.",
+    "duration": "00:24:17",
+    "link": "https://vix.com/video/video-4604164",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604164/741a7bf705179d2437da8d57a531a16d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604166",
+    "title": "EP. 92 - Invitación al cine",
+    "description": "Doña Clotilde le insinúa a don Ramón que la Chilindrina necesita una mamá, pero él está enamorado de Gloria, a quien invita al cine. Ella se niega a ir sin embargo, él sigue insistiendo y, queda impactado al escuchar su respuesta.",
+    "duration": "00:22:44",
+    "link": "https://vix.com/video/video-4604166",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604166/bdf611f51675fd38e324363d813c731c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604168",
+    "title": "EP. 93 - Los desmayos",
+    "description": "Las nuevas vecinas causan sensación en la vecindad. Paty le da un beso al Chavo y otro a Quico provocando que se desmayen. Gloria también besa a don Ramón, cayendo desmayado pero el Chavo lo despierta con una travesura.",
+    "duration": "00:23:40",
+    "link": "https://vix.com/video/video-4604168",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604168/5ae9ff72617b806fbacdb8955346b53e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604170",
+    "title": "EP. 94 - Ponchando globos",
+    "description": "La Chilindrina intencionalmente provoca que Quico pierda su globo; al quedar atorado, ella le propone al Chavo darle media torta a cambio de que lo recupere. Más tarde, el Chavo hace una travesura con el globo de Quico.",
+    "duration": "00:24:00",
+    "link": "https://vix.com/video/video-4604170",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604170/09b2d0b9570a056e2e3dbe43c5d4403e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604172",
+    "title": "EP. 95 - El foco",
+    "description": "Quico le quita una revista del Chapulín Colorado al Chavo. Enojado, el Chavo lanza un ladrillo a Quico rompiendo un foco y golpeando a don Ramón. En el intento de poner focos nuevos, los niños hacen travesuras al papá de la Chilindrina.",
+    "duration": "00:22:08",
+    "link": "https://vix.com/video/video-4604172",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604172/8223f06bd7a183d9b8ad6df3534e7b47?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604174",
+    "title": "EP. 96 - Los coches",
+    "description": "El Chavo y Quico juegan con sus carritos pero la Chilindrina les quita uno y lo esconde en el auto del Sr. Barriga. Debido a esto, el Sr. Barriga se da cuenta que no funciona su auto; don Ramón se ofrece en ayudarlo a cambio de unos meses de renta.",
+    "duration": "00:22:05",
+    "link": "https://vix.com/video/video-4604174",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604174/933efa67f60cd5742879c543bcbc26cb?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604176",
+    "title": "EP. 97 - El partido de fútbol",
+    "description": "Los niños y don Ramón ven el fútbol en casa de doña Florinda, pero ella los corre. Quico escucha por la radio la final del fútbol pero el Chavo lo golpea. Doña Florinda lleva a Quico al doctor mientras la Chilindrina le hace una travesura.",
+    "duration": "00:22:28",
+    "link": "https://vix.com/video/video-4604176",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604176/d10bda1eb1c706b2d76ce14c73635abf?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604179",
+    "title": "EP. 98 - La bruja del 71",
+    "description": "Don Ramón pide a la Chilindrina que deje un periódico en casa de doña Clotilde, así que pide al Chavo y a Quico que la acompañen. Al entrar a casa de la Bruja, se imaginan cosas macabras. Doña Cleotilde los sorprende husmeando en su casa.",
+    "duration": "00:22:54",
+    "link": "https://vix.com/video/video-4604179",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604179/a782e6f988e1d9f6f746c1e4cb3b8ec5?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604181",
+    "title": "EP. 99 - Primer día de clases",
+    "description": "El primer día de clases los niños esperan a sus papás, el Chavo se pone triste pues no tiene familia. Don Ramón hace enojar a doña Florinda pero se esconde en el salón de clases pasando todo el día y aprendiendo junto con los niños.",
+    "duration": "00:23:05",
+    "link": "https://vix.com/video/video-4604181",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604181/45b602985c43e1ea04b9569725f46021?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604183",
+    "title": "EP. 100 - Don Ramón, el estudiante",
+    "description": "Por un problema con doña Florinda, don Ramón se refugia en el salón de clases; el Prof. Jirafales se sorprende al ver a don Ramón y él, le dice que nunca es tarde para aprender. El profesor quedará impactado al ver cómo don Ramón controla a sus alumnos.",
+    "duration": "00:22:43",
+    "link": "https://vix.com/video/video-4604183",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604183/cdbca842e2745a2631286f51ec6bc3ef?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604185",
+    "title": "EP. 101 - La mentira mata el alma y la envenena",
+    "description": "Los niños juegan a los atropellados y disfrazan a Quico para que parezca accidentado. Doña Florinda lo ve y se asusta. Después se descubre que todo fue un juego. Doña Florinda se enfada con Don Ramón porque piensa que fue cómplice de la broma.",
+    "duration": "00:21:50",
+    "link": "https://vix.com/video/video-4604185",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604185/0d25b6daf13f75c8f7517b69c092df44?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604187",
+    "title": "EP. 102 - Tratando de bañar al Chavo",
+    "description": "El Chavo no se ha bañado, debido a esto, se la pasa ensuciando algunas cosas que hay en la vecindad. Todos los inquilinos planean bañar al Chavo en contra de su voluntad, sin embargo, él se escapa y, entre ellos se harán algunas travesuras.",
+    "duration": "00:23:07",
+    "link": "https://vix.com/video/video-4604187",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604187/454c0703ff3d4d45bf305b44640bff53?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604189",
+    "title": "EP. 103 - La viruela",
+    "description": "La Chilindrina se va de pinta y Jirafales hablará con don Ramón. Barriga cobra la renta a Ramón pero utiliza a su hija para decir que tiene viruela; Barriga se asusta pero a la Chilindrina si le brotará de verdad y contagiará a todos menos al Chavo.",
+    "duration": "00:21:04",
+    "link": "https://vix.com/video/video-4604189",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604189/930dbdcb83a1614553546aa54d398175?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604192",
+    "title": "EP. 104 - Las palomitas del Chavo",
+    "description": "El Chavo mata insectos con gasolina; al encontrar una bolsa de palomitas, se le ocurre meterlos ahí. Algunos se confunden y comen insectos pensando que son palomitas. Don Ramón provocará una tragedia en su casa, al tomar según él, un refresco.",
+    "duration": "00:24:24",
+    "link": "https://vix.com/video/video-4604192",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604192/e582fb1556f65599ae575d9441f2105e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604194",
+    "title": "EP. 105 - La fuente de los deseos de la vecindad",
+    "description": "La Chilindrina necesita dinero y miente diciendo que la fuente de la vecindad es de deseos, si se le echa una moneda un deseo se cumple; todos le creen pero se aprovechará de la situación. Ella y el Chavo se pelearán por las monedas de la fuente.",
+    "duration": "00:23:06",
+    "link": "https://vix.com/video/video-4604194",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604194/e67b45ccc402b7c58dfe9e9ceb457e53?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604196",
+    "title": "EP. 106 - En los costales cabe todo",
+    "description": "Don Ramón enseña a los niños que no tiren basura en la vecindad y que la tiren en el lugar adecuado; él, tarta de tener limpio el patio pero después de tanto regaño por parte de doña Florinda, se desespera, se enfada y la sorprenderá con su actitud.",
+    "duration": "00:22:21",
+    "link": "https://vix.com/video/video-4604196",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604196/a2e40c9be8541bbc0ee42eaa3c72917d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604198",
+    "title": "EP. 107 - El lechero",
+    "description": "Don Ramón trabaja de repartidor de leche pero el Chavo le arruina la venta. Luego, a la Chilindrina y al Chavo, se les ocurre alimentar a unos perritos, así que agarran leche de la que vende don Ramón. Sin querer, harán un tiradero de tan rico lácteo.",
+    "duration": "00:21:02",
+    "link": "https://vix.com/video/video-4604198",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604198/52ea3fdb9b75b1258eb9b29a9fe71404?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604201",
+    "title": "EP. 108 - Pollo asado",
+    "description": "Doña Cleotilde hace un pollo asado para don Ramón, pero el Chavo, Quico y la Chilindrina tratan de hurtarlo. La Chilindrina se come un pollo y le hace daño, también el Chavo se comerá uno y dejará sorprendidos a don Ramón y a doña Cleotilde.",
+    "duration": "00:22:08",
+    "link": "https://vix.com/video/video-4604201",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604201/203d9cbc3cdf348ec80cca242a39c38c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604203",
+    "title": "EP. 109 - La nueva profesión",
+    "description": "En el patio, don Ramón pinta un par de sillas pero por una travesura, el Chavo provoca que eche el bote de pintura en la puerta de su casa. La Chilindrina propone al Chavo jugar a los pintores, sin embargo, se creará una guerra de pintura.",
+    "duration": "00:21:23",
+    "link": "https://vix.com/video/video-4604203",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604203/c8de0e1d44097829ddaedd83e1bc56ff?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604205",
+    "title": "EP. 110 - La loca de la escalera",
+    "description": "Por un mal entendido, La Chilindrina se molesta con su papá creyendo que se va a casar con Doña Cleotilde. Don Ramón, hereda de su tío un traje enorme pero doña Cleotilde se acomide en arreglarlo; habrá una fuerte confusión que desencadenan los niños.",
+    "duration": "00:21:32",
+    "link": "https://vix.com/video/video-4604205",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604205/f52992d3fde62500defbfb10236d79e9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604207",
+    "title": "EP. 111 - Los tronadores",
+    "description": "Don Ramón vende artículos para fiestas, entre ellos, brujas y tronadores. Quico propone al Chavo jugar a la Guerra de Independencia pero de pronto, la Chilindrina aparece con unos tronadores que le hurtó a su papá. Don Ramón reprenderá al Chavo.",
+    "duration": "00:23:38",
+    "link": "https://vix.com/video/video-4604207",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604207/4b84d80225e3845daa971201f620f350?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604209",
+    "title": "EP. 112 - Arreglando la guitarra",
+    "description": "Don Ramón arregla una guitarra que se encontró pegándola con cola. El Chavo rompe una maceta y trata de pegarla con la cola de don Ramón, pero al querer pegarle a Quico con la guitarra, se da cuenta que la tiene pegada; don Ramón se enfadará con él.",
+    "duration": "00:22:32",
+    "link": "https://vix.com/video/video-4604209",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604209/8867c0e09c29ee42e85605cb6d9fd157?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604212",
+    "title": "EP. 113 - Las historias de terror",
+    "description": "El Chavo y la Chilindrina ven una película de Terror, pero como ella está castigada, doña Cleotilde le apaga la televisión. Después, la Chilindrina propone al Chavo asustar a Quico jugando a los fantasmas, sin embargo, entre todos se asustarán.",
+    "duration": "00:22:00",
+    "link": "https://vix.com/video/video-4604212",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604212/a02cc002c562fe886851c054a137c6d7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604214",
+    "title": "EP. 114 - Música para todos",
+    "description": "En la vecindad, los niños juegan a la orquesta, asi que hacen mucho ruido; don Ramon les llama la atencion pero Jirafales discute con el. Despues, el profesor les explica, que la musica es un arte, sin embargo, ellos continuaran con el escandalo.",
+    "duration": "00:21:32",
+    "link": "https://vix.com/video/video-4604214",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604214/7ec7a8234452074115bf6d259d1ff27c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604216",
+    "title": "EP. 115 - El empleo del Chavo",
+    "description": "El Chavo trabaja de bolero, por otro lado, don Ramón trabaja de peluquero. Ambos ofrecen el mejor de los servicios, pero harán una que otra travesura al atender a sus clientes. La Chilindrina y Quico quedarán impactados por lo que les hace el Chavo.",
+    "duration": "00:22:10",
+    "link": "https://vix.com/video/video-4604216",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604216/7624d5d0f755f163b47dd2e7190af546?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604218",
+    "title": "EP. 116 - Los toreros y toros",
+    "description": "El Sr. Barriga y don Ramón hablan de toros y toreros; debido a esto, Barriga regala a los niños una carretilla, así que todos muestran su afición por los toros. Doña Florinda entristece al ver que a Jirafales, le interesa más torear, que ella.",
+    "duration": "00:22:02",
+    "link": "https://vix.com/video/video-4604218",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604218/bc772a7910b0f916677a3f8afda58a84?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604220",
+    "title": "EP. 117 - Qué golpiza",
+    "description": "La Chilindrina y el Chavo juegan con una carretilla de toro pero asustan a Quico y a Florinda. Jirafales ve que doña Florinda abraza a don Ramón y siente celos, debido a esto, reta a don Ramón a un duelo, sin embargo, uno de ellos sufre una tragedia.",
+    "duration": "00:22:11",
+    "link": "https://vix.com/video/video-4604220",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604220/0499b55da1c0ae897fb7702d076a93ab?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604222",
+    "title": "EP. 118 - Fútbol en la vecindad",
+    "description": "El Chavo, Quico y Ñoño, juegan fútbol en la vecindad, la Chilindrina es discriminada por ser mujer y la ponen de cronista. Don Ramón quiere dar una lección de fútbol a los niños pero por un mal entendido, doña Florinda le dará la lección a él.",
+    "duration": "00:23:06",
+    "link": "https://vix.com/video/video-4604222",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604222/6c1000fe6d3ced841031c9b3dbb94d95?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604225",
+    "title": "EP. 119 - El libro de animales",
+    "description": "Don Ramón le regala a La Chilindrina un libro de animales, aunque no le gusta, lo ocupa para jugar con El Chavo y Quico. Los niños jugarán a adivinar el nombre de un animal, sin embargo, Don Ramón sorprenderá a La Chilindrina.",
+    "duration": "00:23:28",
+    "link": "https://vix.com/video/video-4604225",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604225/70da437fb7b4fc19864891c552c01063?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604227",
+    "title": "EP. 120 - Todo por un pastel",
+    "description": "Doña Florinda pretende sorprender al profesor Jirafales con un pastel y manda a Quico a comprarlo; doña Cleotilde quiere hacer lo mismo con don Ramón pero al mandar al Chavo a dejar el pastel con una nota, se crea una confusión que deberán aclarar.",
+    "duration": "00:22:34",
+    "link": "https://vix.com/video/video-4604227",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604227/f2e59ebfc938ec15074432f456878dd0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604229",
+    "title": "EP. 121 - Piratas y barquitos de papel",
+    "description": "El Chavo juega a los piratas y la Chilindrina con barquitos de papel; Quico, al verlos, presume sus juguetes, debido a esto, provoca una discusión entre ellos. No obstante, don Ramón y doña Florinda terminan entrometiéndose en asuntos de niños.",
+    "duration": "00:22:23",
+    "link": "https://vix.com/video/video-4604229",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604229/98c52012825b68ccfc68e14e013c0711?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604231",
+    "title": "EP. 122 - La siembra de un huevo",
+    "description": "El Chavo intenta sembrar un huevo para que salga un árbol de gallinas y hace un tiradero de tierra en el patio. Debido a esto, Barriga pone a la Chilindrina y al Chavo a limpiar, pero como Quico les hace maldades, entre todos le darán una lección.",
+    "duration": "00:21:27",
+    "link": "https://vix.com/video/video-4604231",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604231/12b44b75d22ebca0a9f77199cedb7ff4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604234",
+    "title": "EP. 123 - Exámenes Parte 1",
+    "description": "Doña Florinda y don Ramón presencian el examen oral y escrito que aplica el profesor Jirafales a los alumnos que reprobaron, o sea, al Chavo, a la Chilindrina y a Quico. Sin embargo, todos hacen y dicen muchas cosas que desesperan al maestro.",
+    "duration": "00:22:04",
+    "link": "https://vix.com/video/video-4604234",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604234/8602ea442eff3adb2a2d33564523da49?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604236",
+    "title": "EP. 124 - Exámenes Parte 2",
+    "description": "El profesor Jirafales continúa aplicando exámenes a los alumnos que reprobaron, debido a esto, doña Florinda y don Ramón se entrometen en lo que el maestro pregunta. No obstante, todos quedarán sorprendidos, al ver a quién le ponen orejas de burro.",
+    "duration": "00:23:04",
+    "link": "https://vix.com/video/video-4604236",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604236/da44b4ea4f2e1c8e42b5109a975ca644?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604238",
+    "title": "EP. 125 - Venta de la vecindad Parte 1",
+    "description": "El Sr. Barriga ofrece al Sr. Calvillo la vecindad, pues tiene que venderla para irse a vivir a nivel del mar por problemas del corazón. Los niños escuchan que se venderá la vecindad y, junto con los adultos, planearán evitar la venta.",
+    "duration": "00:21:33",
+    "link": "https://vix.com/video/video-4604238",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604238/de5d287cc4f8213bd5b82b9efd95d0a3?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604240",
+    "title": "EP. 126 - Venta de la vecindad Parte 2",
+    "description": "Los niños siguen tristes por la venta de la vecindad; Jirafales les explica la razón por la cual el Sr. Barriga la venderá. El Sr. Calvillo acude a la vivienda porque quiere construir un edificio, sin embargo, el Sr. Barriga le dará una mala noticia.",
+    "duration": "00:21:47",
+    "link": "https://vix.com/video/video-4604240",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604240/9792f9d6ff6a74ae42f8a5d1a14d894b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604242",
+    "title": "EP. 127 - Ropa sucia",
+    "description": "El Chavo recolecta botellas vacías para venderlas. Por otro lado, Don Ramón y Doña Florinda discuten por el uso del tendedero, debido a esto, todos se desquitan ensuciando la ropa que ven tendida. El Chavo le hará una travesura a Quico.",
+    "duration": "00:24:41",
+    "link": "https://vix.com/video/video-4604242",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604242/37092f03c1f32605d936a93c0a5bde56?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604245",
+    "title": "EP. 128 - Fútbol americano",
+    "description": "Jirafales obsequia a los niños un balón, pero como el Sr. Barriga no les permite jugar en la vecindad, se van a un llano. Ahí, el profesor y don Ramón, les enseñan las técnicas del fútbol americano, sin embargo, sus aprendices hacen muchas travesuras.",
+    "duration": "00:21:08",
+    "link": "https://vix.com/video/video-4604245",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604245/a31974b5a40612942e2b84d3af7c2a2e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604247",
+    "title": "EP. 129 - El Globero",
+    "description": "Don Ramón trabaja como globero. Sin embargo; El Chavo, sin querer, hace muchas maldades a todos los de la vecindad, así que lo culpan de todo lo malo que pasa. Debido a esto, decide irse, pero, Don Ramón le obsequiará unos globos, para que se quede.",
+    "duration": "00:24:10",
+    "link": "https://vix.com/video/video-4604247",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604247/1ebcb8d66f105713892ff47aa40b3744?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604249",
+    "title": "EP. 130 - Los sombreros",
+    "description": "Don Ramón agarra el sombrero de su jefe, luego, al faltarle el respeto a doña Florinda, él y el profesor Jirafales tienen un enfrentamiento. Debido a esto, ambos encargan al Chavo sus sombreros, sin embargo, él le hará una travesura a uno de estos.",
+    "duration": "00:23:03",
+    "link": "https://vix.com/video/video-4604249",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604249/bfb608e060a5bf1a2d2b2f7aff18a19f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604251",
+    "title": "EP. 131 - El sorteo de la lotería",
+    "description": "El Chavo entristece al no vender un billete de lotería, don Ramón se entera y se queda con el sin pagarlo. Al enterarse que el billete es premiado, don Ramón no lo encuentra, no obstante, al recordar donde lo dejó, el Chavo le da una mala noticia.",
+    "duration": "00:23:13",
+    "link": "https://vix.com/video/video-4604251",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604251/84bf0680dbd26c50986f4c8a08782d41?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604253",
+    "title": "EP. 132 - Clases de animales",
+    "description": "En clase, el Profesor Jirafales quiere comprobar, si sus alumnos estudiaron la lección de Ciencias Naturales, así que hace preguntas sobre el tema, sin embargo, todos contestan mal y lo desesperan; pero, Don Ramón llegará a sorprender a todos.",
+    "duration": "00:21:51",
+    "link": "https://vix.com/video/video-4604253",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604253/e1269f7cd954b86dc206336a1400d102?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604255",
+    "title": "EP. 133 - La muñequita de la Chilindrina",
+    "description": "La Chilindrina juega con su muñequita y los niños se niegan a ser el papá. Quico no quiere ensuciarse porque irá a una fiesta, así que El Chavo y la Chilindrina planean echarle talco; Doña Florinda sale en su defensa, pero cometerá un error.",
+    "duration": "00:22:44",
+    "link": "https://vix.com/video/video-4604255",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604255/a096187055ff14b4496674fc7f59d0d7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604258",
+    "title": "EP. 134 - Los Pantalones del tendedero",
+    "description": "Don Ramón tiene unos pantalones colgados en el tendedero, sin embargo; Doña Florinda discute con él, porque eso da una mala impresión en la vecindad, ya que la visitará el Profesor Jirafales.",
+    "duration": "00:23:32",
+    "link": "https://vix.com/video/video-4604258",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604258/c12d60d622e61de016a91ccd3fee7f64?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604260",
+    "title": "EP. 135 - Invocando a Satanás",
+    "description": "Los niños piensan que doña Cleotilde está invocando a Satanás, pero ella le habla a su perro. Por un mal entendido, don Ramón le pega al perrito y lo fractura, después, a él, le ocurre un accidente. Los niños creerán que la bruja hechizó a don Ramón.",
+    "duration": "00:23:07",
+    "link": "https://vix.com/video/video-4604260",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604260/8f6ff1be32b23e4a647ef977fe9da6ab?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604262",
+    "title": "EP. 136 - Festival de la buena vecindad Parte 1",
+    "description": "Doña Florinda se enfada al ver que don Ramón hace una tarima, él, le informa que es para el Festival de la buena vecindad en donde los niños van a cantar, recitar y a realizar una obra de teatro. No obstante, los niños le hacen muchas travesuras.",
+    "duration": "00:23:09",
+    "link": "https://vix.com/video/video-4604262",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604262/5a38d0af5e01fd16ffd0d9e1986e42ba?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604264",
+    "title": "EP. 137 - La resortera",
+    "description": "El Chavo caza una lagartija con una resortera. Por un malentendido, don Ramón piensa que la Chilindrina murió y se desmaya; a doña Florinda también le pasa lo mismo, pero ella, al ver la lagartija del Chavo, todos creerán que doña Florinda murió.",
+    "duration": "00:21:12",
+    "link": "https://vix.com/video/video-4604264",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604264/7e11bcbfed89f2fcddbb6a2c11d90b1c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604266",
+    "title": "EP. 138 - Festival de la buena vecindad Parte 2",
+    "description": "Don Ramón organiza el Festival de la buena vecindad y pide a Jirafales que presente a los niños en la obra de teatro del Chapulín Colorado. En plena representación, los niños no se ponen de acuerdo, así que surge una riña entre ellos y los adultos.",
+    "duration": "00:22:23",
+    "link": "https://vix.com/video/video-4604266",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604266/52f93011a667c1c1bdbf778c048becc4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604268",
+    "title": "EP. 139 - Festival de la buena vecindad Parte 3",
+    "description": "Continúa el Festival de la buena vecindad y los adultos hacen algunas gracias, sin embargo, los niños interrumpen sus presentaciones. El motivo del festival es para que se fortalezca la amistad, así que los niños interpretan el tema, Óyelo, escúchalo.",
+    "duration": "00:22:09",
+    "link": "https://vix.com/video/video-4604268",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604268/390c855b53e61cec5f01dfedf6b85ba6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604270",
+    "title": "EP. 140 - Hombre invisible",
+    "description": "El Chavo y Quico buscan al hombre invisible, la Chilindrina les dice que su papá hizo la fórmula para hacerse invisibles; Quico la toma pero le hace daño. Luego, piensan que una pintura hace invisibles las cosas, así que harán travesuras con ésta.",
+    "duration": "00:21:38",
+    "link": "https://vix.com/video/video-4604270",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604270/85b82a0edc18f889997bc4f9457d17d6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604272",
+    "title": "EP. 141 - El ratero arrepentido",
+    "description": "En la vecindad se desaparecen las cosas. Quico encuentra una plancha en el barril de El Chavo, así que todos lo acusan de ratero; él, se va de la vecindad. El Sr. Hurtado escucha lo que pidió El Chavo en la iglesia, debido a esto, él lo remunerará.",
+    "duration": "00:23:31",
+    "link": "https://vix.com/video/video-4604272",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604272/8aa73683ca25784f1e691931da2a0806?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604275",
+    "title": "EP. 142 - Las locuras de don Ramón",
+    "description": "La Chilindrina hace una colecta para la Cruz Roja, su papá no quiere cooperar. Al ver a los niños jugar, don Ramón se hace pasar por loco para que el Sr. Barriga no lo corra de la vecindad, pero por sus locuras, le ocurre un accidente.",
+    "duration": "00:22:35",
+    "link": "https://vix.com/video/video-4604275",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604275/00b6d801f33e21f8835241bcf753e0ee?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604277",
+    "title": "EP. 143 - Mordida",
+    "description": "El Chavo encuentra un perro y don Ramón se adueña de él. Luego, el Chavo sale a buscar a otro, pero al acercarse a uno, lo muerde. Todos se preocupan por la salud del Chavo, debido a esto, se sorprenderán al saber qué le pasó al perrito que lo mordió.",
+    "duration": "00:22:31",
+    "link": "https://vix.com/video/video-4604277",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604277/33f6e145026dd1d688244f4c38e562aa?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604279",
+    "title": "EP. 144 - Fiesta Navideña",
+    "description": "En la vecindad se organiza una posada y los niños hacen piñatas; don Ramón les advierte que si no hay piñata, no habrá posada, sin embargo, les hace una broma con una pelota, por tal motivo, el Chavo sin querer, hará una travesura.",
+    "duration": "00:23:16",
+    "link": "https://vix.com/video/video-4604279",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604279/101c0b60c8a34b93e9f858e5bf875095?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604281",
+    "title": "EP. 145 - La Navidad",
+    "description": "Al Chavo le gustaría vivir rodeado de juguetes, así que junto a sus amigos cantan el tema, La Juguetería. Después, los habitantes de la vecindad celebran que es Navidad e interpretan los temas, Óyelo, escúchalo y, Un año más.",
+    "duration": "00:22:20",
+    "link": "https://vix.com/video/video-4604281",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604281/ec0b8a4076371abb160fe72f6db3fc41?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604283",
+    "title": "EP. 146 - El negocio de las botellas",
+    "description": "Don Ramón aconseja al Chavo juntar botellas vacías para venderlas, luego, le obsequia un cochinito para que ahí junte el dinero que gane. El Sr. Barriga le regala a la Chilindrina un casco de americano, ella lo vende pero el dinero se lo quitarán.",
+    "duration": "00:23:26",
+    "link": "https://vix.com/video/video-4604283",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604283/2fcf644c13504bf8e6e7ec81589ad518?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604286",
+    "title": "EP. 147 - Día de la amistad",
+    "description": "Por ser el día de la Amistad, todos los de la vecindad se reúnen en casa de don Ramón y, doña Florinda lleva la cena. Al expresar lo buenos deseos de amistad, el Chavo y Quico pelean, no obstante, el Chavo recapacita y continúa la celebración.",
+    "duration": "00:23:33",
+    "link": "https://vix.com/video/video-4604286",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604286/1f15fb0927207664ca505ce1a8ad19e0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604288",
+    "title": "EP. 148 - Ramoncito",
+    "description": "Don Ramón lava sus corbatas y las cuelga en el tendedero pero el Chavo, Quico y la Chilindrina las agarran para jugar. Los niños bañan a Ramoncito, el perro de Quico y por hacer algunas travesuras con las corbatas, don Ramón les da una lección.",
+    "duration": "00:22:05",
+    "link": "https://vix.com/video/video-4604288",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604288/a48208ea06cc9e7d629d2c79ed8b6adb?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604290",
+    "title": "EP. 149 - Una broma blanca",
+    "description": "En la vecindad se prohíben los animales pero a Quico se le ocurre hacer una broma con un ratón. Los niños piensan que doña Cleotilde convirtió sus palomitas en ratón y que lo metió en una bolsa de papel, debido a esto, todos se hacen maldades.",
+    "duration": "00:22:13",
+    "link": "https://vix.com/video/video-4604290",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604290/c2dec5e837d8b966ba90ab7265bec242?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604292",
+    "title": "EP. 150 - Dinero en maceta",
+    "description": "El Chavo siembra huesitos de chabacano, de pronto, Quico y La Chilindrina le presumen su algodón de azúcar, él, les echará tierra por envidiosos. Luego, La Chilindrina aconseja a El Chavo y a Quico sembrar dinero en una maceta pero les hará una broma.",
+    "duration": "00:23:09",
+    "link": "https://vix.com/video/video-4604292",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604292/efe455a302dc5a120822a171107ae292?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604295",
+    "title": "EP. 151 - La fotografía",
+    "description": "Don Ramón trabaja como fotógrafo, llega a la vecindad con su cámara que termina en el suelo pues el Chavo y Quico la tiran. El Chavo, Quico y la Chilindrina juegan a ser fotógrafos pero terminan peleando. Don Ramón se harta y tira su cámara.",
+    "duration": "00:22:45",
+    "link": "https://vix.com/video/video-4604295",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604295/d3488fed9c43c11da9e22dd8c948819d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604297",
+    "title": "EP. 152 - Intento de fotografía",
+    "description": "Don Ramón trabaja como fotógrafo, pero al intentar tomarle unas fotografías a Godínez, en el parque y, a Quico y a la Chilindrina en la vecindad, el Chavo le arruina su trabajo, no obstante, avería su cámara.",
+    "duration": "00:23:07",
+    "link": "https://vix.com/video/video-4604297",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604297/06737c15c896599770ba5a38018e77e3?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604300",
+    "title": "EP. 153 - Fantasma",
+    "description": "El Chavo juega tenis y sin querer, golpea al Sr. Barriga, quien se hace el muerto para darle una lección. Por la noche, el Sr. Barriga se disfraza de fantasma, eso ocasiona algunos disturbios entre los vecinos, pero el Chavo le hace una travesura.",
+    "duration": "00:20:35",
+    "link": "https://vix.com/video/video-4604300",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604300/0d52c9f92c4c9f1703a61dbaa409d197?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604302",
+    "title": "EP. 154 - Pago renta",
+    "description": "Don Ramón se compra un traje para ir a comer a casa de la biscabuela, no obstante, el Sr. Barriga le reclama que tenga dinero para comprar ropa y no para pagar la renta, así que si no paga por lo menos un mes, no podrá dormir bajo techo.",
+    "duration": "00:23:50",
+    "link": "https://vix.com/video/video-4604302",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604302/11b436520dbdf534eeef7841dc369516?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604305",
+    "title": "EP. 155 - Ayuda a tus semejantes",
+    "description": "El profesor Jirafales le dice al Chavo que debe ayudar a sus semejantes y más, a las personas ancianas, debido a esto, se ofrece a ayudarle a doña Florinda, sin embargo, por un mal entendido, ella piensa que el profesor Jirafales la ofendió.",
+    "duration": "00:23:35",
+    "link": "https://vix.com/video/video-4604305",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604305/e676c876ab8877a8872109fea53f3b1d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604307",
+    "title": "EP. 156 - El negocio de los globos",
+    "description": "Don Ramón emprende un negocio de globos, por tal motivo, la Chilindrina le explica al Chavo, cómo ser el socio de su papá. Quico y el Sr. Barriga le compran globos a don Ramón, sin embargo, el Chavo desempeña bien el plan de sabotaje.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604307",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604307/335575e3f1d531597ae03ed243168a8c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604309",
+    "title": "EP. 157 - La locura",
+    "description": "Todos en la vecindad, piensan que el Chavo está loco porque lo ven hablando con las puertas. Don Ramón le dice a la Chilindrina que los locos se curan con un baño de agua fría, así que intentarán bañar al Chavo para curarlo.",
+    "duration": "00:20:26",
+    "link": "https://vix.com/video/video-4604309",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604309/2ce1d1147db3c8d792dcb584afd820b1?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604311",
+    "title": "EP. 158 - El carpintero Parte 1",
+    "description": "En la vecindad, don Ramón intenta trabajar como carpintero pero los niños lo distraen y le causan algunos accidentes. Después, a ellos, se les ocurre jugar a los carpinteros con las herramientas de don Ramón, sin embargo, harán algunas travesuras.",
+    "duration": "00:23:01",
+    "link": "https://vix.com/video/video-4604311",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604311/c7c35dc83d597acf1732c5c2435d7b12?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604313",
+    "title": "EP. 159 - El carpintero Parte 2",
+    "description": "Don Ramón sigue trabajando como carpintero y en un descuido, los niños juegan con sus herramientas. Quico saca una silla de su casa para arreglarla pero Doña Florinda piensa que por culpa de Don Ramón quedó mal, así que él la tiene que componer.",
+    "duration": "00:18:37",
+    "link": "https://vix.com/video/video-4604313",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604313/529f490713f353233464537f29d53572?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604315",
+    "title": "EP. 160 - Álbum de billetes",
+    "description": "Quico y la Chilindrina presumen su álbum de estampitas de billetes. El Sr. Barriga pierde un fajo de dólares, pero para su suerte, el Chavo lo encuentra, sin embargo, don Ramón pretende quitárselo. El Sr. Barriga recompensa al Chavo por su honradez.",
+    "duration": "00:23:13",
+    "link": "https://vix.com/video/video-4604315",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604315/e387d1af6f7d154960e085f4d913e563?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604317",
+    "title": "EP. 161 - Sonámbulos Parte 1",
+    "description": "Don Ramon padece de sonambulismo y por las noches deja platos vacios en el barril del Chavo. Al ver los platos, los niños piensan que doña Cleotilde hizo un hechizo, mientras que ella cree, que son los espiritus chocarreros los que desaparecen cosas.",
+    "duration": "00:23:18",
+    "link": "https://vix.com/video/video-4604317",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604317/ae62af9d917e94a16237984ca12e835f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604319",
+    "title": "EP. 162 - Sonámbulos Parte 2",
+    "description": "El Chavo, al hacerse el sonambulo, hurta de la casa de Quico una bolsa de pan. Y debido a que se siguen desapareciendo cosas en la vecindad, doña Cleotilde manda al Chavo por cuatro velas para realizar una sesión espiritista.",
+    "duration": "00:23:59",
+    "link": "https://vix.com/video/video-4604319",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604319/d13e4140c35139a5a4ddb0d5cdcc14bd?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604322",
+    "title": "EP. 163 - Sonámbulos Parte 3",
+    "description": "Por la noche, doña Cleotilde organiza una sesion espiritista en casa de don Ramon. Por otro lado, el Chavo, se esconde debajo de la mesa y, a la hora de la sesion, asusta a los presentes ya que piensan que en realidad hay un espiritu chocarrero.",
+    "duration": "00:24:15",
+    "link": "https://vix.com/video/video-4604322",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604322/faafbba18b4ec921ef036cda66c3f091?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604324",
+    "title": "EP. 164 - Escasez de Agua Parte 1",
+    "description": "En la vecindad sufren escasez de agua y a los niños los mandan con cubetas a la vecindad de enfrente para conseguir el vital líquido, sin embargo, como hacen algunas travesuras, todos terminarán mojándose.",
+    "duration": "00:18:57",
+    "link": "https://vix.com/video/video-4604324",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604324/a609dc6e13890d897c353bba0ba1d0cb?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604326",
+    "title": "EP. 165 - Escasez de Agua Parte 2",
+    "description": "En la vecindad continúan con la escasez de agua, doña Florinda le paga a un plomero para que arregle la tubería. Por tal motivo, el Chavo le dice a Quico que lo ayude a tirar el agua que les sobró, sin querer, entre niños y adultos se mojarán.",
+    "duration": "00:20:11",
+    "link": "https://vix.com/video/video-4604326",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604326/0cc07fe7627dbab91495f9281ea90495?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604328",
+    "title": "EP. 166 - Pie hinchado",
+    "description": "Con una caja de botellas vacías, el Chavo le pega al Sr. Barriga en el pie que tiene hinchado, debido a que le salió un callo. Después, por evitar el pago de la renta, a don Ramón también se le hinchará el pie a causa de un accidente que tuvo.",
+    "duration": "00:21:21",
+    "link": "https://vix.com/video/video-4604328",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604328/a4257e84f980a8fab33498048c55e4fe?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604330",
+    "title": "EP. 167 - Corto circuito",
+    "description": "El Chavo se emociona porque don Ramón lo invitó a ver un partido de fútbol; pero Quico hace un corto circuito en la vecindad y cambian los fusibles. Sin querer, la mayoría de los inquilinos junto con el Sr. Barriga, se electrocutan.",
+    "duration": "00:21:14",
+    "link": "https://vix.com/video/video-4604330",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604330/bf64953b9c905758f758c7f31e909844?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604332",
+    "title": "EP. 168 - Somos cursis",
+    "description": "El profesor Jirafales pide a don Ramón un consejo para declararle su amor a doña Florinda; el Chavo y Quico los ven y piensan que ellos están enamorados. Al aclararse el malentendido, doña Florinda y el profesor cantan el tema, Somos cursis.",
+    "duration": "00:23:17",
+    "link": "https://vix.com/video/video-4604332",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604332/5b193f8c839381ba203011b02c76c9cb?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4605265",
+    "title": "EP. 169 - La tienda del Chavo Parte 1",
+    "description": "El Chavo pone su negocio de aguas frescas afuera de la vecindad, Quico al verlo, también pone el suyo. El Sr. Barriga le destroza su puesto al Chavo por lo que le da 50 pesos, al ver eso, Quico destroza el suyo esperando que también le dé dinero.",
+    "duration": "00:19:37",
+    "link": "https://vix.com/video/video-4605265",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4605265/abe50c3992e5a6c8c5b862c523a0db9a?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604337",
+    "title": "EP. 170 - La tienda del Chavo Parte 2",
+    "description": "Don Ramón se esconde del Sr. Barriga para no pagar la renta y le pide al Chavo que le eche aguas para que no lo encuentre. Luego, el Sr. Barriga le pregunta, en dónde está Don Ramón, él, aprovecha la situación y los chantajeará para vender sus aguas.",
+    "duration": "00:19:18",
+    "link": "https://vix.com/video/video-4604337",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604337/810623b4091a0ce4158e1e093175db60?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604339",
+    "title": "EP. 171 - La tienda del Chavo Parte 3",
+    "description": "Don Ramón sufre de insomnio, debido a esto, doña Cleotilde le manda con el Chavo un jarabe, no obstante, él creé que lo quiere embrujar. Sin querer, los niños tiran el jarabe en las aguas que vende el Chavo y a los que beben el agua, les dará sueño.",
+    "duration": "00:21:49",
+    "link": "https://vix.com/video/video-4604339",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604339/1ebc97181a68ff9ac15a832a30c1638e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604341",
+    "title": "EP. 172 - Los pensamientos del profesor",
+    "description": "El profesor escribe unos pensamientos para doña Florinda pero se le cae el papel. Después, don Ramón escribe un pedido para el carnicero, al mandar a la Chilindrina, ella encuentra el papel de Jirafales, debido a esto, decide crear una confusión.",
+    "duration": "00:23:13",
+    "link": "https://vix.com/video/video-4604341",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604341/9600bb58f15e806958f4022ea5094e47?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604343",
+    "title": "EP. 173 - Un fin de semana con las tías",
+    "description": "La Chilindrina regresa después de haber pasado un fin de semana con sus tías; el Chavo ayuda a cargar sus petacas y don Ramón le paga un peso con el cual, se compra una cerbatana y unos chochitos. Al hacer travesuras, don Ramón reprende a su hija.",
+    "duration": "00:23:03",
+    "link": "https://vix.com/video/video-4604343",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604343/29f122ea9c3ec1d55dacd0df9b4896c9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604345",
+    "title": "EP. 174 - El mejor escondite",
+    "description": "Los niños juegan a las escondidillas y Quico se esconde en una caja de madera; Don Ramón sin saber quién está ahí, clava la tapa. Los niños creen que Doña Cleotilde convirtió a Quico en caja. Doña Florinda se desquita de lo que le hicieron a su hijo.",
+    "duration": "00:23:04",
+    "link": "https://vix.com/video/video-4604345",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604345/066eb58718c2a7883fa08d2695bdf9dc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604347",
+    "title": "EP. 175 - La caricatura del profesor Jirafales",
+    "description": "Los niños le explican a Jirafales sobre los dibujos que hicieron en unas láminas. Quico soborna al Chavo para que le diga al maestro que él hizo la caricatura del profesor, por tal motivo, al Chavo lo premiarán, ya que tiene grandes dotes de pintor.",
+    "duration": "00:22:11",
+    "link": "https://vix.com/video/video-4604347",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604347/5f9f955adbfe73b577c7b87d0aa3b920?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604348",
+    "title": "EP. 176 - Los favores de don Ramón",
+    "description": "Don Ramón le pide a El Chavo que le avise cuando llegue el señor Barriga, porque no tiene para pagar la renta, la clave sera: ya llegó el platillo volador, pero, El Chavo y Quico juegan con un platillo y esto provoca que se confunda y se enfade.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604348",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604348/774bd9a10919524c2131278b816df78e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604349",
+    "title": "EP. 177 - Pintando la vecindad Parte 1",
+    "description": "El Chavo, la Chilindrina y Quico hacen un cochinero en la vecindad; doña Florinda y doña Cleotilde piden al Sr. Barriga que la mande a pintar. El profesor Jirafales propone que don Ramón pinte la vecindad a cambio del pago de algunos meses de renta.",
+    "duration": "00:19:39",
+    "link": "https://vix.com/video/video-4604349",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604349/6318fd6773729e5b11b72935c3b238a9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604350",
+    "title": "EP. 178 - Pintando la vecindad Parte 2",
+    "description": "El Chavo ayuda a don Ramón a lavar la vecindad, pero al olvidar un jabón en el patio, provoca que algunos caigan. Al pintar la vecindad, todos se divierten y conviven en armonía, no obstante, el Chavo sorprende con lo que hace.",
+    "duration": "00:19:39",
+    "link": "https://vix.com/video/video-4604350",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604350/076673df340df44aa10bd48c2975eac9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604351",
+    "title": "EP. 179 - La pancita de don Ramón",
+    "description": "A doña Cleotilde se le quema la pancita que le preparaba a don Ramón, él, la auxilia para que no se queme y en agradecimiento, ella le hará unas exquisitas quesadillas de pancita. Al llevar lo prometido, la Chilindrina y el Chavo hacen una travesura.",
+    "duration": "00:22:42",
+    "link": "https://vix.com/video/video-4604351",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604351/2eb8c3d692003f1604010b9ff9c20867?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604352",
+    "title": "EP. 180 - El desalojo de Don Ramón Parte 1",
+    "description": "El Sr. Barriga desaloja a don Ramón, ya que le debe quince meses de renta; el Chavo, la Chilindrina y Quico entristecen al saber eso, pero se resignan y lo ayudan a empacar. Después, encuentran un álbum de fotos y recuerdan cosas del pasado.",
+    "duration": "00:20:44",
+    "link": "https://vix.com/video/video-4604352",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604352/1eef43bc387724a574d6d3f013577c3c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604353",
+    "title": "EP. 181 - El desalojo de Don Ramón Parte 2",
+    "description": "El Chavo, don Ramón, la Chilindrina y Quico, recuerdan cuando el Chavo llegó por primera vez a la vecindad y cuando don Ramón se dedicó a boxear. Por otro lado, el Sr. Barriga le da una gran noticia a don Ramón, que dejará sorprendidos a todos.",
+    "duration": "00:21:15",
+    "link": "https://vix.com/video/video-4604353",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604353/ca4220a5ff2960d536141aee66115bc4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604354",
+    "title": "EP. 182 - El Chavo campeón",
+    "description": "A don Ramón se le ocurre enseñar al Chavo unas técnicas de boxeo, pero debido a que ese deporte es para salvajes, el profesor Jirafales le advierte, que, si vuelve a ver al Chavo con los guantes puestos, a él le raja todo lo que se llama cara.",
+    "duration": "00:23:56",
+    "link": "https://vix.com/video/video-4604354",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604354/50233320c03c9d09c0d3c77fe87a5c12?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604355",
+    "title": "EP. 183 - El casimir",
+    "description": "Don Ramón ofrece al Sr. Barriga un casimir a cambio de la renta que le debe, él acepta, pero pide que se lo guarde. El Chavo y la Chilindrina deciden jugar a la comidita, ella saca un mantel, al ver eso, don Ramón se llevará un gran disgusto.",
+    "duration": "00:23:32",
+    "link": "https://vix.com/video/video-4604355",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604355/4d1f4067870ed9f31f4cd6dbf1e15123?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604356",
+    "title": "EP. 184 - La clase de música",
+    "description": "El profesor Jirafales enseña a los niños las notas musicales, cada uno sale con cada ocurrencia que lo desilusiona, sin embargo, él tiene fe en que aprenderán y cantarán muy bien. Entre todos cantan los temas, Joven aún y, Qué bonita vecindad.",
+    "duration": "00:23:36",
+    "link": "https://vix.com/video/video-4604356",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604356/581679097e17e30c93ccee84ec56865b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604357",
+    "title": "EP. 185 - La venta de churros Parte 1",
+    "description": "Doña Florinda y don Ramón atraviesan por una situación económica muy difícil, así que ambos se asocian para vender churros azucarados. El Chavo y Quico ayudan a doña Florinda a hacer los churros pero hacen un cochinero; ella, se enfadará.",
+    "duration": "00:19:13",
+    "link": "https://vix.com/video/video-4604357",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604357/5cf9e8096ccf63db24b7272af0544ef0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604358",
+    "title": "EP. 186 - La venta de churros Parte 2",
+    "description": "A don Ramón se le ocurre hacer una mesita para la venta de churros y presiona a doña Florinda para salir a venderlos. Por otro lado, doña Florinda invita al profesor Jirafales a que pruebe los churros pero el Chavo les hará algunas travesuras.",
+    "duration": "00:19:47",
+    "link": "https://vix.com/video/video-4604358",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604358/1bc60af231f91fb1dd7280b9b67f8d56?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604359",
+    "title": "EP. 187 - La venta de churros Parte 3",
+    "description": "En plena venta de churros, a don Ramón le urge ir al sanitario, no le queda de otra que pedirle al Chavo que cuide el puesto, sin embargo, a él le gana el antojo. Al pedirle la cuenta del negocio a don Ramón, doña Florinda sorprenderá con su actitud.",
+    "duration": "00:21:06",
+    "link": "https://vix.com/video/video-4604359",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604359/0dba7e5972e7a54b5a10ac6baf1c45e3?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604360",
+    "title": "EP. 188 - Enyesar la vecindad Parte 1",
+    "description": "El señor Barriga propone a don Ramón enyesar el patio de la vecindad a cambio de algunos meses de renta que debe. El Chavo intenta ayudar a don Ramón, pero lo desespera, por otro lado, la Chilindrina y Quico lo molestan y no lo dejan trabajar a gusto.",
+    "duration": "00:20:38",
+    "link": "https://vix.com/video/video-4604360",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604360/b26693ab2876eba635b1433c3ac37b61?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604361",
+    "title": "EP. 189 - Enyesar la vecindad Parte 2",
+    "description": "Don Ramón le comenta a El Chavo que está enyesando con leche de burra pero comete un gran error al decirle esto, ya que se hace un tremendo lió por la dichosa leche. Los niños juegan con el yeso y Doña Florinda quedará sorprendida al ver a su hijo.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4604361",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604361/2fe61ec141863065b7ad42d16b35d0cf?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604362",
+    "title": "EP. 190 - Los cuernos del profesor",
+    "description": "Doña Florinda hace unos cuernos para el profesor Jirafales. El Chavo sin querer le dice al maestro lo de sus cuernos, sin embargo, él lo malinterpreta. Al aclararse la confusión que se creó, el Chavo sorprenderá con lo que hace.",
+    "duration": "00:20:32",
+    "link": "https://vix.com/video/video-4604362",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604362/7f6101ac17831a1f18ce14d403044315?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604363",
+    "title": "EP. 191 - La jardinera",
+    "description": "A Don Ramón le obsequian una chirimoya y la quiere trasplantar. La Chilindrina le propone a El Chavo jugar a los jardineros, pero su padre la sorprende haciendo travesuras; mientras El Chavo al querer ayudarlo, lo hace todo mal.",
+    "duration": "00:24:42",
+    "link": "https://vix.com/video/video-4604363",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604363/cdc03d51ec548f01d870e49c8cb17e92?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604364",
+    "title": "EP. 192 - El voceador",
+    "description": "El Chavo vende periódico y don Ramón hace una demostración con el yoyo para ganar dinero. Quico y el Chavo se retan al jugar con sus yoyos pero encuentran un cigarrillo, al querer hacer un truco con el, se malinterpreta todo y se hará un caos.",
+    "duration": "00:20:29",
+    "link": "https://vix.com/video/video-4604364",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604364/683666aa9c7d5ac0332136eacf860bcd?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604365",
+    "title": "EP. 193 - Ama a tus enemigos",
+    "description": "El Chavo llora porque todo le sale mal, la Chilindrina lo consuela y le dice que la gente buena debe amar a sus enemigos, por lo tanto, el Chavo lo pone en práctica. Don Ramón recibirá felicitaciones por los buenos consejos que le da a su hija.",
+    "duration": "00:22:24",
+    "link": "https://vix.com/video/video-4604365",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604365/836dfd701140453662ba85c1148d11b8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604366",
+    "title": "EP. 194 - Prohibido los niños",
+    "description": "Doña Florinda manda a hacer un letrero donde dice que están prohibidos los animales y los niños chiquitos; doña Cleotilde se preocupa porque le encargaron a su sobrina. Por otro lado, el Chavo crea una confusión con algo que le encarga don Ramón.",
+    "duration": "00:21:10",
+    "link": "https://vix.com/video/video-4604366",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604366/c162981d2c888d76094ae9bf06d65349?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604367",
+    "title": "EP. 195 - La sobrina de la bruja del 71",
+    "description": "Doña Clotilde preocupada por el letrero que vio en el patio, trata de ser discreta con la sobrina que tiene a cargo. Una pequeña broma terminará confundiendo a doña Clotilde y a don Ramón. Don Ramón se sorprenderá con la actitud de doña Florinda.",
+    "duration": "00:20:42",
+    "link": "https://vix.com/video/video-4604367",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604367/9fee4b110c939bdd3fd18550c380b3a0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604368",
+    "title": "EP. 196 - La sorpresa del profesor",
+    "description": "Doña Florinda quiere sorprender al profesor Jirafales con un pastel y manda a Quico a comprar uno; doña Cleotilde hace un pastel para don Ramón y lo manda con el Chavo, ambas escriben una nota y causarán una confusión entre don Ramón y el maestro.",
+    "duration": "00:22:56",
+    "link": "https://vix.com/video/video-4604368",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604368/1276e3d20d54b64e210bfb05776fbca4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604369",
+    "title": "EP. 197 - El sobre de la renta",
+    "description": "El Sr. Barriga desaloja a don Ramón, él le confiesa que tiene el dinero para pagarle en un sobre, pero no lo encuentra; el Chavo, la Chilindrina y Quico lo ayudan; todos se divertirán en la búsqueda del sobre con el dinero para el pago de la renta.",
+    "duration": "00:20:36",
+    "link": "https://vix.com/video/video-4604369",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604369/008c2fdd826adf762a3dbf22240af0f0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604370",
+    "title": "EP. 198 - Chavo atropellado",
+    "description": "Los niños juegan a los atropellados, sin embargo, Quico crea una confusión al decir que atropellaron al Chavo. Don Ramón, trata de sacar provecho sobre el supuesto accidente del Chavo, pero lo descubre el Sr. Barriga; ambos sufrirán un percance.",
+    "duration": "00:22:13",
+    "link": "https://vix.com/video/video-4604370",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604370/fc0612b8857cc4041330bc883b203085?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604371",
+    "title": "EP. 199 - Accidente de don Ramón",
+    "description": "Don Ramón tiene un accidente y doña Cleotilde le lleva comida, al ver eso, el Chavo se hace pasar por atropellado para que le dé de comer, sin embargo, los demás creerán que murió. Debido a esto, don Ramón pide una cooperación para el sepelio.",
+    "duration": "00:23:33",
+    "link": "https://vix.com/video/video-4604371",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604371/142779376b0a8cc92b4e38fa312acded?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604372",
+    "title": "EP. 200 - El nuevo trabajo de don Ramón Parte 1",
+    "description": "Don Ramón trabaja como zapatero pero El Chavo, Quico y La Chilindrina lo molestan. El Chavo quiere pegarle a Quico con un martillo porque rompió un huevo que se iba a comer; Don Ramón le dice que la venganza nunca es buena, mata el alma y la envenena.",
+    "duration": "00:22:06",
+    "link": "https://vix.com/video/video-4604372",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604372/8f604c923d0ea7aa46b0546d93e3084d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604373",
+    "title": "EP. 201 - El nuevo trabajo de don Ramón Parte 2",
+    "description": "Don Barriga y doña Florinda le piden a don Ramón que les arregle sus zapatos. Quico, la Chilindrina y el Chavo aprovechan que don Ramón está ocupado y deciden jugar a los zapateros aunque terminarán haciendo un desastre.",
+    "duration": "00:21:36",
+    "link": "https://vix.com/video/video-4604373",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604373/223c5a6042208ccb7a941bde8eb02882?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604374",
+    "title": "EP. 202 - La venganza nunca es buena",
+    "description": "Don Ramón le enseña a El Chavo el oficio de zapatero. Quico reta al Chavo para que rompa un vidrio y, le dará un vaso de leche. Como todo fue una broma, La Chilindrina le da dos vasos de leche al Chavo. Después, sin querer, ella, le hará una travesura.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4604374",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604374/1fd141e902ab38e21024d47241ac997c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604375",
+    "title": "EP. 203 - Concurso en la TV",
+    "description": "Don Ramón quiere ver el Concurso de Miss Universo que pasarán por la televisión, pero su tele está descompuesta. Así que todos se juntan en casa de doña Florinda para ver el certamen; las mujeres se aburren porque los hombres no les prestan atención.",
+    "duration": "00:23:03",
+    "link": "https://vix.com/video/video-4604375",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604375/7c0187c8693ce58ab2dc34e6cb859d1c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604376",
+    "title": "EP. 204 - El baño del Chavo",
+    "description": "En el salón de clases, el profesor Jirafales habla sobre el tema de la Higiene y, al Chavo lo regaña porque no se ha bañado. En la vecindad, Quico y la Chilindrina planean bañar al Chavo, pero mojan a todos, menos a quien querían.",
+    "duration": "00:22:35",
+    "link": "https://vix.com/video/video-4604376",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604376/94014c98d4e7382c3c5a0c279b7ee548?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604377",
+    "title": "EP. 205 - Pateando la pelota",
+    "description": "El Sr. Barriga prohíbe jugar fútbol en el patio de la vecindad, por lo que doña Florinda se enfada y le dice que si quiere que le pague la renta, deberá permitir que los niños jueguen fútbol. Así que el Sr. Barriga, sorprenderá con su actitud.",
+    "duration": "00:23:14",
+    "link": "https://vix.com/video/video-4604377",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604377/7f4110aebe0328afd47381d5a726abf7?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604378",
+    "title": "EP. 206 - Ciencias Naturales Parte 1",
+    "description": "El profesor Jirafales castiga a la Chilindrina y a Quico, por lo que llegan tarde a sus casas. En la escuela, el profesor hará preguntas a sus alumnos sobre Ciencias Naturales, pero como todos responden mal, prefiere hacer una práctica de zoología.",
+    "duration": "00:20:56",
+    "link": "https://vix.com/video/video-4604378",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604378/26fa933b805cd0efa220b00d8811b07f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604379",
+    "title": "EP. 207 - Ciencias Naturales Parte 2",
+    "description": "El profesor Jirafales muestra a sus alumnos un alacrán dentro de un frasco; Quico lo pide prestado para mostrárselo a su mamá. Doña Florinda, al verlo, se asusta y tira una caja de alfileres; esto ocasiona un caos con los habitantes de la vecindad.",
+    "duration": "00:21:54",
+    "link": "https://vix.com/video/video-4604379",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604379/a3dd607f21b2e6d75900fda52223ff13?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604380",
+    "title": "EP. 208 - Los astronautas",
+    "description": "El Chavo y Quico juegan con el switch de la luz a los astronautas, por esta razón, don Ramón no puede planchar. Después, los niños juegan a los bomberos, sin embargo, el profesor Jirafales cree que la casa de doña Florinda se está incendiando",
+    "duration": "00:21:46",
+    "link": "https://vix.com/video/video-4604380",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604380/2227df785560ed6919bd3e64837a0fa1?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604381",
+    "title": "EP. 209 - Una noche de desvelo",
+    "description": "El Chavo anda desvelado y se queda dormido en el patio. Después, Quico, la Popis y la Chilindrina le proponen al Chavo jugar a los encantados; don Ramón aprovecha que Quico está paralizado para pellizcarlo, pero tendrá un problema con el Sr. Barriga.",
+    "duration": "00:23:31",
+    "link": "https://vix.com/video/video-4604381",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604381/0853e6eef36eecfc1c729a5bad0f9b31?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604382",
+    "title": "EP. 210 - Don Ramón globero I",
+    "description": "Don Ramón vende productos para las fiestas patrias y le regala a la Chilindrina un globo y al Chavo una bolsa de confeti. Los niños deciden jugar a la guerra de Independencia. Entre ellos se hacen travesuras, además de hacer mucho ruido.",
+    "duration": "00:23:03",
+    "link": "https://vix.com/video/video-4604382",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604382/ae1aa5a42891395b78bca5e8b1ba67c4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604383",
+    "title": "EP. 211 - Don Ramón globero II",
+    "description": "Don Ramón sigue con la venta de mercancía. El Chavo, la Chilindrina y Quico hacen un escándalo el cual no permiten que Don Ramón escuche una propuesta de Doña Clotilde, al conocerla le pide a los niños que hagan más ruido.",
+    "duration": "00:21:55",
+    "link": "https://vix.com/video/video-4604383",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604383/b240abf3007ac011466493d04d518586?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604384",
+    "title": "EP. 212 - El Chavo lava coches",
+    "description": "Para ganarse unos pesos, el Chavo y don Ramón lavan el coche del Sr. Barriga, pero al surgir desacuerdos por el lavado del coche, se arma una guerra de cubetazos de agua entre los miembros de la vecindad, provocando que todos se enfermen.",
+    "duration": "00:22:04",
+    "link": "https://vix.com/video/video-4604384",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604384/2cc288e0fa6dc111d01101169e3e6960?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604385",
+    "title": "EP. 213 - Celos en la vecindad",
+    "description": "Paty y su tía Gloria, las nuevas vecinas, causan gran impresión. Debido a esto, surgen un poco de celos en la vecindad, ya que los hombres tratan muy bien a las nuevas inquilinas. Doña Florinda sorprende a don Ramón con su actitud.",
+    "duration": "00:21:37",
+    "link": "https://vix.com/video/video-4604385",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604385/4a7570fd6071c358a40ea88c030092b5?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604403",
+    "title": "EP. 214 - La Gloria de Don Ramón",
+    "description": "El Chavo está enamorado de Paty y Quico le hace burla mientras la Chilindirina siente celos. Don Ramón está enamorado de Gloria y hace todo lo posible por invitarla al cine, ya que con tan solo escucharla, se siente en la gloria.",
+    "duration": "00:22:10",
+    "link": "https://vix.com/video/video-4604403",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604403/d72dabdca49048896647b0bbcd9acd6a?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604404",
+    "title": "EP. 215 - El beso",
+    "description": "El Chavo y Quico se emocionan cuando Paty los recompensa con un beso, a consecuencia de ello se desmayan. Gloria también besa a don Ramón provocando otro desmayo. El Chavo comete un gran error que sorprende a todos.",
+    "duration": "00:22:08",
+    "link": "https://vix.com/video/video-4604404",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604404/5cc9e3033ac9b3b2edefa7283148cc3c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604405",
+    "title": "EP. 216 - Las goteras",
+    "description": "En casa de doña Florinda hay goteras, así que le dice al Sr. Barriga que las arregle si no, no le pagará la renta. El Chavo, Quico y la Chilindrina aprovechan las goteras para jugar, sin embargo, doña Florinda se enfada y los corre de su casa.",
+    "duration": "00:22:19",
+    "link": "https://vix.com/video/video-4604405",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604405/e8252adcad2f2b092f7aa24616fb78a5?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604406",
+    "title": "EP. 217 - Nunca es demasiado tarde para estudiar",
+    "description": "El Profesor Jirafales les hace preguntas de historia a Quico, la Chilindrina y el Chavo, pero contestan mal. En la vecindad se rumora que don Ramón es un burro porque no estudió, pero doña Clotilde le hace una propuesta que lo sorpende.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4604406",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604406/aa4e8f223b0b256c438d0fdf85b47b2f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604407",
+    "title": "EP. 218 - El trabajo de don Ramón",
+    "description": "Doña Florinda le dice a Quico que a los niños desobedientes se los lleva el ropavejero. Don Ramón por recomendación del Sr. Barriga, trabaja de ropavejero para ganar dinero, pero todo le sale mal y se desquita con él por su mala suerte.",
+    "duration": "00:22:20",
+    "link": "https://vix.com/video/video-4604407",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604407/cc6880e54266303f236ec071beea70e2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604408",
+    "title": "EP. 219 - Jugando con la bola",
+    "description": "Don Ramón vende una bola de boliche y le explica al Chavo cómo jugar. El Sr. Barriga se entera que don Ramón tiene una bola de boliche pero no tiene dinero para pagar la renta, así que lo busca para golpearlo, pro alguien se le adelanta.",
+    "duration": "00:21:21",
+    "link": "https://vix.com/video/video-4604408",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604408/02e52506f637216c31182d9a8e6b371d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604409",
+    "title": "EP. 220 - El trato",
+    "description": "Don Ramón hace un trato con el Sr. Barriga, a cambio de cinco meses de renta por la bola de boliche. El Chavo juega con la bola pero al ocurre un accidente y don Ramón se enoja con él. Doña Florinda se desquita con don Ramón por maltratar a Quico.",
+    "duration": "00:22:16",
+    "link": "https://vix.com/video/video-4604409",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604409/3ba53214a1c068ddd3a46fab5772a738?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604410",
+    "title": "EP. 221 - Clases de Primeros Auxilios",
+    "description": "El profesor Jirafales imparte clase de Primeros Auxilios pero sus alumnos no entienden nada de lo que explica pues al preguntarles responden muy mal y los obliga a estudiar, sin embargo, se sorprende al ver como reaccionan.",
+    "duration": "00:22:37",
+    "link": "https://vix.com/video/video-4604410",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604410/6ad60a3c8630c483bbf9be16a83d2bc8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604411",
+    "title": "EP. 222 - Viaje a Acapulco",
+    "description": "La Chilindrina y don Ramón ganan un viaje todo pagado a Acapulco. Quico le pide a su mamá que también vayan. Ell Sr. Barriga se entera que todos los inquilinos de la vecindad se fueron a Acapulco y sorprende al Chavo con una propuesta.",
+    "duration": "00:22:21",
+    "link": "https://vix.com/video/video-4604411",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604411/d826afc1a7b3db85d7d8dcd7815581c0?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604412",
+    "title": "EP. 223 - Aventuras en Acapulco I",
+    "description": "El Señor Barriga llega con el Chavo a Acapulco. En el hotel donde se hospedan se encuentran con sus vecinos y todos juntos en el bello puerto, pasan unas vacaciones llenas de extraordinarias aventuras y travesuras.",
+    "duration": "00:21:35",
+    "link": "https://vix.com/video/video-4604412",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604412/31037b1a65b771e346bcdccd97e6abfc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604413",
+    "title": "EP. 224 - Aventuras en Acapulco II",
+    "description": "El Chavo, la Chilindrina y Quico, se la pasan haciendo travesuras en Acapulco, hasta que finalmente todos terminan cantado un tema musical que lleva por título, \"Buenas noches vecindad\".",
+    "duration": "00:22:14",
+    "link": "https://vix.com/video/video-4604413",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604413/922408ae786904bb52e85cd07eb3500f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604414",
+    "title": "EP. 225 - El cine",
+    "description": "Doña Florinda invita al Chavo y a la Chilindrina a ver la película del Chanfle, los demás inquilinos de la vecindad también van a verla. El Sr. Barriga invita al Chavo al cine, pero hace algunas travesuras en plena función.",
+    "duration": "00:21:45",
+    "link": "https://vix.com/video/video-4604414",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604414/b4287e465add11c67bae4076a9cf6ca4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604415",
+    "title": "EP. 226 - El cambio de foco",
+    "description": "La Popis le quita una revista al Chavo, para recuperarla, él le avienta un ladrillo y rompe un foco del patio de la vecindad. Al intentar cambiarlo, don Ramón se enfrenta a algunas travesuras que le hacen el Chavo, la Popis y la Chilindrina.",
+    "duration": "00:21:21",
+    "link": "https://vix.com/video/video-4604415",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604415/af3d843cc66328562e9fa0a8830220c9?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604416",
+    "title": "EP. 227 - La fiesta de San Valentín",
+    "description": "Por la fiesta de San Valentín, doña Cleotilde le da a don Ramón dos tarjetas; la Chilindrina aprovecha la que está en blanco para dársela al Chavo. Debido a esto se crea una confusión, pero al aclararse todo, los niños cantan \"Eso, eso, eso\".",
+    "duration": "00:22:40",
+    "link": "https://vix.com/video/video-4604416",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604416/3c1b630d7a8bcd0e5d0c2709ba3e599c?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604417",
+    "title": "EP. 228 - Festejando el Día de la Amistad",
+    "description": "Por el Día de la Amistad, doña Florinda organiza una cena en su casa. El señor Barriga asise a la cena y les lleva obsequios a todos, pero como siempre, el Chavo sin querer, queriendo hace algunas travesuras durante la cena.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604417",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604417/c9f870255167b31f8c85df6f4c211c1d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604418",
+    "title": "EP. 229 - Los pasteles de la Chilindrina",
+    "description": "La Chilindrina le propone al Chavo y a la Popis jugar a la comidita. Mientras ella hace unos pasteles con la crema de rasurar de su papá, el Chavo y la Popis se les ocurre comérselos, desatando una guerra de pasteles. Don Ramón y doña Florinda discuten.",
+    "duration": "00:22:16",
+    "link": "https://vix.com/video/video-4604418",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604418/ca8dafd22d47932fd3b943388695554d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604419",
+    "title": "EP. 230 - Pretendiendo a don Ramón",
+    "description": "Doña Cleotilde le hace un pastel a don Ramón, ya que lo quiere conquistar. Por otro lado, el Chavo mete lombrices con gasolina en una bolsa; algunos los comen pensando que son palomitas. Después, los de la vecindad caminan raro por algo que les pasa.",
+    "duration": "00:22:35",
+    "link": "https://vix.com/video/video-4604419",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604419/55eee2f3180d99af7a13bb0ed332f101?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604420",
+    "title": "EP. 231 - Los animales que pegan",
+    "description": "Don Ramón obsequia a la Chilindrina un libro de animales, después, entre ella y la Popis le hacen adivinanzas al Chavo, pero cuando contesta, lo golpean. No obstante, don Ramón sorprende a su hija haciendo maldades, así que le llamará la atención.",
+    "duration": "00:22:18",
+    "link": "https://vix.com/video/video-4604420",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604420/49b1b71c4ba36d7eccb4b0b4cec9973f?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604421",
+    "title": "EP. 232 - La mentira de la Chilindrina",
+    "description": "Para no pagar la renta, don Ramón inventa al Sr. Barriga que la Chilindrina tiene una enfermedad muy contagiosa; ella también miente para no ir a la escuela, sin embargo, por su gran falsedad, algunos inquilinos de la vecindad pagan las consecuencias.",
+    "duration": "00:21:58",
+    "link": "https://vix.com/video/video-4604421",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604421/6dfd6ac628125ef915aaa449516b4a82?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604422",
+    "title": "EP. 233 - El actor Bonilla",
+    "description": "Héctor Bonilla llega a la vecindad porque su auto se descompuso, así que causa gran alboroto entre los habitantes. Mientras, el profesor arregla su coche, el actor disfruta de las atenciones de doña Florinda, doña Cleotilde y de la Chilindrina.",
+    "duration": "00:21:58",
+    "link": "https://vix.com/video/video-4604422",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604422/221ab30704011f3e68e8fdc68209ca5e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604423",
+    "title": "EP. 234 - La guerra contra los niños",
+    "description": "Don Ramón está enfadado y le declara la guerra a todos los niños del mundo; el Chavo lo escucha y, al verlo con un rifle, cree que los matará. Después, la carabina queda en manos del Chavo, debido a esta circunstancia, hace muchas travesuras.",
+    "duration": "00:21:12",
+    "link": "https://vix.com/video/video-4604423",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604423/af1845814693feab93fe5fffa417fc30?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604424",
+    "title": "EP. 235 - El perro Peluchin",
+    "description": "La Chilindrina desea tener un perro, pero su papá no se lo permite, así que le propone al Chavo ser su perrito. El Chavo muerde a don Ramón y pensándolo bien, le regala a su hija un cachorrito de peluche; ella interpreta el musical, Peluchín.",
+    "duration": "00:21:55",
+    "link": "https://vix.com/video/video-4604424",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604424/42c793996d7d7bd57075af88df9bac07?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604425",
+    "title": "EP. 236 - La clase de Aritmética",
+    "description": "El profesor Jirafales hace un examen a sus alumnos y se da cuenta que no saben nada, así que trata de explicarles Aritmética con ejemplos muy claros, sin embargo, ellos lo desesperan; a él no le quedará de otra más que resignarse.",
+    "duration": "00:22:35",
+    "link": "https://vix.com/video/video-4604425",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604425/cca5c1a7a691f92c8f1f94302316ab6b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604426",
+    "title": "EP. 237 - Día del niño",
+    "description": "Los niños piensan que el Día del Niño es por culpa de los adultos, así que organizan una manifestación pacífica a favor de ellos, en el patio de la vecindad; el profesor Jirafales les explica sus derechos. Los infantes cantan el tema, Gracias Cri Cri.",
+    "duration": "00:22:02",
+    "link": "https://vix.com/video/video-4604426",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604426/302a63315f99453f76cf42e3e8ac22a4?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604427",
+    "title": "EP. 238 - Manos negras del Chavo",
+    "description": "El Chavo lleva algunos días sin bañarse y tiene las manos negras, debido a esto, La Chilindrina y La Popis, deciden bañarlo, pero por malos entendidos entre ellas y los adultos, se lanzan cubetadas de agua.",
+    "duration": "00:21:48",
+    "link": "https://vix.com/video/video-4604427",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604427/b08fbc00993bf2ae83ffa83cb63a463e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604428",
+    "title": "EP. 239 - Clases de Inglés",
+    "description": "Al iniciar las clases de Inglés, el profesor Jirafales les hace preguntas a sus alumnos, ellos le contestan con algunas ocurrencias graciosas. Después, les da clases de Animales y, cuando vuelve a preguntar, le responden cosas que lo desilusionan.",
+    "duration": "00:21:07",
+    "link": "https://vix.com/video/video-4604428",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604428/dea4ca0f813c3cc2ec1df4bfe9056055?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604429",
+    "title": "EP. 240 - Las mascotas",
+    "description": "La Chilindrina tiene una pecera con unos pececitos. Por otro lado, a doña Florinda le regalan un gato, por esta razón, la Chilindrina cree que el minino se come a sus mascotas, sin embargo, al morir éste, se seguirán desapareciendo los pececitos.",
+    "duration": "00:21:54",
+    "link": "https://vix.com/video/video-4604429",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604429/f7e00f12fdd1c338c7a262fa6be2918b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604430",
+    "title": "EP. 241 - El examen de Historia",
+    "description": "El Prof. Jirafales aplica exámenes a los niños, en uno tienen que realizar un dibujo y otro es de Historia. Al pedir explicación de algunos dibujos y preguntar acerca de Historia, los niños contestan con algunas ocurrencias que desesperan al maestro.",
+    "duration": "00:21:51",
+    "link": "https://vix.com/video/video-4604430",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604430/7a35ddfd88206f021f4599d7f22323fe?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604431",
+    "title": "EP. 242 - El saco del señor Barriga",
+    "description": "El señor Barriga y el profesor Jirafales se retan a un enfrentamiento, ambos se quitan sus sacos para poder golpearse y, se los encargan al Chavo, quien sin querer, le pega un chicle a uno de éstos; al buscar una solución, echará a perder el saco.",
+    "duration": "00:22:09",
+    "link": "https://vix.com/video/video-4604431",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604431/256b9ca92e1f6b1952919c14a649637e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604432",
+    "title": "EP. 243 - El cachorro de Doña Cleotilde",
+    "description": "Doña Cleotilde tiene un cachorro llamado Satanás, cuando lo llama, los niños creen que ella invoca al diablo. Después, ven que una caja se mueve y piensan que la bruja la hechizó. Debido a esto, el profesor patea la caja y sufrirá un accidente.",
+    "duration": "00:21:17",
+    "link": "https://vix.com/video/video-4604432",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604432/f1b80c632fe5c54d14a802fcd254f1df?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604433",
+    "title": "EP. 244 - La clase de Higiene",
+    "description": "El profesor Jirafales aplica a sus alumnos un examen de Aritmética, pero queda asombrado al ver que todos lo reprueban. Al reanudar las clases y preguntar sobre el tema de Higiene, los niños contestan con algunas ocurrencias que lo desilusionan.",
+    "duration": "00:22:18",
+    "link": "https://vix.com/video/video-4604433",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604433/f916420180eda459336cb35f36b03403?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604434",
+    "title": "EP. 245 - La moneda del deseo",
+    "description": "La Chilindrina inventa que la fuente de la escuela cumple deseos cuando echan monedas, así que todos hacen sus peticiones. Por otro lado, el Chavo saca el dinero para que no se cumplan los malos deseos, pero terminará haciendo muchas travesuras.",
+    "duration": "00:22:16",
+    "link": "https://vix.com/video/video-4604434",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604434/4b64d6eca1d1a77abeb8baf472ef0d56?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604435",
+    "title": "EP. 246 - El Cumpleaños del profesor Jirafales",
+    "description": "Doña Florinda prepara una cena sorpresa por el Cumpleaños del profesor Jirafales, sin embargo, El Chavo y La Chilindrina echan a perder el plan. El maestro invita a doña Florinda a comer unos tacos, ahí, le hará una sugerencia.",
+    "duration": "00:22:09",
+    "link": "https://vix.com/video/video-4604435",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604435/17ec81ed765adb61f0d4abc309f53a4d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604436",
+    "title": "EP. 247 - El restaurante de doña Florinda",
+    "description": "Doña Florinda decide abrir un restaurante y tiene que limpiarlo para dar un buen servicio; el profesor Jirafales se ofrece a ayudarle, sin embargo, los niños los molestan. Ella se sorprenderá al saber, a quién le tiene que pagar la renta del local.",
+    "duration": "00:22:11",
+    "link": "https://vix.com/video/video-4604436",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604436/3d01fd560a74d907e8aa7970d83283cd?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604437",
+    "title": "EP. 248 - La suerte del profesor",
+    "description": "El Chavo llora porque no pudo vender un billete de lotería, el profesor Jirafales le dice que se quedará con éste, pero no se lo paga. Después, el maestro ve en el periódico que se ganó el premio mayor, sin embargo, el Chavo le dará una noticia.",
+    "duration": "00:21:46",
+    "link": "https://vix.com/video/video-4604437",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604437/4ef8b2431655fb41888d5e15dd2ded4d?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604438",
+    "title": "EP. 249 - Spaguetti para el señor Barriga",
+    "description": "El Chavo pide empleo como mesero a doña Florinda, ya que quiere estar cerca de la comida. El Sr. Barriga llega al restaurant para cobrar la renta, pero al oler el spaguetti se queda a comer, sin embargo, el Chavo le hará algunas travesuras.",
+    "duration": "00:21:42",
+    "link": "https://vix.com/video/video-4604438",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604438/1b69a8dbe12e10ec3f7f5e13da58ed22?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604439",
+    "title": "EP. 250 - Clases de Geometría y Aritmética",
+    "description": "El profesor Jirafales da a sus alumnos clase de Geometría y Aritmética, debido a esto, plantea algunas preguntas las cuales los niños responden equivocadamente. El maestro explica la materia, pero los niños lo desesperarán al no poner atención.",
+    "duration": "00:22:00",
+    "link": "https://vix.com/video/video-4604439",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604439/d939f6829049fafb0eebd362ebd34b56?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604440",
+    "title": "EP. 251 - El bolero I",
+    "description": "El Prof. Jirafales les explica a sus alumnos la importancia que tiene el estudio. Luego, la Chilindrina le presta al Chavo una caja de bolero, él, ofrece sus servicios en el restaurant de doña Florinda, sin embargo, le hará una travesura al profesor.",
+    "duration": "00:21:50",
+    "link": "https://vix.com/video/video-4604440",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604440/ce0d3c6941df6c61dd6b55537ca74a0e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604441",
+    "title": "EP. 252 - El susto de la Chilindrina",
+    "description": "El Chavo atrapa una lagartija con una resortera, debido a esto, asusta a la Chilindrina porque le pone en su mano el cadáver de ésta. No obstante, causará algunos desmayos a doña Cleotilde y a doña Florinda por la misma razón.",
+    "duration": "00:21:59",
+    "link": "https://vix.com/video/video-4604441",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604441/6d57d986a655170ccf07eb42ea88c4f6?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604442",
+    "title": "EP. 253 - El bolero II",
+    "description": "El Chavo continúa ofreciendo sus servicios como bolero para comprarse tortas de jamón; al bolear los zapatos del profesor Jirafales y, llevárselos al restaurant de doña Florinda, sin querer, causará algunos accidentes ahí.",
+    "duration": "00:21:51",
+    "link": "https://vix.com/video/video-4604442",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604442/5de028255c6f05d1cadca577978c4378?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604443",
+    "title": "EP. 254 - La congestión",
+    "description": "El Chavo y la Chilindrina juegan a la comidita y, van al restaurante de doña Florinda. Ahí, piden una torta de jamón, el Chavo come tan aprisa que termina con una congestión; el profesor Jirafales lo auxilia pero el Chavo sorprenderá con su actitud.",
+    "duration": "00:22:26",
+    "link": "https://vix.com/video/video-4604443",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604443/d1ec4576035a1f7b05a29a47cf5baff1?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604444",
+    "title": "EP. 255 - La mosca en el café",
+    "description": "La Chilindrina ve que Doña Florinda no le cobra a un cliente porque su café tenía una mosca y, se lo comenta al Chavo. El Sr. Barriga invita la comida a los niños, pero como ellos no saben, quieren meter una mosca en la comida para que no les cobren.",
+    "duration": "00:22:38",
+    "link": "https://vix.com/video/video-4604444",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604444/b88de0af69c0d9efdc0e39d3100d7902?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604445",
+    "title": "EP. 256 - El pretexto para ir a la escuela",
+    "description": "El Chavo, la Chilindrina y Ñoño tuvieron un mal día en la escuela, así que deciden no ir, no obstante, buscan pretextos para justificar su falta, pero el profesor Jirafales, quien visita a doña Florinda, les hará una aclaración.",
+    "duration": "00:21:58",
+    "link": "https://vix.com/video/video-4604445",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604445/491700c02cea53f685963371b16c8be8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604446",
+    "title": "EP. 257 - Los Enfermos",
+    "description": "El profesor Jirafales cuida a doña Florinda, ya que tiene temperatura; el Chavo y la Chilindrina ayudan al maestro, sin embargo, hacen mucho ruido y no la dejan dormir. Luego, los niños juegan al doctor, pero sin querer, provocan un accidente.",
+    "duration": "00:21:44",
+    "link": "https://vix.com/video/video-4604446",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604446/21074fdeab6b020d266601cce7c57740?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604448",
+    "title": "EP. 258 - El regreso de la biscabuela",
+    "description": "Jaimito entrega unas cartas y el Chavo le ayuda, él encuentra una carta para la Chilindrina; ambos leen que la biscabuela llegará a la vecindad, debido a esto, el Chavo se sorprenderá al ver el parecido de la Chilindrina con doña Nieves.",
+    "duration": "00:22:41",
+    "link": "https://vix.com/video/video-4604448",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604448/ba04723bdeb67cbc0db99e28a57abebe?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604449",
+    "title": "EP. 259 - Cooperación para la Cruz Roja",
+    "description": "El Chavo y la Chilindrina piden cooperación para la Cruz Roja, los adultos se niegan a cooperar pero el Chavo les da a entender que alguna vez necesitarán de la ayuda de ésta, por eso hay que ser solidarios y cooperar.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604449",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604449/a9c47f20c9f49781e02218a0adb460da?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604450",
+    "title": "EP. 260 - La feria I",
+    "description": "Una feria se coloca fuera de la vecindad y los niños deciden ir a divertirse a la feria, sin embargo, los niños tienen accidentes provocándoles conflictos con el dueño. Doña Florinda le molesta que la feria este en la calle.",
+    "duration": "00:22:29",
+    "link": "https://vix.com/video/video-4604450",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604450/c8f948addc169e78a23312cde7bd8440?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604451",
+    "title": "EP. 261 - La feria II",
+    "description": "Los niños van a la feria, pero el Chavo hace travesuras en el juego del martillo. Aunque Doña Florinda se opone a que la feria esté afuera de la vecindad, se sube al carrusel con el profesor Jirafales, ahí, ambos cantan el tema, Idilio sin igual.",
+    "duration": "00:22:17",
+    "link": "https://vix.com/video/video-4604451",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604451/85b3eab44e760ff273bd375a9b514c5b?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604452",
+    "title": "EP. 262 - Los sueños",
+    "description": "La Chilindrina y Paty proponen al Chavo jugar a la comidita, luego, él, tiene que agarrar un pastel de la Fonda de doña Florinda, tras varios intentos fallidos, se queda dormido y sueña que come delicioso. Por su parte, la Chilindrina, hará lo mismo.",
+    "duration": "00:21:41",
+    "link": "https://vix.com/video/video-4604452",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604452/add23f9b9deb0bd615b072549ed3fc94?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604453",
+    "title": "EP. 263 - El mesero",
+    "description": "El Chavo pide trabajo en el Restaurant de Doña Florinda, ella lo acepta y lo pone de mesero, pero hace muchas barbaridades. Por otro lado, La Chilindrina, engaña a Doña Cleotilde para que la invite a comer, ella, quedará sorprendida al ver la cuenta.",
+    "duration": "00:22:25",
+    "link": "https://vix.com/video/video-4604453",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604453/4f6e4b96c08813a3f54ad3edd5e643e2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604454",
+    "title": "EP. 264 - Roedores en la Fonda I",
+    "description": "En la Fonda de doña Florinda hay roedores, el profesor Jirafales y ella, compran ratoneras para exterminarlos, mientras el Chavo y la Chilindrina intentan matar a uno. Un ratón se mete al pantalón del Chavo, debido a esto, se arma un escándalo.",
+    "duration": "00:21:29",
+    "link": "https://vix.com/video/video-4604454",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604454/4d1787a15f7905265e6b2050f608e1b2?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604455",
+    "title": "EP. 265 - Roedores en la Fonda II",
+    "description": "La Fonda es invadida por roedores, el Chavo pone ratoneras, sin embargo, el profesor, doña Florinda y él, se machucan con estas. Después, Jaimito y doña Nieves ordenan su comida, ella, al ver un ratón, hace un escándalo y alarmará a los clientes.",
+    "duration": "00:22:13",
+    "link": "https://vix.com/video/video-4604455",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604455/f627447c71640fe77cfa876f4c9a3b85?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604456",
+    "title": "EP. 266 - Ayuda al trabajador",
+    "description": "En la fonda, el Chavo no recibe un sueldo, debido a esto, doña Nieves se proclama defensora de los humildes y hace una huelga en contra de doña Florinda para que por lo menos, él, perciba el salario mínimo.",
+    "duration": "00:22:18",
+    "link": "https://vix.com/video/video-4604456",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604456/8825b89a56d8ebfe80b4662930d90904?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604457",
+    "title": "EP. 267 - El pastel del profesor",
+    "description": "A doña Florinda no le da tiempo de hacer un pastel para el profesor Jirafales y para no quedar mal, manda al Chavo a comprar uno, sin embargo, a él se le antoja y se lo come, por esa razón, la Chilindrina y el Chavo intentarán hacer un pastel.",
+    "duration": "00:22:27",
+    "link": "https://vix.com/video/video-4604457",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604457/b76d56ad76209cf4d66a7da54a7d09ea?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604458",
+    "title": "EP. 268 - Leche para la gata",
+    "description": "Doña Florinda detesta a la gata que le regaló el profesor, no obstante, ésta muere al tener cuatro gatitos, debido a esto, el Chavo y la Chilindrina quieren conseguir una nodriza, al no tener éxito, hurtan leche de la Fonda y harán algunas travesuras.",
+    "duration": "00:21:43",
+    "link": "https://vix.com/video/video-4604458",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604458/f6df18519b1efe624a4c06d1a569a9ba?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604459",
+    "title": "EP. 269 - Reparación de la vecindad Parte 1",
+    "description": "El señor Barriga manda a reparar la vecindad pero como los inquilinos no tienen a dónde ir, los invita a pasar unos días en su casa. Ahí, todos vivirán algunas experiencias agradables y otras desagradables, pero con mucha diversión.",
+    "duration": "00:22:05",
+    "link": "https://vix.com/video/video-4604459",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604459/35bf3fe79b898273a9e3fddcbcf5be05?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604460",
+    "title": "EP. 270 - Reparación de la vecindad Parte 2",
+    "description": "La vecindad sigue en reparación y el profesor va en busca de doña Florinda, pero con lo que le comenta Jaimito, se crea una confusión. Por otro lado, los niños juegan en casa del señor Barriga y, Noño tendrá que compartir su habitación con el Chavo.",
+    "duration": "00:21:23",
+    "link": "https://vix.com/video/video-4604460",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604460/df689ccccef5e831a4bdfe8c17e58fb8?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604461",
+    "title": "EP. 271 - Quisiera ser pastor",
+    "description": "Será Navidad y en casa del Señor Barriga comienzan los preparativos para la cena, ya que los inquilinos de la vecindad se encuentran ahí. El Chavo y la Chilindrina escriben su carta a Santa Claus y él, canta el tema, Quisiera haber sido un pastor.",
+    "duration": "00:22:11",
+    "link": "https://vix.com/video/video-4604461",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604461/00556be23fc7ab5b2175bc7b929a1dfc?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604462",
+    "title": "EP. 272 - Reparación de la vecindad Parte 3",
+    "description": "Doña Florinda y el profesor siguen molestos por el malentendido que tuvieron; los niños hacen lo posible para que se reconcilien. Después, el señor Barriga lleva a todos los inquilinos a la vecindad reparada. Al Chavo le darán una gran sorpresa.",
+    "duration": "00:22:31",
+    "link": "https://vix.com/video/video-4604462",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604462/7e71035ca57c69d42518f7cdc420212e?tr=w-350,ar-16-9,q-80"
+  },
+  {
+    "id": "4604463",
+    "title": "EP. 273 - Lavadora nueva",
+    "description": "Doña Florinda discute con las vecinas por no poder lavar su ropa, así que decide comprar una lavadora; a todos se les hace raro que no salga y, mandan a El Chavo a investigar. Él hará travesuras con la nueva lavadora.",
+    "duration": "00:21:35",
+    "link": "https://vix.com/video/video-4604463",
+    "image": "https://images.vix.com/prd/videos/video:mcp:4604463/acbb9fb59fe28086a4c28de896614642?tr=w-350,ar-16-9,q-80"
+  }
+];
+        
+        // =========================================================================================
+        // 👆👆👆 FIN DE ZONA DE DATOS 👆👆👆
+        // =========================================================================================
+
+        const DOM = {
+            input: document.getElementById('searchInput'),
+            btn: document.getElementById('searchBtn'),
+            grid: document.getElementById('resultsGrid'),
+            stats: document.getElementById('stats')
+        };
+
+        // Quita tildes y mayúsculas
+        const limpiarTexto = (texto) => {
+            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        };
+
+        // Algoritmo profesional para detectar "errores ortográficos" (Distancia de Levenshtein)
+        const calcularSimilitud = (a, b) => {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        };
+
+        // Resaltar palabras exactas
+        const aplicarHighlight = (texto, palabras) => {
+            if (!palabras.length) return texto;
+            let resultado = texto;
+            palabras.forEach(p => {
+                if(p.length > 2) {
+                    const regex = new RegExp(`(${p})`, 'gi');
+                    resultado = resultado.replace(regex, '<span class="highlight">$1</span>');
+                }
+            });
+            return resultado;
+        };
+
+        // Motor de búsqueda avanzado
+        const ejecutarBusqueda = () => {
+            const queryRaw = DOM.input.value.trim();
+            const queryClean = limpiarTexto(queryRaw);
+            const palabrasClave = queryClean.split(/\s+/).filter(w => w.length > 0);
+
+            // Si está vacío, mostrar todo
+            if (palabrasClave.length === 0) {
+                renderizarPantalla(baseDeDatos, []);
+                return;
+            }
+
+            DOM.stats.innerHTML = `Buscando...`;
+
+            // Filtrado tolerante a errores ortográficos
+            const resultados = baseDeDatos.filter(item => {
+                const tituloYDesc = limpiarTexto(`${item.title} ${item.description}`);
+                const palabrasDelCapitulo = tituloYDesc.split(/\s+/);
+
+                // Verificamos que TODAS las palabras que el usuario escribió tengan coincidencia
+                return palabrasClave.every(palabraBuscada => {
+                    return palabrasDelCapitulo.some(palabraTexto => {
+                        // 1. Coincidencia exacta o si contiene un pedazo (ej: "amor" en "enamorados")
+                        if (palabraTexto.includes(palabraBuscada)) return true;
+                        
+                        // 2. Tolerancia a errores ortográficos (Solo para palabras de 4 letras o más)
+                        if (palabraBuscada.length >= 4) {
+                            const errores = calcularSimilitud(palabraBuscada, palabraTexto);
+                            // Permite 1 o 2 letras de error dependiendo del tamaño de la palabra
+                            const limiteErrores = palabraBuscada.length > 5 ? 2 : 1; 
+                            if (errores <= limiteErrores) return true;
+                        }
+                        return false;
+                    });
+                });
+            });
+
+            renderizarPantalla(resultados, palabrasClave);
+        };
+
+        const renderizarPantalla = (datos, palabrasClave = []) => {
+            DOM.grid.innerHTML = ''; 
+
+            if (datos.length === 0) {
+                DOM.stats.innerHTML = `No encontramos nada parecido a "<b>${DOM.input.value}</b>"`;
+                DOM.grid.innerHTML = `<div class="empty-state"><h3>¡Chanfle! No hay resultados.</h3><p>Intenta con otras palabras.</p></div>`;
+                return;
+            }
+
+            DOM.stats.innerHTML = `¡Bingo! Encontramos <b>${datos.length}</b> capítulo(s).`;
+
+            const fragmento = document.createDocumentFragment();
+            
+            datos.forEach(ep => {
+                // Solo resalta si la palabra es exacta, pero el capítulo aparece aunque haya error ortográfico
+                const tituloMostrado = aplicarHighlight(ep.title, palabrasClave);
+                const descMostrada = aplicarHighlight(ep.description, palabrasClave);
+
+                const div = document.createElement('article');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${ep.image}" alt="Portada" loading="lazy" onerror="this.src='https://via.placeholder.com/350x197/1e293b/475569?text=Sin+Imagen'">
+                        <span class="duration-badge">⏱ ${ep.duration}</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">${tituloMostrado}</h2>
+                        <p class="card-desc">${descMostrada}</p>
+                        <a href="${ep.link}" target="_blank" class="btn-play">▶ Ver Capítulo</a>
+                    </div>
+                `;
+                fragmento.appendChild(div);
+            });
+
+            DOM.grid.appendChild(fragmento);
+        };
+
+        // === EVENTOS DEL BOTÓN ===
+        // Busca cuando haces clic en el botón
+        DOM.btn.addEventListener('click', ejecutarBusqueda);
+        
+        // Busca si presionas la tecla "Enter" en el teclado de tu celular
+        DOM.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') ejecutarBusqueda();
+        });
+
+        // Mostrar todo al cargar la página
+        renderizarPantalla(baseDeDatos, []);
+    </script>
+</body>
+</html>
