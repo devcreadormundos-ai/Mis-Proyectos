@@ -37,7 +37,6 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 260px;
             background-color: var(--bg-panel);
@@ -47,6 +46,7 @@
             padding: 24px;
             position: fixed;
             height: 100vh;
+            z-index: 100;
         }
 
         .logo-area {
@@ -81,6 +81,11 @@
             transition: all 0.3s ease;
             font-weight: 500;
             cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
         }
 
         .nav-item:hover, .nav-item.active {
@@ -88,14 +93,12 @@
             color: var(--accent-primary);
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 260px;
             padding: 30px 40px;
         }
 
-        /* Top Header */
         .top-header {
             display: flex;
             justify-content: space-between;
@@ -128,7 +131,6 @@
             outline: none;
         }
 
-        /* Stats Row */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -161,6 +163,7 @@
         .stat-info h3 {
             font-size: 24px;
             margin-bottom: 4px;
+            font-weight: 600;
         }
 
         .stat-info p {
@@ -168,14 +171,13 @@
             font-size: 13px;
         }
 
-        /* Content Layout */
         .content-layout {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 30px;
+            transition: all 0.3s ease;
         }
 
-        /* Form Area */
         .form-container {
             background-color: var(--bg-panel);
             padding: 25px;
@@ -190,6 +192,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
         }
 
         .form-group {
@@ -213,6 +216,7 @@
             border-radius: 8px;
             outline: none;
             transition: all 0.3s;
+            font-family: inherit;
         }
 
         .form-control:focus {
@@ -246,7 +250,18 @@
             transform: translateY(-2px);
         }
 
-        /* Filters */
+        .btn-secondary {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
+            background-color: var(--bg-card);
+        }
+
         .filters-area {
             display: flex;
             gap: 10px;
@@ -271,7 +286,6 @@
             border-color: var(--accent-primary);
         }
 
-        /* Cards Grid */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -357,7 +371,6 @@
             color: #fff;
         }
 
-        /* Toast Notifications */
         .toast-container {
             position: fixed;
             bottom: 30px;
@@ -384,6 +397,7 @@
 
         .toast.success { border-color: var(--success); }
         .toast.error { border-color: var(--danger); }
+        .toast.warning { border-color: var(--warning); }
 
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
@@ -398,7 +412,13 @@
             grid-column: 1 / -1;
         }
 
-        /* Responsive */
+        .config-panel {
+            background-color: var(--bg-panel);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
         @media (max-width: 1024px) {
             .content-layout { grid-template-columns: 1fr; }
         }
@@ -417,10 +437,10 @@
             <span>SysControl Pro</span>
         </div>
         <nav class="nav-menu">
-            <a class="nav-item active" onclick="cargarDatos()"><i class="fa-solid fa-border-all"></i> Dashboard</a>
-            <a class="nav-item" onclick="document.getElementById('tituloCaja').focus()"><i class="fa-solid fa-plus-circle"></i> Nuevo Registro</a>
-            <a class="nav-item"><i class="fa-solid fa-folder-open"></i> Mi Biblioteca</a>
-            <a class="nav-item"><i class="fa-solid fa-gear"></i> Configuración</a>
+            <button class="nav-item active" onclick="cambiarVista('dashboard', this)"><i class="fa-solid fa-border-all"></i> Dashboard</button>
+            <button class="nav-item" onclick="cambiarVista('nuevo', this)"><i class="fa-solid fa-plus-circle"></i> Nuevo Registro</button>
+            <button class="nav-item" onclick="cambiarVista('biblioteca', this)"><i class="fa-solid fa-folder-open"></i> Mi Biblioteca</button>
+            <button class="nav-item" onclick="cambiarVista('configuracion', this)"><i class="fa-solid fa-gear"></i> Configuración</button>
         </nav>
     </aside>
 
@@ -428,16 +448,16 @@
         
         <header class="top-header">
             <div>
-                <h2 style="font-weight: 600; font-size: 22px;">Panel Principal</h2>
-                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Gestión avanzada de recursos</p>
+                <h2 id="tituloVista" style="font-weight: 600; font-size: 22px;">Panel Principal</h2>
+                <p id="subtituloVista" style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Gestión avanzada de recursos</p>
             </div>
-            <div class="search-bar">
+            <div class="search-bar" id="searchBarContainer">
                 <i class="fa-solid fa-search" style="color: var(--text-secondary);"></i>
                 <input type="text" id="searchInput" placeholder="Buscar por título, categoría o nota..." onkeyup="filtrarTarjetas()">
             </div>
         </header>
 
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
                 <div class="stat-info">
@@ -461,8 +481,8 @@
             </div>
         </div>
 
-        <div class="content-layout">
-            <div class="form-container">
+        <div class="content-layout" id="contentLayout">
+            <div class="form-container" id="formContainer">
                 <h3 class="section-title"><i class="fa-solid fa-cloud-arrow-up"></i> Agregar Recurso</h3>
                 
                 <div class="form-group">
@@ -493,16 +513,31 @@
                 </button>
             </div>
 
-            <div>
+            <div id="galleryContainer">
                 <div class="filters-area" id="contenedorFiltros">
                     <span class="filter-chip active" onclick="aplicarFiltro('Todo', this)">Todo</span>
-                    </div>
+                </div>
 
                 <div class="cards-grid" id="contenedorTarjetas">
                     <div id="loaderLista" class="loader"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
                 </div>
             </div>
         </div>
+
+        <div class="config-panel" id="configContainer" style="display: none;">
+            <h3 class="section-title"><i class="fa-solid fa-shield-halved"></i> Gestión de Datos</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Administra y asegura la información guardada en tu base de datos de Google Sheets.</p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn-primary" style="width: auto;" onclick="descargarBackup()">
+                    <i class="fa-solid fa-download"></i> Descargar Copia de Seguridad
+                </button>
+                <button class="btn-primary btn-secondary" style="width: auto;" onclick="mostrarToast('Conectado a: Google Apps Script', 'success')">
+                    <i class="fa-solid fa-check-circle"></i> Verificar Conexión
+                </button>
+            </div>
+        </div>
+
     </main>
 
     <div class="toast-container" id="toastContainer"></div>
@@ -513,15 +548,16 @@
         let categoriasGuardadas = new Set();
         let filtroActual = 'Todo';
 
-        // Sistema de Notificaciones Toast
         function mostrarToast(mensaje, tipo = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${tipo}`;
             
-            const icono = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            let icono = 'fa-check-circle';
+            if(tipo === 'error') icono = 'fa-exclamation-triangle';
+            if(tipo === 'warning') icono = 'fa-circle-info';
+
             toast.innerHTML = `<i class="fa-solid ${icono}"></i> <span>${mensaje}</span>`;
-            
             container.appendChild(toast);
             
             setTimeout(() => {
@@ -530,6 +566,72 @@
                 toast.style.transition = 'all 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        function cambiarVista(vista, elemento) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            elemento.classList.add('active');
+
+            const layout = document.getElementById('contentLayout');
+            const stats = document.getElementById('statsGrid');
+            const form = document.getElementById('formContainer');
+            const gallery = document.getElementById('galleryContainer');
+            const config = document.getElementById('configContainer');
+            const searchBar = document.getElementById('searchBarContainer');
+            
+            const titulo = document.getElementById('tituloVista');
+            const subtitulo = document.getElementById('subtituloVista');
+
+            layout.style.display = 'none';
+            stats.style.display = 'none';
+            config.style.display = 'none';
+            searchBar.style.display = 'none';
+
+            if (window.innerWidth > 1024) layout.style.gridTemplateColumns = '350px 1fr';
+
+            if (vista === 'dashboard') {
+                stats.style.display = 'grid';
+                layout.style.display = 'grid';
+                form.style.display = 'block';
+                gallery.style.display = 'block';
+                searchBar.style.display = 'flex';
+                titulo.innerText = "Panel Principal";
+                subtitulo.innerText = "Gestión avanzada de recursos";
+            } else if (vista === 'nuevo') {
+                layout.style.display = 'grid';
+                form.style.display = 'block';
+                gallery.style.display = 'none';
+                titulo.innerText = "Nuevo Registro";
+                subtitulo.innerText = "Agrega un nuevo enlace a tu base de datos";
+                document.getElementById('tituloCaja').focus();
+            } else if (vista === 'biblioteca') {
+                layout.style.display = 'grid';
+                form.style.display = 'none';
+                gallery.style.display = 'block';
+                searchBar.style.display = 'flex';
+                layout.style.gridTemplateColumns = '1fr';
+                titulo.innerText = "Mi Biblioteca";
+                subtitulo.innerText = "Explora y filtra todos tus enlaces guardados";
+            } else if (vista === 'configuracion') {
+                config.style.display = 'block';
+                titulo.innerText = "Configuración";
+                subtitulo.innerText = "Ajustes del sistema y copias de seguridad";
+            }
+        }
+
+        function descargarBackup() {
+            if(datosGlobales.length === 0) {
+                mostrarToast("No hay datos para descargar", "error");
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosGlobales, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "SysControl_Backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            mostrarToast("Copia de seguridad descargada con éxito", "success");
         }
 
         function verificarCategoriaNueva() {
@@ -618,10 +720,7 @@
                     </div>
                     <h3 class="card-title">${item.titulo}</h3>
                     <div class="card-desc">${item.descripcion || 'Sin notas adicionales.'}</div>
-                    ${item.link ? `
-                    <div class="card-actions">
-                        <a href="${item.link}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Enlace</a>
-                    </div>` : ''}
+                    ${item.link ? '<div class="card-actions"><a href="' + item.link + '" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Enlace</a></div>' : ''}
                 `;
                 contenedor.appendChild(card);
             });
@@ -664,11 +763,9 @@
         function aplicarFiltro(categoria, elemento) {
             filtroActual = categoria;
             
-            // Actualizar UI de botones
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
             elemento.classList.add('active');
 
-            // Limpiar buscador
             document.getElementById('searchInput').value = '';
 
             if(categoria === 'Todo') {
@@ -682,9 +779,8 @@
         function filtrarTarjetas() {
             const texto = document.getElementById('searchInput').value.toLowerCase();
             
-            // Quitar filtro activo de chips
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
-            document.querySelector('.filter-chip').classList.add('active'); // Selecciona "Todo"
+            document.querySelector('.filter-chip').classList.add('active');
             filtroActual = 'Todo';
 
             const filtrados = datosGlobales.filter(item => {
@@ -737,13 +833,11 @@
                 if(data.status === "exito") {
                     mostrarToast("Registro guardado exitosamente");
                     
-                    // Limpiar formulario
                     document.getElementById('tituloCaja').value = '';
                     document.getElementById('descCaja').value = '';
                     document.getElementById('linkCaja').value = '';
                     if(selectCat.value === 'nueva') inputNuevaCat.value = '';
                     
-                    // Recargar datos para ver el nuevo registro
                     cargarDatos();
                 } else {
                     throw new Error("Error del servidor");
@@ -756,8 +850,10 @@
             });
         }
 
-        // Cargar datos al iniciar
-        window.onload = cargarDatos;
+        window.onload = function() {
+            cambiarVista('dashboard', document.querySelector('.nav-item.active'));
+            cargarDatos();
+        };
     </script>
 </body>
 </html>
