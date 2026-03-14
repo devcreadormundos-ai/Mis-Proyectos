@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoxAdmin Pro | Transcriptor IA</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -32,9 +35,9 @@
             color: var(--text-main);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .dashboard {
@@ -68,7 +71,6 @@
             font-size: 15px;
         }
 
-        /* Controles de Voz */
         .voice-controls {
             display: flex;
             justify-content: center;
@@ -120,7 +122,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Área de Texto */
         .text-area-container {
             position: relative;
             margin-bottom: 25px;
@@ -146,7 +147,6 @@
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
         }
 
-        /* Botones de Acción */
         .action-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -191,7 +191,86 @@
 
         .btn-clear:hover { border-color: var(--text-main); color: var(--text-main); }
 
-        /* Notificaciones */
+        .history-section {
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+            padding-top: 30px;
+        }
+
+        .history-section h2 {
+            color: var(--text-main);
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .history-card {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .history-card:hover {
+            border-color: var(--accent);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-text {
+            font-size: 15px;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+
+        .btn-copy-small {
+            background-color: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-copy-small:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .loader {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -249,6 +328,12 @@
                 <i class="fa-solid fa-cloud-arrow-up"></i> Subir a la Base de Datos
             </button>
         </div>
+
+        <div class="history-section">
+            <h2><i class="fa-solid fa-folder-open"></i> Archivos Guardados</h2>
+            <div id="loaderHistorial" class="loader">Conectando con la base de datos...</div>
+            <div class="history-grid" id="contenedorHistorial"></div>
+        </div>
     </div>
 
     <div class="toast" id="toastMsg">
@@ -257,24 +342,21 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DE TU ENLACE ---
         const API_URL = "https://script.google.com/macros/s/AKfycbzTPPeuceuHeGyJOsKdcEsiy5iOAO96R34UBgGMhmbBYvwLFLU6c7LjQvSuG04nD4Sanw/exec";
         
-        // --- VARIABLES DE RECONOCIMIENTO DE VOZ ---
         let recognition;
         let isRecording = false;
         const btnMic = document.getElementById('btnMic');
         const statusText = document.getElementById('statusText');
         const textBox = document.getElementById('textBox');
 
-        // Verificar si el navegador soporta el reconocimiento
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             
-            recognition.continuous = true; // Sigue escuchando aunque hagas pausas
-            recognition.interimResults = true; // Muestra las palabras mientras hablas
-            recognition.lang = 'es-ES'; // Idioma Español
+            recognition.continuous = true; 
+            recognition.interimResults = true; 
+            recognition.lang = 'es-ES'; 
 
             recognition.onstart = function() {
                 isRecording = true;
@@ -295,14 +377,12 @@
                     }
                 }
 
-                // Escribir en la caja de texto. Evitamos borrar lo que ya estaba editado a mano.
                 if (finalTranscript !== '') {
                     textBox.value += (textBox.value === '' ? '' : ' ') + finalTranscript;
                 }
             };
 
             recognition.onerror = function(event) {
-                console.error("Error de reconocimiento:", event.error);
                 if(event.error === 'not-allowed') {
                     mostrarNotificacion("Debes permitir el acceso al micrófono en tu navegador.");
                     detenerGrabacion();
@@ -310,7 +390,6 @@
             };
 
             recognition.onend = function() {
-                // Si se apaga solo (ej. mucho silencio), lo reiniciamos si sigue en modo grabación
                 if (isRecording) {
                     recognition.start();
                 } else {
@@ -323,7 +402,6 @@
             btnMic.style.opacity = '0.5';
         }
 
-        // --- FUNCIONES DE CONTROL ---
         function toggleRecording() {
             if (isRecording) {
                 isRecording = false;
@@ -358,7 +436,12 @@
             });
         }
 
-        // --- CONEXIÓN CON GOOGLE SHEETS ---
+        function copiarDesdeHistorial(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                mostrarNotificacion("Texto copiado desde el historial.", "success");
+            });
+        }
+
         function guardarEnNube() {
             const texto = textBox.value.trim();
             if (texto === '') {
@@ -388,6 +471,7 @@
                 if(data.status === "exito") {
                     mostrarNotificacion("Texto guardado en la base de datos", "success");
                     limpiarTexto();
+                    cargarHistorial();
                 } else {
                     throw new Error("Error del servidor");
                 }
@@ -399,7 +483,46 @@
             });
         }
 
-        // --- SISTEMA DE NOTIFICACIONES ---
+        function cargarHistorial() {
+            const contenedor = document.getElementById('contenedorHistorial');
+            const loader = document.getElementById('loaderHistorial');
+            
+            contenedor.innerHTML = '';
+            loader.style.display = 'block';
+
+            fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                loader.style.display = 'none';
+                
+                if(!data || data.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align:center; color:#94a3b8;">No hay registros aún. Graba tu primer audio.</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const textoLimpio = item.texto ? item.texto.replace(/"/g, '&quot;') : '';
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.innerHTML = `
+                        <div class="history-header">
+                            <span><i class="fa-regular fa-clock"></i> ${item.fecha}</span>
+                            <span>${item.tipo}</span>
+                        </div>
+                        <div class="history-text">${item.texto}</div>
+                        <button class="btn-copy-small" onclick="copiarDesdeHistorial('${textoLimpio}')">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
+                    `;
+                    contenedor.appendChild(card);
+                });
+            })
+            .catch(err => {
+                loader.style.display = 'none';
+                contenedor.innerHTML = '<p style="text-align:center; color:#ef4444;">Error al cargar el historial.</p>';
+            });
+        }
+
         function mostrarNotificacion(mensaje, tipo = '') {
             const toast = document.getElementById('toastMsg');
             const toastText = document.getElementById('toastText');
@@ -417,6 +540,8 @@
                 toast.classList.remove('show');
             }, 3000);
         }
+
+        window.onload = cargarHistorial;
     </script>
 </body>
 </html>
