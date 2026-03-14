@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Base de Datos Pro</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #334155;
+            
+            --tag-red: #ef4444;
+            --tag-blue: #3b82f6;
+            --tag-green: #10b981;
+            --tag-yellow: #f59e0b;
+            --tag-gray: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--accent);
+            margin: 0 0 10px 0;
+        }
+
+        /* Formulario */
+        .form-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-submit {
+            background-color: var(--accent);
+            color: #000;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #7dd3fc;
+        }
+
+        #statusMsg {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Galeria de Tarjetas */
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-muted);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .card-title {
+            font-size: 18px;
+            margin: 0 0 8px 0;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .card-link {
+            display: inline-block;
+            background-color: var(--bg-dark);
+            color: var(--accent);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            transition: 0.2s;
+            word-break: break-all;
+        }
+
+        .card-link:hover {
+            background-color: var(--border);
+        }
+
+        .loader {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Panel de Control</h1>
+            <p style="color: #94a3b8; margin: 0;">Gestor de Enlaces y Recursos</p>
+        </div>
+
+        <div class="form-panel">
+            <div class="form-group">
+                <label>Categoría</label>
+                <select id="categoriaSelect" onchange="verificarCategoriaNueva()">
+                    <option value="nueva">+ Crear nueva categoría...</option>
+                </select>
+                <input type="text" id="categoriaNueva" placeholder="Escribe la nueva categoría" style="margin-top: 10px;">
+            </div>
+
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="tituloCaja" placeholder="Ej: Película Taxista Extremo">
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="descCaja" placeholder="Breve nota sobre este recurso..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Enlace / URL</label>
+                <input type="url" id="linkCaja" placeholder="https://...">
+            </div>
+
+            <button class="btn-submit" id="btnGuardar" onclick="guardarRegistro()">Guardar en la Base de Datos</button>
+            <div id="statusMsg"></div>
+        </div>
+
+        <div class="gallery-header">
+            <h2 style="margin: 0; font-size: 18px;">Mis Recursos Guardados</h2>
+            <button onclick="cargarDatos()" style="background: none; border: 1px solid #334155; color: #f8fafc; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Actualizar</button>
+        </div>
+
+        <div id="loaderLista" class="loader">Conectando con Google Sheets...</div>
+        <div class="cards-grid" id="contenedorTarjetas"></div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzuX8ShGAwn_RoYtBIL9k2fxEQYzzU2HVhSmwbRoFeQiOTCpZAPfXGOrGxhZZlTwoy80A/exec";
+        let categoriasGuardadas = new Set();
+
+        function verificarCategoriaNueva() {
+            const select = document.getElementById('categoriaSelect');
+            const inputNueva = document.getElementById('categoriaNueva');
+            if (select.value === 'nueva') {
+                inputNueva.style.display = 'block';
+            } else {
+                inputNueva.style.display = 'none';
+                inputNueva.value = '';
+            }
+        }
+
+        function asignarColorCategoria(categoria) {
+            const cat = categoria.toLowerCase();
+            if (cat.includes('pelicula') || cat.includes('película') || cat.includes('video')) return 'var(--tag-red)';
+            if (cat.includes('sistema') || cat.includes('codigo') || cat.includes('código')) return 'var(--tag-blue)';
+            if (cat.includes('curso') || cat.includes('tutorial')) return 'var(--tag-yellow)';
+            if (cat.includes('personal') || cat.includes('nota')) return 'var(--tag-green)';
+            return 'var(--tag-gray)';
+        }
+
+        function cargarDatos() {
+            const contenedor = document.getElementById('contenedorTarjetas');
+            const loader = document.getElementById('loaderLista');
+            const selectCat = document.getElementById('categoriaSelect');
+            
+            contenedor.innerHTML = '';
+            loader.style.display = 'block';
+            categoriasGuardadas.clear();
+
+            fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                loader.style.display = 'none';
+                
+                if(!data || data.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align:center; color:#94a3b8;">No hay registros aún. ¡Guarda el primero!</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    if(item.categoria && item.categoria !== "Sin categoría") {
+                        categoriasGuardadas.add(item.categoria);
+                    }
+
+                    const colorTag = asignarColorCategoria(item.categoria);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-top">
+                            <span class="tag" style="background-color: ${colorTag}">${item.categoria}</span>
+                            <span class="date">${item.fecha}</span>
+                        </div>
+                        <h3 class="card-title">${item.titulo}</h3>
+                        <div class="card-desc">${item.descripcion}</div>
+                        ${item.link ? `<a href="${item.link}" target="_blank" class="card-link">Abrir Enlace</a>` : ''}
+                    `;
+                    contenedor.appendChild(card);
+                });
+
+                actualizarSelectorCategorias();
+            })
+            .catch(err => {
+                loader.style.display = 'none';
+                contenedor.innerHTML = '<p style="text-align:center; color:#ef4444;">Error al cargar los datos.</p>';
+            });
+        }
+
+        function actualizarSelectorCategorias() {
+            const select = document.getElementById('categoriaSelect');
+            const valorActual = select.value;
+            
+            select.innerHTML = '<option value="nueva">+ Crear nueva categoría...</option>';
+            
+            categoriasGuardadas.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+
+            if (categoriasGuardadas.has(valorActual)) {
+                select.value = valorActual;
+            } else {
+                select.value = 'nueva';
+            }
+            verificarCategoriaNueva();
+        }
+
+        function guardarRegistro() {
+            const selectCat = document.getElementById('categoriaSelect');
+            const inputNuevaCat = document.getElementById('categoriaNueva');
+            const titulo = document.getElementById('tituloCaja').value.trim();
+            const desc = document.getElementById('descCaja').value.trim();
+            const link = document.getElementById('linkCaja').value.trim();
+            
+            let categoriaFinal = selectCat.value === 'nueva' ? inputNuevaCat.value.trim() : selectCat.value;
+
+            if (!titulo) {
+                alert("Por favor, escribe al menos un título.");
+                return;
+            }
+
+            if (!categoriaFinal) categoriaFinal = "General";
+
+            const btn = document.getElementById('btnGuardar');
+            const msg = document.getElementById('statusMsg');
+            
+            btn.disabled = true;
+            btn.innerText = "Guardando...";
+            msg.style.display = "block";
+            msg.style.color = "#f59e0b";
+            msg.innerText = "Enviando a Google Sheets...";
+
+            const payload = {
+                categoria: categoriaFinal,
+                titulo: titulo,
+                descripcion: desc,
+                link: link
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerText = "Guardar en la Base de Datos";
+                
+                if(data.status === "exito") {
+                    msg.style.color = "#10b981";
+                    msg.innerText = "¡Guardado con éxito!";
+                    
+                    document.getElementById('tituloCaja').value = '';
+                    document.getElementById('descCaja').value = '';
+                    document.getElementById('linkCaja').value = '';
+                    if(selectCat.value === 'nueva') inputNuevaCat.value = '';
+                    
+                    setTimeout(() => msg.style.display = "none", 3000);
+                    cargarDatos();
+                } else {
+                    throw new Error("Error del servidor");
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerText = "Guardar en la Base de Datos";
+                msg.style.color = "#ef4444";
+                msg.innerText = "Ocurrió un error al guardar.";
+            });
+        }
+
+        window.onload = cargarDatos;
+    </script>
+
+</body>
+</html>
