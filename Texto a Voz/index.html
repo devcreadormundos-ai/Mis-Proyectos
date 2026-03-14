@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxAdmin Pro | Transcriptor IA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-main: #0f172a;
+            --bg-panel: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --recording: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--accent);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Controles de Voz */
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .btn-mic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-mic:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-hover);
+        }
+
+        .btn-mic.recording {
+            background-color: var(--recording);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .status-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: -15px;
+            margin-bottom: 20px;
+            min-height: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Área de Texto */
+        .text-area-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .transcription-box {
+            width: 100%;
+            min-height: 200px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            color: var(--text-main);
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .transcription-box:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        /* Botones de Acción */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-action {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background-color: var(--success);
+            color: #fff;
+            grid-column: span 3;
+        }
+
+        .btn-save:hover { background-color: #059669; transform: translateY(-2px); }
+
+        .btn-copy {
+            background-color: var(--bg-main);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-copy:hover { background-color: rgba(56, 189, 248, 0.1); }
+
+        .btn-clear {
+            background-color: var(--bg-main);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-clear:hover { border-color: var(--text-main); color: var(--text-main); }
+
+        /* Notificaciones */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--bg-panel);
+            border-left: 4px solid var(--accent);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left-color: var(--success); }
+
+        @media (max-width: 600px) {
+            .action-buttons { grid-template-columns: 1fr; }
+            .btn-save { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="header">
+            <h1><i class="fa-solid fa-wave-square"></i> VoxAdmin Pro</h1>
+            <p>Sistema avanzado de dictado y captura de ideas</p>
+        </div>
+
+        <div class="voice-controls">
+            <button class="btn-mic" id="btnMic" onclick="toggleRecording()">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
+        
+        <div class="status-text" id="statusText">Presiona el micrófono para empezar a hablar</div>
+
+        <div class="text-area-container">
+            <textarea id="textBox" class="transcription-box" placeholder="Tu texto aparecerá aquí en tiempo real..."></textarea>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-action btn-copy" onclick="copiarTexto()">
+                <i class="fa-solid fa-copy"></i> Copiar Texto
+            </button>
+            <button class="btn-action btn-clear" onclick="limpiarTexto()">
+                <i class="fa-solid fa-trash-can"></i> Limpiar
+            </button>
+            <button class="btn-action btn-save" id="btnSave" onclick="guardarEnNube()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Subir a la Base de Datos
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toastMsg">
+        <i class="fa-solid fa-circle-check" style="color: var(--success);"></i>
+        <span id="toastText">Acción completada</span>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN DE TU ENLACE ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbzTPPeuceuHeGyJOsKdcEsiy5iOAO96R34UBgGMhmbBYvwLFLU6c7LjQvSuG04nD4Sanw/exec";
+        
+        // --- VARIABLES DE RECONOCIMIENTO DE VOZ ---
+        let recognition;
+        let isRecording = false;
+        const btnMic = document.getElementById('btnMic');
+        const statusText = document.getElementById('statusText');
+        const textBox = document.getElementById('textBox');
+
+        // Verificar si el navegador soporta el reconocimiento
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.continuous = true; // Sigue escuchando aunque hagas pausas
+            recognition.interimResults = true; // Muestra las palabras mientras hablas
+            recognition.lang = 'es-ES'; // Idioma Español
+
+            recognition.onstart = function() {
+                isRecording = true;
+                btnMic.classList.add('recording');
+                btnMic.innerHTML = '<i class="fa-solid fa-stop"></i>';
+                statusText.innerHTML = '<span style="color: var(--recording);">Escuchando en vivo...</span>';
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                // Escribir en la caja de texto. Evitamos borrar lo que ya estaba editado a mano.
+                if (finalTranscript !== '') {
+                    textBox.value += (textBox.value === '' ? '' : ' ') + finalTranscript;
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Error de reconocimiento:", event.error);
+                if(event.error === 'not-allowed') {
+                    mostrarNotificacion("Debes permitir el acceso al micrófono en tu navegador.");
+                    detenerGrabacion();
+                }
+            };
+
+            recognition.onend = function() {
+                // Si se apaga solo (ej. mucho silencio), lo reiniciamos si sigue en modo grabación
+                if (isRecording) {
+                    recognition.start();
+                } else {
+                    detenerGrabacion();
+                }
+            };
+        } else {
+            statusText.innerHTML = '<span style="color: var(--recording);">Tu navegador no soporta el dictado por voz. Usa Google Chrome.</span>';
+            btnMic.disabled = true;
+            btnMic.style.opacity = '0.5';
+        }
+
+        // --- FUNCIONES DE CONTROL ---
+        function toggleRecording() {
+            if (isRecording) {
+                isRecording = false;
+                recognition.stop();
+                detenerGrabacion();
+            } else {
+                textBox.focus();
+                recognition.start();
+            }
+        }
+
+        function detenerGrabacion() {
+            isRecording = false;
+            btnMic.classList.remove('recording');
+            btnMic.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            statusText.innerText = 'Grabación detenida. Puedes editar el texto o guardar.';
+        }
+
+        function limpiarTexto() {
+            textBox.value = '';
+            textBox.focus();
+            mostrarNotificacion("Caja de texto limpia.");
+        }
+
+        function copiarTexto() {
+            if (textBox.value.trim() === '') {
+                mostrarNotificacion("No hay texto para copiar.");
+                return;
+            }
+            navigator.clipboard.writeText(textBox.value).then(() => {
+                mostrarNotificacion("Texto copiado al portapapeles.", "success");
+            });
+        }
+
+        // --- CONEXIÓN CON GOOGLE SHEETS ---
+        function guardarEnNube() {
+            const texto = textBox.value.trim();
+            if (texto === '') {
+                mostrarNotificacion("No hay texto para subir.");
+                return;
+            }
+
+            const btnSave = document.getElementById('btnSave');
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Subiendo...';
+
+            const payload = {
+                tipo: "Dictado Web",
+                texto: texto
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Subir a la Base de Datos';
+                
+                if(data.status === "exito") {
+                    mostrarNotificacion("Texto guardado en la base de datos", "success");
+                    limpiarTexto();
+                } else {
+                    throw new Error("Error del servidor");
+                }
+            })
+            .catch(err => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Subir a la Base de Datos';
+                mostrarNotificacion("Hubo un error al guardar. Revisa tu conexión.");
+            });
+        }
+
+        // --- SISTEMA DE NOTIFICACIONES ---
+        function mostrarNotificacion(mensaje, tipo = '') {
+            const toast = document.getElementById('toastMsg');
+            const toastText = document.getElementById('toastText');
+            
+            toastText.innerText = mensaje;
+            
+            if (tipo === 'success') {
+                toast.classList.add('success');
+            } else {
+                toast.classList.remove('success');
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
