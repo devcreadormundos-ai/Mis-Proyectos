@@ -43,9 +43,9 @@
         h1 {
             color: var(--accent);
             margin: 0 0 10px 0;
+            font-weight: normal;
         }
 
-        /* Formulario */
         .form-panel {
             background-color: var(--card-bg);
             border: 1px solid var(--border);
@@ -112,7 +112,6 @@
             display: none;
         }
 
-        /* Galeria de Tarjetas */
         .gallery-header {
             display: flex;
             justify-content: space-between;
@@ -245,7 +244,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwVgSajbuKALwVsws9Km_in1KAi5mvOt4vDRsap357MyV-DLeBJbvtgYzyNdjw2kCgnmw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxpUkqUoY48C4utx-khkacX533Yh46zyk1HPeVX0i249Jc7WUUabmJkLY5pFhV9L109/exec";
         let categoriasGuardadas = new Set();
 
         function verificarCategoriaNueva() {
@@ -271,7 +270,6 @@
         function cargarDatos() {
             const contenedor = document.getElementById('contenedorTarjetas');
             const loader = document.getElementById('loaderLista');
-            const selectCat = document.getElementById('categoriaSelect');
             
             contenedor.innerHTML = '';
             loader.style.display = 'block';
@@ -303,7 +301,7 @@
                         </div>
                         <h3 class="card-title">${item.titulo}</h3>
                         <div class="card-desc">${item.descripcion}</div>
-                        ${item.link ? `<a href="${item.link}" target="_blank" class="card-link">Abrir Enlace</a>` : ''}
+                        ${item.link ? '<a href="' + item.link + '" target="_blank" class="card-link">Abrir Enlace</a>' : ''}
                     `;
                     contenedor.appendChild(card);
                 });
