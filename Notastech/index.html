@@ -3,249 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Base de Datos Pro</title>
+    <title>Sistematix Panel Pro | Base de Datos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
-            
-            --tag-red: #ef4444;
-            --tag-blue: #3b82f6;
-            --tag-green: #10b981;
-            --tag-yellow: #f59e0b;
-            --tag-gray: #64748b;
+            --bg-main: #0b1120;
+            --bg-panel: #1e293b;
+            --bg-card: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             display: flex;
-            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .container {
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            color: var(--accent-primary);
+            font-size: 24px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px 40px;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-bar {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            color: var(--text-primary);
             width: 100%;
-            max-width: 700px;
+            outline: none;
         }
 
-        .header {
-            text-align: center;
+        /* Stats Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
 
-        h1 {
-            color: var(--accent);
-            margin: 0 0 10px 0;
-            font-weight: normal;
-        }
-
-        .form-panel {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+        .stat-card {
+            background-color: var(--bg-panel);
             padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-info h3 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .stat-info p {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        /* Content Layout */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        /* Form Area */
+        .form-container {
+            background-color: var(--bg-panel);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: var(--text-muted);
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
         }
 
-        input, select, textarea {
+        .form-control {
             width: 100%;
-            padding: 12px;
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: var(--text-main);
+            padding: 12px 15px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             border-radius: 8px;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 15px;
-        }
-
-        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: var(--accent);
+            transition: all 0.3s;
         }
 
-        textarea {
+        .form-control:focus {
+            border-color: var(--accent-primary);
+        }
+
+        textarea.form-control {
             resize: vertical;
-            min-height: 80px;
+            min-height: 90px;
         }
 
-        .btn-submit {
-            background-color: var(--accent);
-            color: #000;
-            font-weight: 600;
-            border: none;
-            padding: 12px;
+        .btn-primary {
             width: 100%;
+            padding: 14px;
+            background-color: var(--accent-primary);
+            color: #fff;
+            border: none;
             border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 16px;
-            transition: 0.2s;
-        }
-
-        .btn-submit:hover {
-            background-color: #7dd3fc;
-        }
-
-        #statusMsg {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .gallery-header {
+            transition: all 0.3s;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
         }
 
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Filters */
+        .filters-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Cards Grid */
         .cards-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px;
-            transition: transform 0.2s;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .card:hover {
-            transform: translateY(-2px);
-            border-color: var(--text-muted);
+            transform: translateY(-5px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
-        .card-top {
+        .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .tag {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .date {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .card-title {
-            font-size: 18px;
-            margin: 0 0 8px 0;
-            color: var(--text-main);
-        }
-
-        .card-desc {
-            font-size: 14px;
-            color: var(--text-muted);
-            line-height: 1.5;
             margin-bottom: 15px;
         }
 
-        .card-link {
-            display: inline-block;
-            background-color: var(--bg-dark);
-            color: var(--accent);
-            text-decoration: none;
-            padding: 8px 12px;
+        .badge {
+            padding: 4px 10px;
             border-radius: 6px;
-            font-size: 13px;
-            border: 1px solid var(--border);
-            transition: 0.2s;
-            word-break: break-all;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        .card-link:hover {
-            background-color: var(--border);
+        .card-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .card-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-link {
+            padding: 8px 15px;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-primary);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-link:hover {
+            background-color: var(--accent-primary);
+            color: #fff;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background-color: var(--bg-panel);
+            border-left: 4px solid var(--accent-primary);
+            color: var(--text-primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease forwards;
+            min-width: 250px;
+        }
+
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .loader {
+            color: var(--accent-primary);
             text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
+            padding: 40px;
+            font-size: 24px;
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .search-bar { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>Panel de Control</h1>
-            <p style="color: #94a3b8; margin: 0;">Gestor de Enlaces y Recursos</p>
+    <aside class="sidebar">
+        <div class="logo-area">
+            <i class="fa-solid fa-database logo-icon"></i>
+            <span>SysControl Pro</span>
+        </div>
+        <nav class="nav-menu">
+            <a class="nav-item active" onclick="cargarDatos()"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a class="nav-item" onclick="document.getElementById('tituloCaja').focus()"><i class="fa-solid fa-plus-circle"></i> Nuevo Registro</a>
+            <a class="nav-item"><i class="fa-solid fa-folder-open"></i> Mi Biblioteca</a>
+            <a class="nav-item"><i class="fa-solid fa-gear"></i> Configuración</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="top-header">
+            <div>
+                <h2 style="font-weight: 600; font-size: 22px;">Panel Principal</h2>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Gestión avanzada de recursos</p>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-search" style="color: var(--text-secondary);"></i>
+                <input type="text" id="searchInput" placeholder="Buscar por título, categoría o nota..." onkeyup="filtrarTarjetas()">
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
+                <div class="stat-info">
+                    <h3 id="statTotal">0</h3>
+                    <p>Enlaces Guardados</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--success); background: rgba(16, 185, 129, 0.1);"><i class="fa-solid fa-tags"></i></div>
+                <div class="stat-info">
+                    <h3 id="statCat">0</h3>
+                    <p>Categorías Únicas</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--warning); background: rgba(245, 158, 11, 0.1);"><i class="fa-solid fa-bolt"></i></div>
+                <div class="stat-info">
+                    <h3 id="statEstado">Activo</h3>
+                    <p>Estado del Sistema</p>
+                </div>
+            </div>
         </div>
 
-        <div class="form-panel">
-            <div class="form-group">
-                <label>Categoría</label>
-                <select id="categoriaSelect" onchange="verificarCategoriaNueva()">
-                    <option value="nueva">+ Crear nueva categoría...</option>
-                </select>
-                <input type="text" id="categoriaNueva" placeholder="Escribe la nueva categoría" style="margin-top: 10px;">
+        <div class="content-layout">
+            <div class="form-container">
+                <h3 class="section-title"><i class="fa-solid fa-cloud-arrow-up"></i> Agregar Recurso</h3>
+                
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="categoriaSelect" class="form-control" onchange="verificarCategoriaNueva()">
+                        <option value="nueva">+ Crear nueva categoría...</option>
+                    </select>
+                    <input type="text" id="categoriaNueva" class="form-control" placeholder="Escribe la categoría" style="margin-top: 10px;">
+                </div>
+
+                <div class="form-group">
+                    <label>Título del Recurso</label>
+                    <input type="text" id="tituloCaja" class="form-control" placeholder="Ej: Película Acción...">
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción / Notas</label>
+                    <textarea id="descCaja" class="form-control" placeholder="¿Por qué guardas esto?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Enlace URL</label>
+                    <input type="url" id="linkCaja" class="form-control" placeholder="https://...">
+                </div>
+
+                <button class="btn-primary" id="btnGuardar" onclick="guardarRegistro()">
+                    <i class="fa-solid fa-save"></i> Guardar en Nube
+                </button>
             </div>
 
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="tituloCaja" placeholder="Ej: Película Taxista Extremo">
-            </div>
+            <div>
+                <div class="filters-area" id="contenedorFiltros">
+                    <span class="filter-chip active" onclick="aplicarFiltro('Todo', this)">Todo</span>
+                    </div>
 
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="descCaja" placeholder="Breve nota sobre este recurso..."></textarea>
+                <div class="cards-grid" id="contenedorTarjetas">
+                    <div id="loaderLista" class="loader"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label>Enlace / URL</label>
-                <input type="url" id="linkCaja" placeholder="https://...">
-            </div>
-
-            <button class="btn-submit" id="btnGuardar" onclick="guardarRegistro()">Guardar en la Base de Datos</button>
-            <div id="statusMsg"></div>
         </div>
+    </main>
 
-        <div class="gallery-header">
-            <h2 style="margin: 0; font-size: 18px;">Mis Recursos Guardados</h2>
-            <button onclick="cargarDatos()" style="background: none; border: 1px solid #334155; color: #f8fafc; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Actualizar</button>
-        </div>
-
-        <div id="loaderLista" class="loader">Conectando con Google Sheets...</div>
-        <div class="cards-grid" id="contenedorTarjetas"></div>
-    </div>
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxpUkqUoY48C4utx-khkacX533Yh46zyk1HPeVX0i249Jc7WUUabmJkLY5pFhV9L109/exec";
+        let datosGlobales = [];
         let categoriasGuardadas = new Set();
+        let filtroActual = 'Todo';
+
+        // Sistema de Notificaciones Toast
+        function mostrarToast(mensaje, tipo = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            
+            const icono = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            toast.innerHTML = `<i class="fa-solid ${icono}"></i> <span>${mensaje}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
         function verificarCategoriaNueva() {
             const select = document.getElementById('categoriaSelect');
@@ -258,13 +543,13 @@
             }
         }
 
-        function asignarColorCategoria(categoria) {
+        function getColorCategoria(categoria) {
             const cat = categoria.toLowerCase();
-            if (cat.includes('pelicula') || cat.includes('película') || cat.includes('video')) return 'var(--tag-red)';
-            if (cat.includes('sistema') || cat.includes('codigo') || cat.includes('código')) return 'var(--tag-blue)';
-            if (cat.includes('curso') || cat.includes('tutorial')) return 'var(--tag-yellow)';
-            if (cat.includes('personal') || cat.includes('nota')) return 'var(--tag-green)';
-            return 'var(--tag-gray)';
+            if (cat.includes('pelicula') || cat.includes('video')) return { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' };
+            if (cat.includes('sistema') || cat.includes('codigo')) return { bg: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6' };
+            if (cat.includes('curso') || cat.includes('tutorial')) return { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b' };
+            if (cat.includes('personal') || cat.includes('nota')) return { bg: 'rgba(16, 185, 129, 0.2)', color: '#10b981' };
+            return { bg: 'rgba(148, 163, 184, 0.2)', color: '#94a3b8' };
         }
 
         function cargarDatos() {
@@ -272,46 +557,79 @@
             const loader = document.getElementById('loaderLista');
             
             contenedor.innerHTML = '';
+            contenedor.appendChild(loader);
             loader.style.display = 'block';
             categoriasGuardadas.clear();
 
             fetch(API_URL)
             .then(res => res.json())
             .then(data => {
-                loader.style.display = 'none';
-                
-                if(!data || data.length === 0) {
-                    contenedor.innerHTML = '<p style="text-align:center; color:#94a3b8;">No hay registros aún. ¡Guarda el primero!</p>';
-                    return;
-                }
-
-                data.forEach(item => {
-                    if(item.categoria && item.categoria !== "Sin categoría") {
-                        categoriasGuardadas.add(item.categoria);
-                    }
-
-                    const colorTag = asignarColorCategoria(item.categoria);
-                    
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-top">
-                            <span class="tag" style="background-color: ${colorTag}">${item.categoria}</span>
-                            <span class="date">${item.fecha}</span>
-                        </div>
-                        <h3 class="card-title">${item.titulo}</h3>
-                        <div class="card-desc">${item.descripcion}</div>
-                        ${item.link ? '<a href="' + item.link + '" target="_blank" class="card-link">Abrir Enlace</a>' : ''}
-                    `;
-                    contenedor.appendChild(card);
-                });
-
-                actualizarSelectorCategorias();
+                datosGlobales = data || [];
+                procesarDatos();
             })
             .catch(err => {
-                loader.style.display = 'none';
-                contenedor.innerHTML = '<p style="text-align:center; color:#ef4444;">Error al cargar los datos.</p>';
+                mostrarToast("Error de conexión con el servidor", "error");
+                document.getElementById('statEstado').innerText = "Desconectado";
+                document.getElementById('statEstado').parentElement.previousElementSibling.style.color = "var(--danger)";
             });
+        }
+
+        function procesarDatos() {
+            const contenedor = document.getElementById('contenedorTarjetas');
+            contenedor.innerHTML = '';
+            categoriasGuardadas.clear();
+
+            if(datosGlobales.length === 0) {
+                contenedor.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-secondary);">No hay registros aún. ¡Inicia tu biblioteca!</div>';
+                actualizarEstadisticas();
+                return;
+            }
+
+            datosGlobales.forEach(item => {
+                if(item.categoria && item.categoria !== "Sin categoría") {
+                    categoriasGuardadas.add(item.categoria);
+                }
+            });
+
+            actualizarEstadisticas();
+            actualizarSelectorCategorias();
+            generarFiltrosChips();
+            renderizarTarjetas(datosGlobales);
+        }
+
+        function renderizarTarjetas(datos) {
+            const contenedor = document.getElementById('contenedorTarjetas');
+            contenedor.innerHTML = '';
+
+            if(datos.length === 0) {
+                contenedor.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-secondary);">No se encontraron coincidencias.</div>';
+                return;
+            }
+
+            datos.forEach(item => {
+                const colores = getColorCategoria(item.categoria);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="badge" style="background-color: ${colores.bg}; color: ${colores.color}">${item.categoria}</span>
+                        <span class="card-date"><i class="fa-regular fa-clock"></i> ${item.fecha}</span>
+                    </div>
+                    <h3 class="card-title">${item.titulo}</h3>
+                    <div class="card-desc">${item.descripcion || 'Sin notas adicionales.'}</div>
+                    ${item.link ? `
+                    <div class="card-actions">
+                        <a href="${item.link}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Enlace</a>
+                    </div>` : ''}
+                `;
+                contenedor.appendChild(card);
+            });
+        }
+
+        function actualizarEstadisticas() {
+            document.getElementById('statTotal').innerText = datosGlobales.length;
+            document.getElementById('statCat').innerText = categoriasGuardadas.size;
         }
 
         function actualizarSelectorCategorias() {
@@ -320,19 +638,62 @@
             
             select.innerHTML = '<option value="nueva">+ Crear nueva categoría...</option>';
             
-            categoriasGuardadas.forEach(cat => {
+            Array.from(categoriasGuardadas).sort().forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
                 option.textContent = cat;
                 select.appendChild(option);
             });
 
-            if (categoriasGuardadas.has(valorActual)) {
-                select.value = valorActual;
-            } else {
-                select.value = 'nueva';
-            }
+            if (categoriasGuardadas.has(valorActual)) select.value = valorActual;
+            else select.value = 'nueva';
+            
             verificarCategoriaNueva();
+        }
+
+        function generarFiltrosChips() {
+            const contenedor = document.getElementById('contenedorFiltros');
+            contenedor.innerHTML = `<span class="filter-chip ${filtroActual === 'Todo' ? 'active' : ''}" onclick="aplicarFiltro('Todo', this)">Todo</span>`;
+            
+            Array.from(categoriasGuardadas).sort().forEach(cat => {
+                const isActive = filtroActual === cat ? 'active' : '';
+                contenedor.innerHTML += `<span class="filter-chip ${isActive}" onclick="aplicarFiltro('${cat}', this)">${cat}</span>`;
+            });
+        }
+
+        function aplicarFiltro(categoria, elemento) {
+            filtroActual = categoria;
+            
+            // Actualizar UI de botones
+            document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+            elemento.classList.add('active');
+
+            // Limpiar buscador
+            document.getElementById('searchInput').value = '';
+
+            if(categoria === 'Todo') {
+                renderizarTarjetas(datosGlobales);
+            } else {
+                const filtrados = datosGlobales.filter(item => item.categoria === categoria);
+                renderizarTarjetas(filtrados);
+            }
+        }
+
+        function filtrarTarjetas() {
+            const texto = document.getElementById('searchInput').value.toLowerCase();
+            
+            // Quitar filtro activo de chips
+            document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+            document.querySelector('.filter-chip').classList.add('active'); // Selecciona "Todo"
+            filtroActual = 'Todo';
+
+            const filtrados = datosGlobales.filter(item => {
+                return (item.titulo && item.titulo.toLowerCase().includes(texto)) || 
+                       (item.categoria && item.categoria.toLowerCase().includes(texto)) ||
+                       (item.descripcion && item.descripcion.toLowerCase().includes(texto));
+            });
+            
+            renderizarTarjetas(filtrados);
         }
 
         function guardarRegistro() {
@@ -345,20 +706,16 @@
             let categoriaFinal = selectCat.value === 'nueva' ? inputNuevaCat.value.trim() : selectCat.value;
 
             if (!titulo) {
-                alert("Por favor, escribe al menos un título.");
+                mostrarToast("El título es obligatorio", "error");
+                document.getElementById('tituloCaja').focus();
                 return;
             }
 
             if (!categoriaFinal) categoriaFinal = "General";
 
             const btn = document.getElementById('btnGuardar');
-            const msg = document.getElementById('statusMsg');
-            
             btn.disabled = true;
-            btn.innerText = "Guardando...";
-            msg.style.display = "block";
-            msg.style.color = "#f59e0b";
-            msg.innerText = "Enviando a Google Sheets...";
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
             const payload = {
                 categoria: categoriaFinal,
@@ -369,26 +726,24 @@
 
             fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
-                btn.innerText = "Guardar en la Base de Datos";
+                btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar en Nube';
                 
                 if(data.status === "exito") {
-                    msg.style.color = "#10b981";
-                    msg.innerText = "¡Guardado con éxito!";
+                    mostrarToast("Registro guardado exitosamente");
                     
+                    // Limpiar formulario
                     document.getElementById('tituloCaja').value = '';
                     document.getElementById('descCaja').value = '';
                     document.getElementById('linkCaja').value = '';
                     if(selectCat.value === 'nueva') inputNuevaCat.value = '';
                     
-                    setTimeout(() => msg.style.display = "none", 3000);
+                    // Recargar datos para ver el nuevo registro
                     cargarDatos();
                 } else {
                     throw new Error("Error del servidor");
@@ -396,14 +751,13 @@
             })
             .catch(err => {
                 btn.disabled = false;
-                btn.innerText = "Guardar en la Base de Datos";
-                msg.style.color = "#ef4444";
-                msg.innerText = "Ocurrió un error al guardar.";
+                btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar en Nube';
+                mostrarToast("Error al guardar el registro", "error");
             });
         }
 
+        // Cargar datos al iniciar
         window.onload = cargarDatos;
     </script>
-
 </body>
 </html>
