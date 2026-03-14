@@ -3,130 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Portapapeles</title>
+    <title>CloudSync Pro</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #121212; 
-            color: #ffffff; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center;
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --primary: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border: #30363d;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-        .container { 
-            background-color: #1e1e1e; 
-            padding: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5); 
-            width: 100%; 
-            max-width: 400px; 
-            border-left: 5px solid #00d2ff; 
+        .app-container {
+            width: 100%;
+            max-width: 600px;
         }
-        h2 { color: #00d2ff; margin-top: 0; text-align: center; }
-        textarea { 
-            width: 100%; 
-            height: 120px; 
-            background-color: #2d2d2d; 
-            color: #fff; 
-            border: 1px solid #444; 
-            border-radius: 8px; 
-            padding: 10px; 
-            margin-bottom: 15px; 
-            resize: none; 
-            box-sizing: border-box; 
-            font-size: 16px;
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
         }
-        button { 
-            background-color: #00d2ff; 
-            color: #000; 
-            border: none; 
-            padding: 14px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-bottom: 12px; 
-            font-size: 16px; 
+        .header h1 {
+            color: var(--primary);
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .input-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            box-sizing: border-box;
+            font-size: 15px;
+            resize: vertical;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #79c0ff;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .loader {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 15px 0;
+            display: none;
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .btn-refresh {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-refresh:hover {
+            background-color: var(--border);
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .card-content {
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .card-content a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .card-content a:hover {
+            text-decoration: underline;
+        }
+        .btn-copy {
+            background-color: #21262d;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
             transition: 0.2s;
         }
-        button:active { transform: scale(0.98); }
-        button.load { background-color: #444; color: #fff; }
-        #status { 
-            margin-top: 10px; 
-            font-size: 14px; 
-            color: #aaaaaa; 
-            text-align: center; 
-            height: 20px;
+        .btn-copy:hover {
+            background-color: var(--border);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>⚡ Mi Portapapeles</h2>
-        <textarea id="textoCaja" placeholder="Pega tu enlace o texto aquí..."></textarea>
-        
-        <button onclick="guardarTexto()">📤 Guardar en la Nube</button>
-        <button class="load" onclick="cargarTexto()">📥 Cargar Último Guardado</button>
-        
-        <div id="status">Listo para usar</div>
+<div class="app-container">
+    <div class="header">
+        <h1>⚡ CloudSync Pro</h1>
+        <p>Portapapeles en la nube sincronizado</p>
     </div>
 
-    <script>
-        // Tu URL de Google Apps Script
-        const urlWebApp = "https://script.google.com/macros/s/AKfycbwP4sm2s-Py7vJ9y22UY9aymE81PyyexmlLgVV5HLvIqJS9q1X6e0JRolDltR14T-AT/exec";
+    <div class="input-section">
+        <textarea id="textoCaja" placeholder="Pega un enlace, nota o fragmento de código..."></textarea>
+        <button class="btn-primary" id="btnGuardar" onclick="guardarTexto()">Subir a la Nube</button>
+        <div id="loaderInput" class="loader">⏳ Guardando en servidores...</div>
+    </div>
 
-        function guardarTexto() {
-            const texto = document.getElementById('textoCaja').value;
-            const status = document.getElementById('status');
-            
-            if(!texto.trim()) {
-                status.innerText = "❌ La caja está vacía.";
+    <div class="list-header">
+        <h3 style="margin:0; font-size:16px;">Últimos Registros</h3>
+        <button class="btn-refresh" onclick="cargarTodo()">🔄 Actualizar Lista</button>
+    </div>
+    
+    <div id="loaderLista" class="loader" style="display: block;">⏳ Descargando base de datos...</div>
+    <div id="contenedorTarjetas"></div>
+</div>
+
+<script>
+    // 🔥 REEMPLAZA ESTO CON TU NUEVA URL DE APPS SCRIPT 🔥
+    const urlWebApp = "https://script.google.com/macros/s/AKfycbyjgmU8jmRXn1cAWo-OX9C_uz7SjEIjyeniN1VnvwV9ciDP8FoPRtkgtmc52dDby7FP/exec";
+
+    // Función para detectar URLs y hacerlas clickeables
+    function convertirLinks(texto) {
+        const regex = /(https?:\/\/[^\s]+)/g;
+        return texto.replace(regex, '<a href="$1" target="_blank">$1</a>');
+    }
+
+    // Copiar al portapapeles del teléfono/PC
+    function copiarTexto(texto, btnElement) {
+        navigator.clipboard.writeText(texto).then(() => {
+            const textoOriginal = btnElement.innerText;
+            btnElement.innerText = "¡Copiado!";
+            btnElement.style.color = "#58a6ff";
+            setTimeout(() => {
+                btnElement.innerText = textoOriginal;
+                btnElement.style.color = "var(--text-main)";
+            }, 2000);
+        });
+    }
+
+    // Cargar historial
+    function cargarTodo() {
+        const contenedor = document.getElementById('contenedorTarjetas');
+        const loader = document.getElementById('loaderLista');
+        
+        contenedor.innerHTML = '';
+        loader.style.display = 'block';
+
+        fetch(urlWebApp)
+        .then(res => res.json())
+        .then(data => {
+            loader.style.display = 'none';
+            if(data.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#8b949e;">No hay datos guardados aún.</p>';
                 return;
             }
-            
-            status.innerText = "⏳ Guardando...";
-            status.style.color = "#ffaa00";
-            
-            // Enviamos el texto a Google Sheets
-            fetch(urlWebApp, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'text=' + encodeURIComponent(texto)
-            }).then(() => {
-                status.innerText = "✅ ¡Guardado con éxito!";
-                status.style.color = "#00ff00";
-                document.getElementById('textoCaja').value = ''; // Limpia la caja tras guardar
-            }).catch(err => {
-                status.innerText = "❌ Ocurrió un error.";
-                status.style.color = "#ff0000";
-            });
-        }
 
-        function cargarTexto() {
-            const status = document.getElementById('status');
-            const caja = document.getElementById('textoCaja');
-            
-            status.innerText = "⏳ Buscando datos...";
-            status.style.color = "#ffaa00";
-            
-            // Leemos el texto de Google Sheets
-            fetch(urlWebApp)
-            .then(response => response.text())
-            .then(data => {
-                caja.value = data;
-                status.innerText = "✅ Texto recuperado.";
-                status.style.color = "#00d2ff";
-            }).catch(err => {
-                status.innerText = "❌ Error al conectar.";
-                status.style.color = "#ff0000";
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Limpiamos comillas que pueda meter JSON extrañas
+                const textoLimpio = item.texto.replace(/^"|"$/g, '');
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span>🕒 ${item.fecha || 'Fecha desconocida'}</span>
+                        <button class="btn-copy" onclick='copiarTexto(${JSON.stringify(textoLimpio)}, this)'>📋 Copiar</button>
+                    </div>
+                    <div class="card-content">${convertirLinks(textoLimpio)}</div>
+                `;
+                contenedor.appendChild(card);
             });
-        }
-    </script>
+        })
+        .catch(err => {
+            loader.style.display = 'none';
+            contenedor.innerHTML = '<p style="color:#ff7b72; text-align:center;">❌ Error de conexión con Google Sheets.</p>';
+        });
+    }
+
+    // Guardar nuevo texto
+    function guardarTexto() {
+        const caja = document.getElementById('textoCaja');
+        const btn = document.getElementById('btnGuardar');
+        const loader = document.getElementById('loaderInput');
+        const texto = caja.value.trim();
+
+        if(!texto) return;
+
+        btn.style.display = 'none';
+        loader.style.display = 'block';
+
+        fetch(urlWebApp, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'text=' + encodeURIComponent(texto)
+        }).then(() => {
+            caja.value = '';
+            btn.style.display = 'block';
+            loader.style.display = 'none';
+            cargarTodo(); // Recarga la lista automáticamente
+        }).catch(() => {
+            btn.style.display = 'block';
+            loader.style.display = 'none';
+            alert('Hubo un error al guardar.');
+        });
+    }
+
+    // Cargar datos al iniciar la página
+    window.onload = cargarTodo;
+</script>
 
 </body>
 </html>
