@@ -271,7 +271,7 @@
         }
         .btn-submit:hover { background-color: var(--accent-hover); }
 
-        .loader { text-align: center; color: var(--text-muted); padding: 40px; grid-column: 1 / -1; }
+        .loader { text-align: center; color: var(--text-muted); padding: 40px; width: 100%; }
         
         /* Notificaciones */
         .toast {
@@ -309,9 +309,8 @@
 
     <div class="container">
         <h2 class="section-title">Mis Herramientas Activas</h2>
-        <div class="hub-grid" id="hubGrid">
-            <div id="loader" class="loader"><i class="fa-solid fa-circle-notch fa-spin"></i> Conectando con la base de datos...</div>
-        </div>
+        <div id="loader" class="loader"><i class="fa-solid fa-circle-notch fa-spin"></i> Conectando con la base de datos...</div>
+        <div class="hub-grid" id="hubGrid"></div>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
@@ -377,24 +376,22 @@
     </div>
 
     <script>
-        // --- PEGA TU ENLACE DE GOOGLE SCRIPT AQUÍ ---
+        // Enlace restaurado a tu Google Apps Script
         const API_URL = "https://script.google.com/macros/s/AKfycbwwr_Iz5VcBMyg755MrXBPI9fcga1Ck9U7L34LNZ9Q9RbT-QCNll8SESgGmo_HQ8NTMOA/exec";
         
         let sistemasGlobales = [];
 
-        // --- MANEJO DEL MODAL ---
         function abrirModal() { document.getElementById('modalOverlay').classList.add('active'); }
         function cerrarModal() { 
             document.getElementById('modalOverlay').classList.remove('active'); 
             limpiarFormulario();
         }
 
-        // --- CARGA DE DATOS ---
         function cargarSistemas() {
             const grid = document.getElementById('hubGrid');
             const loader = document.getElementById('loader');
+            
             grid.innerHTML = '';
-            grid.appendChild(loader);
             loader.style.display = 'block';
 
             fetch(API_URL)
@@ -406,7 +403,7 @@
             })
             .catch(() => {
                 loader.style.display = 'none';
-                grid.innerHTML = '<p style="text-align:center; color:#ef4444; width:100%;">Error al conectar con el Cuartel General.</p>';
+                grid.innerHTML = '<p style="text-align:center; color:#ef4444; width:100%; grid-column: 1/-1;">Error al conectar con el Cuartel General.</p>';
             });
         }
 
@@ -420,8 +417,7 @@
             }
 
             datos.forEach(item => {
-                // Determinar el color del estado
-                let estadoLimpio = item.estado.replace(/[^a-zA-Z]/g, '').trim(); // Quita los emojis
+                let estadoLimpio = item.estado.replace(/[^a-zA-Z]/g, '').trim(); 
                 
                 const card = document.createElement('div');
                 card.className = 'app-card';
@@ -443,7 +439,6 @@
             });
         }
 
-        // --- BUSCADOR ---
         function filtrarSistemas() {
             const texto = document.getElementById('searchInput').value.toLowerCase();
             const filtrados = sistemasGlobales.filter(item => 
@@ -454,7 +449,6 @@
             renderizarTarjetas(filtrados);
         }
 
-        // --- GUARDAR ---
         function guardarSistema() {
             const nombre = document.getElementById('inNombre').value.trim();
             const link = document.getElementById('inLink').value.trim();
@@ -477,6 +471,7 @@
                 icono: document.getElementById('inIcono').value
             };
 
+            // Estructura de guardado idéntica a los sistemas anteriores que funcionan a la perfección
             fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -486,16 +481,19 @@
             .then(data => {
                 btnSave.disabled = false;
                 btnSave.innerHTML = 'Guardar y Conectar';
+                
                 if(data.status === "exito") {
                     mostrarToast("Sistema registrado en el Cuartel General");
                     cerrarModal();
                     cargarSistemas();
-                } else throw new Error();
+                } else {
+                    throw new Error("Error del servidor");
+                }
             })
             .catch(() => {
                 btnSave.disabled = false;
                 btnSave.innerHTML = 'Guardar y Conectar';
-                mostrarToast("Error de conexión", "error");
+                mostrarToast("Error de red", "error");
             });
         }
 
@@ -524,7 +522,6 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Iniciar
         window.onload = cargarSistemas;
     </script>
 </body>
