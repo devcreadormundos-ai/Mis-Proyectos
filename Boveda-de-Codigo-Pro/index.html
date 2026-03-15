@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bóveda Master Code | SysControl</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-main: #09090b;
+            --bg-panel: #18181b;
+            --bg-card: #27272a;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border: #3f3f46;
+            --success: #10b981;
+            --tag-bg: #3b82f633;
+            --tag-color: #60a5fa;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Cabecera */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: var(--accent);
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header p { color: var(--text-muted); margin-top: 5px; }
+
+        /* Panel Principal */
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Formulario Global */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: inherit;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-control:focus { border-color: var(--accent); }
+        
+        .row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Selector de Modo */
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: var(--bg-main);
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .mode-btn.active {
+            background: var(--bg-card);
+            color: var(--accent);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Áreas Dinámicas de Código */
+        .dynamic-area { display: none; }
+        .dynamic-area.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+        .code-textarea {
+            font-family: 'Fira Code', monospace;
+            background-color: #1d1f21;
+            font-size: 14px;
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        /* Estilo Cuaderno / Colab */
+        .celda-block {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .btn-remove-celda {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-add-celda {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .btn-add-celda:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Estilo Web (Tabs) */
+        .web-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .tab-btn {
+            padding: 8px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Botón Guardar */
+        .btn-save {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        .btn-save:hover { background-color: var(--accent-hover); }
+
+        /* Historial y Galería */
+        .history-section { margin-top: 20px; width: 100%; }
+        .history-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .card-title { font-size: 20px; color: var(--accent); font-weight: 600; }
+        .card-meta { display: flex; gap: 10px; font-size: 12px; color: var(--text-muted); }
+        .tag {
+            background-color: var(--tag-bg);
+            color: var(--tag-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .card-desc { font-size: 15px; margin-bottom: 20px; line-height: 1.5; color: var(--text-main); }
+        
+        /* Pre visualización de código con Prism */
+        pre { border-radius: 8px !important; margin: 10px 0 !important; position: relative; }
+        .btn-copy-code {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-copy-code:hover { background: var(--accent); }
+        
+        /* Notificaciones */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--bg-panel); border-left: 4px solid var(--success);
+            padding: 15px 25px; border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 10px;
+            transform: translateX(150%); transition: 0.3s; z-index: 1000;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: #ef4444; }
+        
+        .loader { text-align: center; color: var(--text-muted); padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-layer-group"></i> Bóveda Dinámica</h1>
+            <p>Almacenamiento inteligente de scripts, proyectos web y cuadernos Colab</p>
+        </div>
+
+        <div class="panel">
+            <div class="row-grid">
+                <div class="form-group">
+                    <label>Título del Proyecto</label>
+                    <input type="text" id="inTitulo" class="form-control" placeholder="Ej: Bot Extractor de N8N">
+                </div>
+                <div class="form-group">
+                    <label>Etiquetas (separadas por coma)</label>
+                    <input type="text" id="inTags" class="form-control" placeholder="Ej: bot, javascript, automatizacion">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Descripción / Notas</label>
+                <input type="text" id="inDesc" class="form-control" placeholder="¿Qué hace este código?">
+            </div>
+
+            <label style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 8px; display: block;">Modo de Trabajo</label>
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="setModo('unico', this)"><i class="fa-solid fa-code"></i> Script Único</button>
+                <button class="mode-btn" onclick="setModo('web', this)"><i class="fa-brands fa-html5"></i> Proyecto Web</button>
+                <button class="mode-btn" onclick="setModo('secuencia', this)"><i class="fa-solid fa-list-ol"></i> Cuaderno Colab</button>
+            </div>
+
+            <div id="area-unico" class="dynamic-area active">
+                <div class="form-group">
+                    <textarea id="codeUnico" class="form-control code-textarea" placeholder="Pega tu bloque de código aquí..."></textarea>
+                </div>
+            </div>
+
+            <div id="area-web" class="dynamic-area">
+                <div class="web-tabs">
+                    <button class="tab-btn active" onclick="setWebTab('html', this)">HTML</button>
+                    <button class="tab-btn" onclick="setWebTab('css', this)">CSS</button>
+                    <button class="tab-btn" onclick="setWebTab('js', this)">JavaScript</button>
+                </div>
+                <textarea id="codeHtml" class="form-control code-textarea tab-content active" placeholder=""></textarea>
+                <textarea id="codeCss" class="form-control code-textarea tab-content" placeholder="/* Tu CSS aquí */"></textarea>
+                <textarea id="codeJs" class="form-control code-textarea tab-content" placeholder="// Tu JavaScript aquí"></textarea>
+            </div>
+
+            <div id="area-secuencia" class="dynamic-area">
+                <div id="celdas-container">
+                    </div>
+                <button class="btn-add-celda" onclick="agregarCelda()">+ Agregar Nueva Celda</button>
+            </div>
+
+            <button class="btn-save" id="btnSave" onclick="guardarProyecto()"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Bóveda</button>
+        </div>
+
+        <div class="header" style="margin-top: 50px;">
+            <h2 style="color: var(--text-main); font-size: 24px;"><i class="fa-solid fa-boxes-stacked"></i> Archivos Guardados</h2>
+        </div>
+
+        <div class="history-section">
+            <div id="loader" class="loader"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando bóveda...</div>
+            <div id="galeria"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toastMsg">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastText">Acción completada</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // --- TU ENLACE DE GOOGLE SCRIPT ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbz_j5S6R9Hke3wz3_9xj6bejSAG-nW2OIVcg-nI53V1tudCPgJWZVSjPFwXiOvmadiZ/exec";
+        
+        let modoActual = 'unico';
+        let celdaCount = 0;
+
+        // --- MANEJO DE LA INTERFAZ ---
+        function setModo(modo, btn) {
+            modoActual = modo;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            document.querySelectorAll('.dynamic-area').forEach(a => a.classList.remove('active'));
+            document.getElementById(`area-${modo}`).classList.add('active');
+
+            if(modo === 'secuencia' && celdaCount === 0) agregarCelda();
+        }
+
+        function setWebTab(tab, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#area-web .tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`code${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+        }
+
+        function agregarCelda() {
+            celdaCount++;
+            const container = document.getElementById('celdas-container');
+            const block = document.createElement('div');
+            block.className = 'celda-block';
+            block.id = `celda-${celdaCount}`;
+            block.innerHTML = `
+                <button class="btn-remove-celda" onclick="eliminarCelda('${block.id}')"><i class="fa-solid fa-times"></i></button>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <input type="text" class="form-control in-celda-titulo" placeholder="Título de la celda (Ej: Paso 1: Variables)">
+                </div>
+                <textarea class="form-control code-textarea in-celda-codigo" placeholder="// Pega el código de esta celda aquí"></textarea>
+            `;
+            container.appendChild(block);
+        }
+
+        function eliminarCelda(id) {
+            document.getElementById(id).remove();
+        }
+
+        // --- LÓGICA DE GUARDADO ---
+        function guardarProyecto() {
+            const titulo = document.getElementById('inTitulo').value.trim();
+            if (!titulo) { mostrarToast("El título es obligatorio", "error"); return; }
+
+            const btnSave = document.getElementById('btnSave');
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Empaquetando...';
+
+            let paqueteContenido = {};
+
+            if (modoActual === 'unico') {
+                paqueteContenido = { codigo: document.getElementById('codeUnico').value };
+            } else if (modoActual === 'web') {
+                paqueteContenido = {
+                    html: document.getElementById('codeHtml').value,
+                    css: document.getElementById('codeCss').value,
+                    js: document.getElementById('codeJs').value
+                };
+            } else if (modoActual === 'secuencia') {
+                const celdas = [];
+                document.querySelectorAll('.celda-block').forEach(bloque => {
+                    celdas.push({
+                        titulo: bloque.querySelector('.in-celda-titulo').value,
+                        codigo: bloque.querySelector('.in-celda-codigo').value
+                    });
+                });
+                paqueteContenido = { celdas: celdas };
+            }
+
+            const payload = {
+                titulo: titulo,
+                descripcion: document.getElementById('inDesc').value,
+                etiquetas: document.getElementById('inTags').value,
+                modo: modoActual,
+                contenido: paqueteContenido
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Bóveda';
+                if(data.status === "exito") {
+                    mostrarToast("Proyecto guardado con éxito");
+                    limpiarFormulario();
+                    cargarBoveda();
+                } else throw new Error();
+            })
+            .catch(() => {
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar en Bóveda';
+                mostrarToast("Error de conexión", "error");
+            });
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('inTitulo').value = '';
+            document.getElementById('inDesc').value = '';
+            document.getElementById('inTags').value = '';
+            document.getElementById('codeUnico').value = '';
+            document.getElementById('codeHtml').value = '';
+            document.getElementById('codeCss').value = '';
+            document.getElementById('codeJs').value = '';
+            document.getElementById('celdas-container').innerHTML = '';
+            celdaCount = 0;
+            if(modoActual === 'secuencia') agregarCelda();
+        }
+
+        // --- CARGA Y RENDERIZADO DE GALERÍA ---
+        function cargarBoveda() {
+            const galeria = document.getElementById('galeria');
+            const loader = document.getElementById('loader');
+            
+            galeria.innerHTML = '';
+            loader.style.display = 'block';
+
+            fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                loader.style.display = 'none';
+                if(data.length === 0) {
+                    galeria.innerHTML = '<p style="text-align:center; color:var(--text-muted)">Tu bóveda está vacía.</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    let contenidoParsed = {};
+                    try { contenidoParsed = JSON.parse(item.contenido); } catch(e){}
+
+                    let htmlRender = `<div class="history-card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">${item.titulo}</h3>
+                                <div style="margin-top:5px; font-size:13px; color:var(--text-muted)">
+                                    <i class="fa-regular fa-clock"></i> ${item.fecha} | Modo: <span style="text-transform:capitalize; color:var(--accent)">${item.modo}</span>
+                                </div>
+                            </div>
+                            <div class="card-meta">`;
+                    
+                    // Tags
+                    if (item.etiquetas) {
+                        item.etiquetas.split(',').forEach(tag => {
+                            if(tag.trim()) htmlRender += `<span class="tag">#${tag.trim()}</span>`;
+                        });
+                    }
+                    htmlRender += `</div></div>`;
+                    
+                    if(item.descripcion) htmlRender += `<p class="card-desc">${item.descripcion}</p>`;
+
+                    // Desempaquetar según el modo
+                    if (item.modo === 'unico' && contenidoParsed.codigo) {
+                        htmlRender += generarBloqueCodigo(contenidoParsed.codigo, 'javascript');
+                    } else if (item.modo === 'web') {
+                        if(contenidoParsed.html) htmlRender += `<h4 style="margin-top:10px; color:var(--text-muted)">HTML</h4>` + generarBloqueCodigo(contenidoParsed.html, 'markup');
+                        if(contenidoParsed.css) htmlRender += `<h4 style="margin-top:10px; color:var(--text-muted)">CSS</h4>` + generarBloqueCodigo(contenidoParsed.css, 'css');
+                        if(contenidoParsed.js) htmlRender += `<h4 style="margin-top:10px; color:var(--text-muted)">JavaScript</h4>` + generarBloqueCodigo(contenidoParsed.js, 'javascript');
+                    } else if (item.modo === 'secuencia' && contenidoParsed.celdas) {
+                        contenidoParsed.celdas.forEach((celda, idx) => {
+                            htmlRender += `<div style="background:var(--bg-main); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border)">
+                                <h4 style="color:var(--text-muted); margin-bottom:10px;"><i class="fa-solid fa-play" style="color:var(--success); font-size:12px;"></i> [${idx+1}] ${celda.titulo || 'Celda'}</h4>
+                                ${generarBloqueCodigo(celda.codigo, 'python')}
+                            </div>`;
+                        });
+                    }
+
+                    htmlRender += `</div>`;
+                    galeria.innerHTML += htmlRender;
+                });
+                
+                // Activar el coloreado de sintaxis después de insertar en el DOM
+                Prism.highlightAll();
+            })
+            .catch(() => {
+                loader.style.display = 'none';
+                galeria.innerHTML = '<p style="text-align:center; color:#ef4444">Error al cargar la bóveda.</p>';
+            });
+        }
+
+        function generarBloqueCodigo(codigo, lenguaje) {
+            // Reemplazamos caracteres especiales para que no rompan el HTML
+            const safeCode = codigo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const escapeCodeForJS = safeCode.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+            
+            return `
+                <pre><button class="btn-copy-code" onclick="copiarAlPortapapeles('${escapeCodeForJS}')"><i class="fa-solid fa-copy"></i></button><code class="language-${lenguaje}">${safeCode}</code></pre>
+            `;
+        }
+
+        function copiarAlPortapapeles(textoStr) {
+            // Revertir el escape para copiar el texto exacto
+            const textoReal = textoStr.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+            navigator.clipboard.writeText(textoReal).then(() => {
+                mostrarToast("Código copiado al portapapeles");
+            });
+        }
+
+        function mostrarToast(mensaje, tipo = 'success') {
+            const toast = document.getElementById('toastMsg');
+            document.getElementById('toastText').innerText = mensaje;
+            const icon = document.getElementById('toastIcon');
+            
+            if (tipo === 'success') {
+                toast.classList.remove('error');
+                icon.className = 'fa-solid fa-circle-check';
+                icon.style.color = 'var(--success)';
+            } else {
+                toast.classList.add('error');
+                icon.className = 'fa-solid fa-triangle-exclamation';
+                icon.style.color = '#ef4444';
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        window.onload = cargarBoveda;
+    </script>
+</body>
+</html>
