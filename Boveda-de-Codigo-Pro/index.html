@@ -233,21 +233,54 @@
         }
         .card-desc { font-size: 15px; margin-bottom: 20px; line-height: 1.5; color: var(--text-main); }
         
-        /* Pre visualización de código con Prism */
-        pre { border-radius: 8px !important; margin: 10px 0 !important; position: relative; }
+        /* Cajas de Código Personalizadas y Scrollbars */
+        .code-container {
+            position: relative;
+            margin: 15px 0;
+            background-color: #1d1f21;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden; /* Mantiene bordes limpios */
+        }
+        
+        .code-container pre {
+            margin: 0 !important;
+            padding: 20px !important;
+            padding-top: 45px !important; /* Espacio superior para el botón copiar */
+            background: transparent !important;
+            max-height: 350px; /* Altura máxima antes de hacer scroll */
+            overflow-y: auto !important;
+        }
+
+        /* Scrollbar elegante para el código */
+        .code-container pre::-webkit-scrollbar { width: 8px; height: 8px; }
+        .code-container pre::-webkit-scrollbar-track { background: #18181b; border-radius: 0 8px 8px 0; }
+        .code-container pre::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 8px; }
+        .code-container pre::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
         .btn-copy-code {
             position: absolute;
             top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
+            right: 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
+            z-index: 10;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .btn-copy-code:hover { background: var(--accent); }
+        .btn-copy-code:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
         
         /* Notificaciones */
         .toast {
@@ -314,8 +347,7 @@
             </div>
 
             <div id="area-secuencia" class="dynamic-area">
-                <div id="celdas-container">
-                    </div>
+                <div id="celdas-container"></div>
                 <button class="btn-add-celda" onclick="agregarCelda()">+ Agregar Nueva Celda</button>
             </div>
 
@@ -344,13 +376,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 
     <script>
-        // --- TU ENLACE DE GOOGLE SCRIPT ---
         const API_URL = "https://script.google.com/macros/s/AKfycbz_j5S6R9Hke3wz3_9xj6bejSAG-nW2OIVcg-nI53V1tudCPgJWZVSjPFwXiOvmadiZ/exec";
         
         let modoActual = 'unico';
         let celdaCount = 0;
 
-        // --- MANEJO DE LA INTERFAZ ---
         function setModo(modo, btn) {
             modoActual = modo;
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -389,7 +419,6 @@
             document.getElementById(id).remove();
         }
 
-        // --- LÓGICA DE GUARDADO ---
         function guardarProyecto() {
             const titulo = document.getElementById('inTitulo').value.trim();
             if (!titulo) { mostrarToast("El título es obligatorio", "error"); return; }
@@ -462,7 +491,6 @@
             if(modoActual === 'secuencia') agregarCelda();
         }
 
-        // --- CARGA Y RENDERIZADO DE GALERÍA ---
         function cargarBoveda() {
             const galeria = document.getElementById('galeria');
             const loader = document.getElementById('loader');
@@ -493,7 +521,6 @@
                             </div>
                             <div class="card-meta">`;
                     
-                    // Tags
                     if (item.etiquetas) {
                         item.etiquetas.split(',').forEach(tag => {
                             if(tag.trim()) htmlRender += `<span class="tag">#${tag.trim()}</span>`;
@@ -503,7 +530,6 @@
                     
                     if(item.descripcion) htmlRender += `<p class="card-desc">${item.descripcion}</p>`;
 
-                    // Desempaquetar según el modo
                     if (item.modo === 'unico' && contenidoParsed.codigo) {
                         htmlRender += generarBloqueCodigo(contenidoParsed.codigo, 'javascript');
                     } else if (item.modo === 'web') {
@@ -523,7 +549,6 @@
                     galeria.innerHTML += htmlRender;
                 });
                 
-                // Activar el coloreado de sintaxis después de insertar en el DOM
                 Prism.highlightAll();
             })
             .catch(() => {
@@ -533,18 +558,22 @@
         }
 
         function generarBloqueCodigo(codigo, lenguaje) {
-            // Reemplazamos caracteres especiales para que no rompan el HTML
             const safeCode = codigo.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const escapeCodeForJS = safeCode.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+            // Usamos encriptación segura para evitar que las comillas rompan el botón de copiar
+            const encodedCode = encodeURIComponent(codigo);
             
             return `
-                <pre><button class="btn-copy-code" onclick="copiarAlPortapapeles('${escapeCodeForJS}')"><i class="fa-solid fa-copy"></i></button><code class="language-${lenguaje}">${safeCode}</code></pre>
+                <div class="code-container">
+                    <button class="btn-copy-code" onclick="copiarCodigoSeguro('${encodedCode}')" title="Copiar código">
+                        <i class="fa-solid fa-copy"></i> Copiar
+                    </button>
+                    <pre><code class="language-${lenguaje}">${safeCode}</code></pre>
+                </div>
             `;
         }
 
-        function copiarAlPortapapeles(textoStr) {
-            // Revertir el escape para copiar el texto exacto
-            const textoReal = textoStr.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        function copiarCodigoSeguro(encodedStr) {
+            const textoReal = decodeURIComponent(encodedStr);
             navigator.clipboard.writeText(textoReal).then(() => {
                 mostrarToast("Código copiado al portapapeles");
             });
