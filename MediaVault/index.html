@@ -13,238 +13,94 @@
         :root {
             --bg-main: #09090b;
             --bg-panel: #18181b;
-            --accent: #8b5cf6; /* Morado neón estilo anime/gaming */
+            --accent: #8b5cf6;
             --accent-hover: #7c3aed;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #27272a;
-            
-            --tag-donghua: #ef4444;
-            --tag-anime: #3b82f6;
-            --tag-manga: #10b981;
-            --tag-serie: #f59e0b;
-            --tag-pelicula: #ec4899;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; }
 
-        /* Navbar */
         .navbar {
-            background-color: rgba(24, 24, 27, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background-color: rgba(24, 24, 27, 0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .brand {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-        }
-
+        .brand { font-size: 24px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
         .brand i { color: var(--accent); }
 
         .btn-add {
-            background-color: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background-color: var(--accent); color: #fff; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
         }
-
         .btn-add:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
 
-        /* Filtros */
-        .filters {
-            display: flex;
-            gap: 10px;
-            padding: 30px 40px 10px 40px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
+        .filters { display: flex; gap: 10px; padding: 30px 40px 10px 40px; overflow-x: auto; scrollbar-width: none; }
         .filters::-webkit-scrollbar { display: none; }
 
         .filter-btn {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: 0.3s;
-            white-space: nowrap;
+            background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; transition: 0.3s; white-space: nowrap;
         }
+        .filter-btn.active, .filter-btn:hover { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
 
-        .filter-btn.active, .filter-btn:hover {
-            background: var(--text-main);
-            color: var(--bg-main);
-            border-color: var(--text-main);
-        }
-
-        /* Contenedor Grid */
         .container { padding: 20px 40px 60px 40px; }
-        
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-        }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
 
-        /* Diseño de Tarjeta (Póster) */
         .media-card {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            aspect-ratio: 2 / 3;
-            background-color: var(--bg-panel);
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            transition: 0.3s;
-            group: card;
+            position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 2 / 3;
+            background-color: var(--bg-panel); background-size: cover; background-position: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: 0.3s;
         }
-
-        .media-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
-        }
+        .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2); }
 
         .media-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.95) 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 15px;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 15px;
         }
 
         .card-header-info { display: flex; justify-content: space-between; align-items: flex-start; }
-
-        .badge-type {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: #fff;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(5px);
-        }
-
+        .badge-type { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; color: #fff; backdrop-filter: blur(5px); }
         .badge-Donghua { background: rgba(239, 68, 68, 0.8); }
         .badge-Anime { background: rgba(59, 130, 246, 0.8); }
         .badge-Manga { background: rgba(16, 185, 129, 0.8); }
         .badge-Serie { background: rgba(245, 158, 11, 0.8); }
         .badge-Pelicula { background: rgba(236, 72, 153, 0.8); }
 
-        .badge-status {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            backdrop-filter: blur(5px);
-        }
+        .badge-status { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; backdrop-filter: blur(5px); }
 
         .card-bottom { text-align: left; }
+        .media-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 5px; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.8); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .chapter-info { font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
-        .media-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 5px;
-            line-height: 1.2;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .chapter-info {
-            font-size: 14px;
-            color: var(--accent);
-            font-weight: 600;
-            margin-bottom: 12px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 10px;
-        }
-
+        .card-actions { display: flex; gap: 8px; }
+        
         .btn-play {
-            flex-grow: 1;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            transition: 0.3s;
+            flex-grow: 1; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 8px; border-radius: 6px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; transition: 0.3s;
         }
         .btn-play:hover { background: #fff; color: #000; }
 
-        .btn-plus {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .btn-edit, .btn-plus {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; width: 35px; height: 35px; border-radius: 6px; font-size: 14px; cursor: pointer; transition: 0.3s;
+            display: flex; justify-content: center; align-items: center;
         }
+        .btn-plus { background: var(--accent); border: none; font-weight: 700; font-size: 16px; }
+        
+        .btn-edit:hover { background: #fff; color: #000; }
         .btn-plus:hover { background: var(--accent-hover); transform: scale(1.1); }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
-
-        .modal-content {
-            background-color: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 16px; padding: 30px; width: 100%; max-width: 500px;
-            animation: slideUp 0.3s ease;
-        }
+        .modal-content { background-color: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; width: 100%; max-width: 500px; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
@@ -254,28 +110,15 @@
 
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        
-        .form-control {
-            width: 100%; padding: 12px; background-color: var(--bg-main); border: 1px solid var(--border);
-            border-radius: 8px; color: var(--text-main); outline: none; transition: 0.3s;
-        }
+        .form-control { width: 100%; padding: 12px; background-color: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); outline: none; transition: 0.3s; }
         .form-control:focus { border-color: var(--accent); }
 
-        .btn-submit {
-            width: 100%; padding: 14px; background-color: var(--accent); color: #fff;
-            border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px;
-        }
+        .btn-submit { width: 100%; padding: 14px; background-color: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
         .btn-submit:hover { background-color: var(--accent-hover); }
 
         .loader { text-align: center; color: var(--accent); padding: 40px; font-size: 18px; width: 100%; grid-column: 1/-1;}
 
-        /* Notificaciones */
-        .toast {
-            position: fixed; bottom: 30px; right: 30px; background: var(--bg-panel);
-            border-left: 4px solid var(--accent); padding: 15px 25px; border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
-            transform: translateX(150%); transition: 0.3s; z-index: 1001;
-        }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--bg-panel); border-left: 4px solid var(--accent); padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transform: translateX(150%); transition: 0.3s; z-index: 1001; }
         .toast.show { transform: translateX(0); }
 
         @media (max-width: 600px) {
@@ -291,7 +134,7 @@
 
     <nav class="navbar">
         <div class="brand"><i class="fa-solid fa-play"></i> StreamDex Pro</div>
-        <button class="btn-add" onclick="abrirModal()"><i class="fa-solid fa-plus"></i> <span>Añadir</span></button>
+        <button class="btn-add" onclick="abrirModalNuevo()"><i class="fa-solid fa-plus"></i> <span>Añadir</span></button>
     </nav>
 
     <div class="filters" id="filtros">
@@ -312,13 +155,13 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fa-solid fa-film"></i> Nuevo Registro</h2>
+                <h2 id="modalTitle"><i class="fa-solid fa-film"></i> Nuevo Registro</h2>
                 <button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-times"></i></button>
             </div>
             
             <div class="form-group">
                 <label>Título de la Obra</label>
-                <input type="text" id="inTitulo" class="form-control" placeholder="Ej: Jugador que regresó 10,000 años después, The Sandman...">
+                <input type="text" id="inTitulo" class="form-control" placeholder="Ej: Jugador que regresó 10,000 años después...">
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -336,6 +179,7 @@
                     <label>Estado</label>
                     <select id="inEstado" class="form-control">
                         <option value="Viendo">Viendo</option>
+                        <option value="Emision">Emision</option>
                         <option value="En Espera">En Espera</option>
                         <option value="Finalizado">Finalizado</option>
                     </select>
@@ -349,13 +193,13 @@
                 </div>
                 <div class="form-group">
                     <label>Total Capítulos (Opcional)</label>
-                    <input type="text" id="inTotal" class="form-control" placeholder="Ej: 24 o 'Emisión'">
+                    <input type="text" id="inTotal" class="form-control" placeholder="Ej: 24 o 'Indefinido'">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Enlace para Ver/Leer</label>
-                <input type="url" id="inLink" class="form-control" placeholder="https://crunchyroll.com/...">
+                <input type="url" id="inLink" class="form-control" placeholder="https://...">
             </div>
             <div class="form-group">
                 <label>Link de la Portada (Imagen JPG/PNG)</label>
@@ -372,14 +216,51 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxavXIPOOnuGOa_h_odsiPN_Ay7Vcn97G8O7M759jRxrbSOqwjKKMIxSA1QNXHpqnSp/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzzGpgIzTP-_yJXHcqoMPHQ8_odfheqdJkbXgPgbHhaxurxJhsrW6NnsrJaap11hPUf/exec";
         let mediaGlobal = [];
+        let modoModal = 'insert';
+        let idEdicionActual = '';
 
-        function abrirModal() { document.getElementById('modalOverlay').classList.add('active'); }
+        function abrirModalNuevo() {
+            modoModal = 'insert';
+            idEdicionActual = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-film"></i> Nuevo Registro';
+            document.getElementById('btnGuardar').innerText = 'Añadir a la Cartelera';
+            limpiarFormulario();
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function abrirModalEditar(id) {
+            modoModal = 'edit';
+            idEdicionActual = id;
+            
+            const item = mediaGlobal.find(m => m.id === id);
+            if(!item) return;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Editar Registro';
+            document.getElementById('btnGuardar').innerText = 'Guardar Cambios';
+
+            document.getElementById('inTitulo').value = item.titulo;
+            document.getElementById('inTipo').value = item.tipo;
+            document.getElementById('inEstado').value = item.estado;
+            document.getElementById('inCapActual').value = item.capitulo;
+            document.getElementById('inTotal').value = item.total;
+            document.getElementById('inLink').value = item.link;
+            document.getElementById('inPortada').value = item.portada;
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
         function cerrarModal() { 
             document.getElementById('modalOverlay').classList.remove('active'); 
+            limpiarFormulario();
+        }
+
+        function limpiarFormulario() {
             document.querySelectorAll('.form-control').forEach(el => el.value = '');
             document.getElementById('inCapActual').value = '0';
+            document.getElementById('inTipo').value = 'Donghua';
+            document.getElementById('inEstado').value = 'Viendo';
         }
 
         function cargarMedia() {
@@ -407,7 +288,6 @@
             }
 
             datos.forEach(item => {
-                // Imagen por defecto si no pone portada
                 const bgImage = item.portada ? item.portada : 'https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?auto=format&fit=crop&q=80&w=400';
                 const totalText = item.total ? ` / ${item.total}` : '';
                 
@@ -425,7 +305,8 @@
                             <h3 class="media-title" title="${item.titulo}">${item.titulo}</h3>
                             <div class="chapter-info" id="cap-text-${item.id}">Capítulo ${item.capitulo}${totalText}</div>
                             <div class="card-actions">
-                                <a href="${item.link}" target="_blank" class="btn-play"><i class="fa-solid fa-play"></i> Ver</a>
+                                <a href="${item.link}" target="_blank" class="btn-play" title="Abrir enlace"><i class="fa-solid fa-play"></i> Ver</a>
+                                <button class="btn-edit" onclick="abrirModalEditar('${item.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn-plus" onclick="sumarCapitulo('${item.id}', ${item.capitulo}, this)" title="Sumar un capítulo">+1</button>
                             </div>
                         </div>
@@ -452,11 +333,13 @@
             if (!titulo) { mostrarToast("El título es obligatorio"); return; }
 
             const btnSave = document.getElementById('btnGuardar');
+            const textoOriginal = btnSave.innerText;
             btnSave.disabled = true;
             btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
             const payload = {
-                action: "insert",
+                action: modoModal, // Aquí el sistema sabe si es "insert" o "edit"
+                id: idEdicionActual,
                 titulo: titulo,
                 tipo: document.getElementById('inTipo').value,
                 estado: document.getElementById('inEstado').value,
@@ -469,44 +352,34 @@
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
             .then(() => {
                 btnSave.disabled = false;
-                btnSave.innerHTML = 'Añadir a la Cartelera';
-                mostrarToast("Obra añadida a la cartelera");
+                btnSave.innerText = textoOriginal;
+                mostrarToast(modoModal === 'insert' ? "Obra añadida" : "Cambios guardados");
                 cerrarModal();
-                setTimeout(cargarMedia, 1000);
+                cargarMedia(); // Recarga la cartelera para mostrar los cambios
             }).catch(() => {
                 btnSave.disabled = false;
-                btnSave.innerHTML = 'Añadir a la Cartelera';
+                btnSave.innerText = textoOriginal;
                 mostrarToast("Error al guardar");
             });
         }
 
         function sumarCapitulo(id, capActual, btnElement) {
-            // Actualización visual instantánea (Magia Front-End)
             const nuevoCap = parseInt(capActual) + 1;
-            
-            // Cambiamos el texto temporalmente mientras guarda en fondo
             btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:14px;"></i>';
             btnElement.disabled = true;
 
-            const payload = {
-                action: "update",
-                id: id,
-                capitulo: nuevoCap
-            };
+            const payload = { action: "update", id: id, capitulo: nuevoCap };
 
             fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
             .then(() => {
                 mostrarToast("¡Capítulo actualizado!");
-                // Actualizamos la base de datos local para que los filtros sigan funcionando
                 const item = mediaGlobal.find(m => m.id === id);
                 if(item) item.capitulo = nuevoCap;
                 
-                // Actualizamos el número en pantalla y restauramos el botón
                 const totalText = item && item.total ? ` / ${item.total}` : '';
                 document.getElementById(`cap-text-${id}`).innerText = `Capítulo ${nuevoCap}${totalText}`;
                 btnElement.innerHTML = '+1';
                 btnElement.disabled = false;
-                // Actualizamos la función onclick con el nuevo número
                 btnElement.setAttribute('onclick', `sumarCapitulo('${id}', ${nuevoCap}, this)`);
             })
             .catch(() => {
