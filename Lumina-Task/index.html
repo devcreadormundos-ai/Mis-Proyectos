@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --background-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        .links-container {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+        }
+
+        .link-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 30px;
+            font-size: 16px;
+            padding: 15px;
+        }
+
+        #statusMessage {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .success { background-color: #dcfce7; color: #166534; }
+        .error { background-color: #fee2e2; color: #991b1b; }
+        .loading { background-color: #e0f2fe; color: #075985; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>System Manager</h1>
+    
+    <form id="systemForm">
+        <div class="form-group">
+            <label for="title">Título de la Actividad</label>
+            <input type="text" id="title" placeholder="Ej. Crear sistema descargador" required>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="date">Día Asignado</label>
+                <input type="date" id="date" required>
+            </div>
+            <div class="form-group">
+                <label for="time">Hora (Opcional)</label>
+                <input type="time" id="time">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Descripción Completa</label>
+            <textarea id="description" placeholder="Escribe todos los detalles de la idea, lo que vas a construir o lo que vas a ver..." required></textarea>
+        </div>
+
+        <div class="form-group links-container" id="linksWrapper">
+            <label>Enlaces de Referencia</label>
+            <div id="linksList">
+                <div class="link-input-group">
+                    <input type="text" class="link-item" placeholder="https://ejemplo.com">
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addLinkField()">+ Agregar otro link</button>
+        </div>
+
+        <div class="form-group">
+            <label for="image">Subir Imagen (Opcional)</label>
+            <input type="file" id="image" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn submit-btn" id="submitBtn">Guardar en el Sistema</button>
+    </form>
+
+    <div id="statusMessage"></div>
+</div>
+
+<script>
+    // IMPORTANTE: Reemplaza esto con tu URL de Apps Script
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-BXKWdQF_s2t73t3gkuCf9sPsTEW1V6dZDKVPuHbSI4qEiYA_v5mxfxViqDdY2BKX/exec';
+
+    function addLinkField() {
+        const linksList = document.getElementById('linksList');
+        const newGroup = document.createElement('div');
+        newGroup.className = 'link-input-group';
+        newGroup.innerHTML = '<input type="text" class="link-item" placeholder="https://ejemplo.com">';
+        linksList.appendChild(newGroup);
+    }
+
+    document.getElementById('systemForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const statusDiv = document.getElementById('statusMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'loading';
+        statusDiv.textContent = 'Guardando en el sistema y subiendo archivos...';
+        submitBtn.disabled = true;
+
+        // Recopilar datos
+        const title = document.getElementById('title').value;
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const description = document.getElementById('description').value;
+        
+        // Recopilar todos los links ingresados
+        const linkInputs = document.querySelectorAll('.link-item');
+        const links = [];
+        linkInputs.forEach(input => {
+            if(input.value.trim() !== '') {
+                links.push(input.value.trim());
+            }
+        });
+
+        // Procesar imagen si existe
+        const imageFile = document.getElementById('image').files[0];
+        let base64Image = null;
+        let imageName = null;
+
+        if (imageFile) {
+            base64Image = await getBase64(imageFile);
+            imageName = imageFile.name;
+        }
+
+        const payload = {
+            title: title,
+            date: date,
+            time: time,
+            description: description,
+            links: links,
+            imageFile: base64Image,
+            imageName: imageName
+        };
+
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if(result.status === 'success') {
+                statusDiv.className = 'success';
+                statusDiv.textContent = '¡Actividad guardada exitosamente!';
+                document.getElementById('systemForm').reset();
+                // Dejar solo un campo de link limpio
+                document.getElementById('linksList').innerHTML = '<div class="link-input-group"><input type="text" class="link-item" placeholder="https://ejemplo.com"></div>';
+            } else {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error: ' + result.message;
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+        } finally {
+            submitBtn.disabled = false;
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+        }
+    });
+
+    function getBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+</script>
+
+</body>
+</html>
