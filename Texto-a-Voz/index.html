@@ -1,27 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Reader System</title>
+  <title>Sistema Lector de Voz</title>
   <style>
     :root {
-      --bg-color: #121212;
-      --surface-color: #1e1e1e;
-      --primary-color: #007bff;
-      --danger-color: #dc3545;
-      --success-color: #28a745;
-      --text-primary: #ffffff;
-      --text-secondary: #b3b3b3;
-      --border-radius: 12px;
+      --bg-color: #f3f4f6;
+      --surface-color: #ffffff;
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --danger-color: #ef4444;
+      --danger-hover: #dc2626;
+      --success-color: #10b981;
+      --success-hover: #059669;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --border-radius: 16px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
     body {
       background-color: var(--bg-color);
       color: var(--text-primary);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 30px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -29,132 +34,152 @@
 
     .container {
       width: 100%;
-      max-width: 700px;
+      max-width: 750px;
     }
 
     h1 {
       text-align: center;
-      font-weight: 600;
-      margin-bottom: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
       color: var(--text-primary);
+      font-size: 28px;
     }
 
     h2 {
-      font-weight: 500;
-      margin-bottom: 15px;
+      font-weight: 600;
+      margin-bottom: 20px;
       color: var(--text-primary);
       font-size: 20px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
     }
 
     .input-section, .library-section {
       background-color: var(--surface-color);
-      padding: 25px;
+      padding: 30px;
       border-radius: var(--border-radius);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 35px;
+      border: 1px solid var(--border-color);
     }
 
     textarea {
       width: 100%;
-      height: 200px;
-      background-color: #2d2d2d;
+      height: 180px;
+      background-color: #f9fafb;
       color: var(--text-primary);
-      border: 1px solid #404040;
-      border-radius: 8px;
-      padding: 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
       font-size: 16px;
-      line-height: 1.5;
+      line-height: 1.6;
       resize: vertical;
       box-sizing: border-box;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       outline: none;
-      transition: border-color 0.3s;
+      transition: all 0.3s ease;
+      font-family: inherit;
     }
 
     textarea:focus {
       border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+      background-color: #ffffff;
     }
 
     .controls {
       display: flex;
-      gap: 15px;
+      gap: 16px;
     }
 
     button {
       flex: 1;
-      padding: 14px 20px;
+      padding: 14px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
       color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     button:active {
-      transform: scale(0.98);
+      transform: translateY(2px);
+      box-shadow: none;
     }
 
-    .btn-play { background-color: var(--success-color); }
-    .btn-play:hover { background-color: #218838; }
+    .btn-play { background-color: var(--primary-color); }
+    .btn-play:hover { background-color: var(--primary-hover); }
     
     .btn-stop { background-color: var(--danger-color); }
-    .btn-stop:hover { background-color: #c82333; }
+    .btn-stop:hover { background-color: var(--danger-hover); }
 
     .library-item {
-      background-color: #2d2d2d;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      border-left: 4px solid var(--primary-color);
+      gap: 12px;
+      border-left: 5px solid var(--primary-color);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .library-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
 
     .item-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 15px;
     }
 
     .item-title {
       font-size: 16px;
-      font-weight: 500;
-      line-height: 1.4;
-      margin-right: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text-primary);
     }
 
     .item-date {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-secondary);
       white-space: nowrap;
+      background-color: #f3f4f6;
+      padding: 6px 12px;
+      border-radius: 20px;
     }
 
     .item-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 5px;
+      gap: 12px;
+      margin-top: 8px;
     }
 
     .btn-read {
-      background-color: var(--primary-color);
-      padding: 8px 15px;
+      background-color: var(--success-color);
+      padding: 10px 20px;
       font-size: 14px;
       flex: 0 1 auto;
+      box-shadow: none;
     }
-    .btn-read:hover { background-color: #0056b3; }
+    .btn-read:hover { background-color: var(--success-hover); }
 
     .btn-delete {
-      background-color: transparent;
+      background-color: white;
       border: 1px solid var(--danger-color);
       color: var(--danger-color);
-      padding: 8px 15px;
+      padding: 10px 20px;
       font-size: 14px;
       flex: 0 1 auto;
+      box-shadow: none;
     }
     .btn-delete:hover {
       background-color: var(--danger-color);
@@ -164,28 +189,28 @@
     #loading {
       text-align: center;
       color: var(--text-secondary);
-      font-style: italic;
-      padding: 20px;
+      padding: 30px;
+      font-size: 15px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Voice Reader System</h1>
+    <h1>Sistema Lector de Voz</h1>
     
     <div class="input-section">
-      <h2>Text Input</h2>
+      <h2>Entrada de Texto</h2>
       <textarea id="textToRead" placeholder="Pega aquí el texto que deseas escuchar..."></textarea>
       
       <div class="controls">
-        <button class="btn-play" onclick="saveAndRead()">Save & Read</button>
-        <button class="btn-stop" onclick="stopAudio()">Stop Audio</button>
+        <button class="btn-play" onclick="saveAndRead()">Guardar y Leer</button>
+        <button class="btn-stop" onclick="stopAudio()">Detener Audio</button>
       </div>
     </div>
 
     <div class="library-section">
-      <h2>Library</h2>
+      <h2>Biblioteca de Audios</h2>
       <div id="libraryContainer">
         <div id="loading">Cargando tu base de datos...</div>
       </div>
@@ -282,8 +307,8 @@
               <div class="item-date">${item.date}</div>
             </div>
             <div class="item-actions">
-              <button class="btn-read" onclick="readText('${safeText}')">Read</button>
-              <button class="btn-delete" onclick="deleteItem('${item.id}', this)">Delete</button>
+              <button class="btn-read" onclick="readText('${safeText}')">Leer</button>
+              <button class="btn-delete" onclick="deleteItem('${item.id}', this)">Eliminar</button>
             </div>
           `;
           
