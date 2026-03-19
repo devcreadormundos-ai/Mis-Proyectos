@@ -186,7 +186,11 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Temporada</label>
+                    <input type="number" id="inTemporada" class="form-control" placeholder="Ej: 1" value="1">
+                </div>
                 <div class="form-group">
                     <label>Capítulo Actual</label>
                     <input type="number" id="inCapActual" class="form-control" placeholder="Ej: 15" value="0">
@@ -196,7 +200,6 @@
                     <input type="text" id="inTotal" class="form-control" placeholder="Ej: 24 o 'Indefinido'">
                 </div>
             </div>
-
             <div class="form-group">
                 <label>Enlace para Ver/Leer</label>
                 <input type="url" id="inLink" class="form-control" placeholder="https://...">
@@ -216,7 +219,9 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzzGpgIzTP-_yJXHcqoMPHQ8_odfheqdJkbXgPgbHhaxurxJhsrW6NnsrJaap11hPUf/exec";
+        // LINK DE API ACTUALIZADO AL NUEVO
+        const API_URL = "https://script.google.com/macros/s/AKfycbz3MALu--3B02mXlNLZjkB9PQnqTQ9j8f2VpVX99aSIn6sBmCWqdg1utp_lxoOyRJwv/exec";
+        
         let mediaGlobal = [];
         let modoModal = 'insert';
         let idEdicionActual = '';
@@ -243,6 +248,7 @@
             document.getElementById('inTitulo').value = item.titulo;
             document.getElementById('inTipo').value = item.tipo;
             document.getElementById('inEstado').value = item.estado;
+            document.getElementById('inTemporada').value = item.temporada || 1; // Se llena la temporada
             document.getElementById('inCapActual').value = item.capitulo;
             document.getElementById('inTotal').value = item.total;
             document.getElementById('inLink').value = item.link;
@@ -258,6 +264,7 @@
 
         function limpiarFormulario() {
             document.querySelectorAll('.form-control').forEach(el => el.value = '');
+            document.getElementById('inTemporada').value = '1'; // Temporada por defecto
             document.getElementById('inCapActual').value = '0';
             document.getElementById('inTipo').value = 'Donghua';
             document.getElementById('inEstado').value = 'Viendo';
@@ -290,6 +297,7 @@
             datos.forEach(item => {
                 const bgImage = item.portada ? item.portada : 'https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?auto=format&fit=crop&q=80&w=400';
                 const totalText = item.total ? ` / ${item.total}` : '';
+                const tempText = item.temporada ? `T${item.temporada} • ` : ''; // Se crea el texto de la temporada
                 
                 const card = document.createElement('div');
                 card.className = 'media-card';
@@ -303,7 +311,7 @@
                         </div>
                         <div class="card-bottom">
                             <h3 class="media-title" title="${item.titulo}">${item.titulo}</h3>
-                            <div class="chapter-info" id="cap-text-${item.id}">Capítulo ${item.capitulo}${totalText}</div>
+                            <div class="chapter-info" id="cap-text-${item.id}">${tempText}Capítulo ${item.capitulo}${totalText}</div>
                             <div class="card-actions">
                                 <a href="${item.link}" target="_blank" class="btn-play" title="Abrir enlace"><i class="fa-solid fa-play"></i> Ver</a>
                                 <button class="btn-edit" onclick="abrirModalEditar('${item.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
@@ -338,11 +346,12 @@
             btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
             const payload = {
-                action: modoModal, // Aquí el sistema sabe si es "insert" o "edit"
+                action: modoModal, 
                 id: idEdicionActual,
                 titulo: titulo,
                 tipo: document.getElementById('inTipo').value,
                 estado: document.getElementById('inEstado').value,
+                temporada: document.getElementById('inTemporada').value || 1, // Se envía la temporada
                 capitulo: document.getElementById('inCapActual').value || 0,
                 total: document.getElementById('inTotal').value,
                 link: document.getElementById('inLink').value,
@@ -355,7 +364,7 @@
                 btnSave.innerText = textoOriginal;
                 mostrarToast(modoModal === 'insert' ? "Obra añadida" : "Cambios guardados");
                 cerrarModal();
-                cargarMedia(); // Recarga la cartelera para mostrar los cambios
+                cargarMedia(); 
             }).catch(() => {
                 btnSave.disabled = false;
                 btnSave.innerText = textoOriginal;
@@ -377,7 +386,9 @@
                 if(item) item.capitulo = nuevoCap;
                 
                 const totalText = item && item.total ? ` / ${item.total}` : '';
-                document.getElementById(`cap-text-${id}`).innerText = `Capítulo ${nuevoCap}${totalText}`;
+                const tempText = item && item.temporada ? `T${item.temporada} • ` : ''; // Se mantiene la temporada al sumar
+                document.getElementById(`cap-text-${id}`).innerText = `${tempText}Capítulo ${nuevoCap}${totalText}`;
+                
                 btnElement.innerHTML = '+1';
                 btnElement.disabled = false;
                 btnElement.setAttribute('onclick', `sumarCapitulo('${id}', ${nuevoCap}, this)`);
