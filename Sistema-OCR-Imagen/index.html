@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema OCR Profesional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Zona de carga de imagen */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            display: none;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Área de texto */
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            resize: none;
+            font-size: 1rem;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        /* Botones */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Historial */
+        .history-section {
+            margin-top: 3rem;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .history-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .history-date {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            height: 100px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .history-actions .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary);">Procesando imagen...</h3>
+        <p style="color: var(--text-muted);">Detectando texto e idiomas</p>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Sistema Profesional OCR</h1>
+            <p>Extrae texto de cualquier imagen al instante</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2 class="card-title"><i class="fa-regular fa-image"></i> Imagen Original</h2>
+                
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div id="uploadPlaceholder">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Sube o arrastra una imagen</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Soporta JPG, PNG, WEBP</p>
+                    </div>
+                    <img id="preview" class="image-preview" alt="Vista previa">
+                </div>
+                <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+
+                <div class="btn-group" style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="iniciarEscaneo()" style="width: 100%; justify-content: center;">
+                        <i class="fa-solid fa-expand"></i> Escanear Imagen
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fa-solid fa-align-left"></i> Texto Extraído</h2>
+                <textarea id="resultText" placeholder="El texto detectado aparecerá aquí. Puedes editarlo antes de guardarlo o copiarlo."></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="guardarTexto()">
+                        <i class="fa-solid fa-database"></i> Guardar
+                    </button>
+                    <button class="btn btn-secondary" onclick="copiarTexto('resultText')">
+                        <i class="fa-regular fa-copy"></i> Copiar
+                    </button>
+                    <button class="btn btn-secondary" onclick="limpiarInterfaz()">
+                        <i class="fa-solid fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section card">
+            <div class="history-header">
+                <h2 class="card-title" style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Archivos Guardados</h2>
+                <button class="btn btn-secondary" onclick="cargarHistorial()">
+                    <i class="fa-solid fa-rotate-right"></i> Actualizar
+                </button>
+            </div>
+            
+            <div class="history-grid" id="historyContainer">
+                <p style="color: var(--text-muted);">Presiona "Actualizar" para ver tus textos guardados.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRUicosRzZ6yyawiFXEob6xUJNDPC5UL5aJi2ziJT2eLy5vgJCGNfOHoI7KAyO6R7d/exec';
+        
+        let currentBase64 = null;
+        let currentMimeType = null;
+
+        // Función central para hacer peticiones a Apps Script
+        async function fetchAPI(data) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    // text/plain evita bloqueos de CORS en Apps Script
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(data)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("Error en la petición:", error);
+                throw error;
+            }
+        }
+
+        // Manejo de carga de archivo
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Mostrar vista previa
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+
+                // Guardar datos para procesar
+                currentBase64 = e.target.result.split(',')[1];
+                currentMimeType = file.type;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Drag and Drop
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border-color)';
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border-color)';
+            if(e.dataTransfer.files.length > 0) {
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                handleFileSelect({target: {files: e.dataTransfer.files}});
+            }
+        });
+
+        // 1. Iniciar OCR
+        async function iniciarEscaneo() {
+            if (!currentBase64) {
+                Swal.fire('Atención', 'Por favor, sube una imagen primero.', 'warning');
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const respuesta = await fetchAPI({
+                    accion: 'procesarOCR',
+                    imagenBase64: currentBase64,
+                    mimeType: currentMimeType
+                });
+
+                if (respuesta.status === 'success') {
+                    document.getElementById('resultText').value = respuesta.texto;
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Texto detectado!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    Swal.fire('Error', respuesta.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        // 2. Guardar en Base de Datos
+        async function guardarTexto() {
+            const texto = document.getElementById('resultText').value.trim();
+            if (!texto) {
+                Swal.fire('Atención', 'No hay texto para guardar.', 'warning');
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const respuesta = await fetchAPI({
+                    accion: 'guardar',
+                    texto: texto
+                });
+
+                if (respuesta.status === 'success') {
+                    Swal.fire('Guardado', 'El texto se guardó en la base de datos.', 'success');
+                    cargarHistorial(); // Actualizar lista automáticamente
+                } else {
+                    Swal.fire('Error', respuesta.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Fallo al guardar el registro.', 'error');
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        // 3. Obtener Historial
+        async function cargarHistorial() {
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '<p style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando registros...</p>';
+
+            try {
+                const respuesta = await fetchAPI({ accion: 'obtener' });
+
+                if (respuesta.status === 'success') {
+                    container.innerHTML = '';
+                    if (respuesta.data.length === 0) {
+                        container.innerHTML = '<p style="color:var(--text-muted);">No hay archivos guardados aún.</p>';
+                        return;
+                    }
+
+                    respuesta.data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'history-card';
+                        
+                        // Escapar el texto para evitar errores de renderizado
+                        const safeText = item.texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        
+                        card.innerHTML = `
+                            <div class="history-date"><i class="fa-regular fa-clock"></i> ${item.fecha}</div>
+                            <div class="history-text" id="hist-${item.id}">${safeText}</div>
+                            <div class="history-actions">
+                                <button class="btn btn-secondary" onclick="copiarTexto('hist-${item.id}', true)">
+                                    <i class="fa-regular fa-copy"></i> Copiar
+                                </button>
+                                <button class="btn btn-danger" onclick="eliminarRegistro('${item.id}')">
+                                    <i class="fa-regular fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color:var(--danger);">Error al cargar el historial.</p>';
+            }
+        }
+
+        // 4. Eliminar Registro
+        async function eliminarRegistro(id) {
+            const confirmacion = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción borrará el registro de la base de datos",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (confirmacion.isConfirmed) {
+                document.getElementById('loader').style.display = 'flex';
+                try {
+                    const respuesta = await fetchAPI({ accion: 'eliminar', id: id });
+                    if (respuesta.status === 'success') {
+                        Swal.fire('Eliminado', 'El registro ha sido borrado.', 'success');
+                        cargarHistorial(); // Refrescar vista
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo eliminar.', 'error');
+                } finally {
+                    document.getElementById('loader').style.display = 'none';
+                }
+            }
+        }
+
+        // Funciones Auxiliares
+        function copiarTexto(elementId, isDiv = false) {
+            let texto = "";
+            if (isDiv) {
+                texto = document.getElementById(elementId).innerText;
+            } else {
+                texto = document.getElementById(elementId).value;
+            }
+
+            if (!texto.trim()) {
+                Swal.fire({icon: 'warning', title: 'Nada que copiar', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false});
+                return;
+            }
+
+            navigator.clipboard.writeText(texto).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Copiado al portapapeles!',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        }
+
+        function limpiarInterfaz() {
+            document.getElementById('resultText').value = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('preview').src = '';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
+            document.getElementById('fileInput').value = '';
+            currentBase64 = null;
+            currentMimeType = null;
+        }
+
+        // Cargar historial al iniciar la página
+        window.onload = cargarHistorial;
+    </script>
+</body>
+</html>
