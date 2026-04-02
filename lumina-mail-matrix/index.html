@@ -4,25 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Alias Manager</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
+            --bg-main: #0b1120;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
+            --accent: #8b5cf6;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border-color: #334155;
-            --success: #10b981;
+            --border: #334155;
+            --border-light: #475569;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg-main);
             color: var(--text-main);
             display: flex;
             justify-content: center;
@@ -31,60 +36,154 @@
         }
 
         .container {
-            background-color: var(--card-bg);
+            background-color: var(--bg-card);
             width: 100%;
-            max-width: 800px;
-            border-radius: 16px;
+            max-width: 850px;
+            border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
         }
 
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        /* Título con diseño profesional (Gradiente) */
+        .header { text-align: center; margin-bottom: 35px; }
+        .header h1 { 
+            font-size: 32px; 
+            font-weight: 700; 
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
         .header p { color: var(--text-muted); font-size: 15px; }
 
+        /* Controles y Entradas */
         .input-group { margin-bottom: 25px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-muted); font-size: 14px; }
         .input-group input {
-            width: 100%; padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color);
-            background-color: #0f172a; color: var(--text-main); font-size: 16px; outline: none; transition: border-color 0.3s;
+            width: 100%; padding: 15px 18px; border-radius: 10px; border: 1px solid var(--border);
+            background-color: var(--bg-input); color: var(--text-main); font-size: 16px; 
+            outline: none; transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        .input-group input:focus { border-color: var(--primary); }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
+        /* Botones de Modo */
         .modes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .mode-btn {
-            background-color: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
-            padding: 15px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 500;
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text-muted);
+            padding: 18px 15px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-        .mode-btn i { font-size: 20px; }
-        .mode-btn:hover { border-color: var(--primary); color: var(--text-main); }
-        .mode-btn.active { background-color: var(--primary); border-color: var(--primary); color: white; }
+        .mode-btn i { font-size: 24px; transition: transform 0.3s ease; }
+        .mode-btn:hover { border-color: var(--border-light); color: var(--text-main); transform: translateY(-2px); }
+        .mode-btn.active { 
+            background: linear-gradient(145deg, var(--primary), var(--primary-hover)); 
+            border-color: transparent; color: white; 
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .mode-btn.active i { transform: scale(1.1); }
 
+        /* Botón Generar */
         .btn-generate {
-            width: 100%; background-color: var(--primary); color: white; border: none; padding: 16px;
-            border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; margin-bottom: 30px;
+            width: 100%; background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white; border: none; padding: 18px; border-radius: 12px; font-size: 16px; font-weight: 700; 
+            cursor: pointer; transition: opacity 0.3s, transform 0.2s; margin-bottom: 35px;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
         }
-        .btn-generate:hover { background-color: var(--primary-hover); }
+        .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-generate:active { transform: translateY(1px); }
 
-        .results-section { background-color: #0f172a; border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); }
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        /* Sección de Resultados */
+        .results-section { background-color: var(--bg-input); border-radius: 16px; padding: 25px; border: 1px solid var(--border); }
+        .results-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); 
+        }
+        .results-header h3 { font-size: 18px; font-weight: 600; }
         
         #config-numerica { display: none; margin-bottom: 25px; }
 
+        /* Títulos de sub-secciones */
+        .section-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .section-fijados { margin-bottom: 30px; display: none; } /* Se muestra solo si hay fijados */
+
+        /* Elementos de la lista */
+        .alias-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
         .alias-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;
-            background-color: var(--card-bg); border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;
+            background-color: var(--bg-card); border-radius: 10px; border: 1px solid var(--border);
+            transition: border-color 0.2s;
         }
-        .alias-text { font-family: monospace; font-size: 15px; word-break: break-all; }
-        .btn-copy {
-            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
-            padding: 8px; border-radius: 4px; transition: all 0.2s;
-        }
-        .btn-copy:hover { color: var(--success); background-color: rgba(16, 185, 129, 0.1); }
+        .alias-item:hover { border-color: var(--border-light); }
+        .alias-item.pinned { border-left: 4px solid var(--accent); }
         
-        .tag-time { font-size: 11px; color: var(--text-muted); margin-left: 10px; }
+        .alias-info { display: flex; flex-direction: column; gap: 5px; }
+        .alias-text { font-family: monospace; font-size: 15px; word-break: break-all; color: var(--text-main); font-weight: 500; }
+        .tag-time { font-size: 12px; color: var(--text-muted); }
+
+        /* Botones de acción dentro del ítem */
+        .alias-actions { display: flex; gap: 8px; }
+        .btn-action {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; font-size: 14px;
+        }
+        .btn-action:hover { background-color: var(--bg-input); color: var(--text-main); }
+        .btn-action.copy:hover { color: var(--success); background-color: rgba(16, 185, 129, 0.1); }
+        .btn-action.pin:hover, .btn-action.pin.active { color: var(--accent); background-color: rgba(139, 92, 246, 0.1); }
+        .btn-action.delete:hover { color: var(--danger); background-color: rgba(239, 68, 68, 0.1); }
+
+        .btn-clear {
+            background: transparent; border: 1px solid var(--border); color: var(--danger);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-clear:hover { background-color: var(--danger); color: white; border-color: var(--danger); }
+
+        /* --- UI PERSONALIZADA: MODALES Y NOTIFICACIONES --- */
+        
+        /* Notificación Flotante (Toast) */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background-color: var(--bg-card); color: var(--success); border: 1px solid var(--border);
+            padding: 12px 25px; border-radius: 50px; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Ventana Modal Propia */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(11, 17, 32, 0.8); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 2000;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-box {
+            background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 30px; width: 90%; max-width: 400px; text-align: center;
+            transform: scale(0.9); transition: all 0.3s ease; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        
+        .modal-box i { font-size: 40px; color: var(--danger); margin-bottom: 15px; }
+        .modal-box h3 { margin-bottom: 10px; font-size: 20px; }
+        .modal-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
+        
+        .modal-actions { display: flex; gap: 15px; }
+        .modal-btn {
+            flex: 1; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: all 0.2s; border: none;
+        }
+        .modal-btn.cancel { background-color: var(--bg-input); color: var(--text-main); border: 1px solid var(--border); }
+        .modal-btn.cancel:hover { background-color: var(--border); }
+        .modal-btn.confirm { background-color: var(--danger); color: white; }
+        .modal-btn.confirm:hover { background-color: var(--danger-hover); }
+
     </style>
 </head>
 <body>
@@ -92,19 +191,19 @@
     <div class="container">
         <div class="header">
             <h1><i class="fa-solid fa-shield-halved"></i> Nexus Alias Manager</h1>
-            <p>Generador de correos únicos con marca de tiempo e historial local</p>
+            <p>Matriz de correos dinámicos con protección local</p>
         </div>
 
         <div class="input-group">
             <label for="correoBase">Correo Gmail Raíz</label>
-            <input type="email" id="correoBase" placeholder="ejemplo@gmail.com" required>
+            <input type="email" id="correoBase" placeholder="tu.correo@gmail.com" required>
         </div>
 
         <div class="input-group">
-            <label>Selecciona el Modo de Generación</label>
+            <label>Selecciona la Arquitectura de Generación</label>
             <div class="modes-grid">
                 <button class="mode-btn active" data-mode="tematico">
-                    <i class="fa-solid fa-book"></i> Temático
+                    <i class="fa-solid fa-layer-group"></i> Temático
                 </button>
                 <button class="mode-btn" data-mode="fantasma">
                     <i class="fa-solid fa-ghost"></i> Desechable
@@ -119,8 +218,8 @@
         </div>
 
         <div id="config-numerica" class="input-group">
-            <label for="numeroBase">Número base (ej. 2026, 99)</label>
-            <input type="number" id="numeroBase" placeholder="Ingresa un número">
+            <label for="numeroBase">Base Numérica (Ej. 2026, 99)</label>
+            <input type="number" id="numeroBase" placeholder="Ingresa un valor">
         </div>
 
         <button class="btn-generate" id="btn-generar">
@@ -129,26 +228,55 @@
 
         <div class="results-section">
             <div class="results-header">
-                <h3>Historial Local de Alias Generados</h3>
-                <button class="btn-copy" id="btn-limpiar" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Limpiar Historial</button>
+                <h3>Base de Datos Local</h3>
+                <button class="btn-clear" id="btn-limpiar"><i class="fa-solid fa-trash-can"></i> Limpiar Recientes</button>
             </div>
-            <ul id="lista-correos" style="list-style: none; padding: 0;"></ul>
+
+            <div id="seccion-fijados" class="section-fijados">
+                <h4 class="section-subtitle"><i class="fa-solid fa-thumbtack" style="color: var(--accent);"></i> Alias Protegidos</h4>
+                <ul id="lista-fijados" class="alias-list"></ul>
+            </div>
+
+            <h4 class="section-subtitle" id="titulo-recientes"><i class="fa-solid fa-clock-rotate-left"></i> Historial Reciente</h4>
+            <ul id="lista-correos" class="alias-list"></ul>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i> <span>Copiado al portapapeles</span>
+    </div>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>¿Limpiar historial?</h3>
+            <p>Se borrarán permanentemente todos los correos generados, excepto los que hayas protegido (fijados).</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="modal-cancel">Cancelar</button>
+                <button class="modal-btn confirm" id="modal-confirm">Sí, limpiar</button>
+            </div>
         </div>
     </div>
 
     <script>
         // --- ESTADO DEL SISTEMA ---
         let modoActual = 'tematico';
+        let historialDatos = []; // Ahora será un array de objetos: { id, alias, time, pinned }
+        
+        // Elementos del DOM
         const listaCorreosUI = document.getElementById('lista-correos');
+        const listaFijadosUI = document.getElementById('lista-fijados');
+        const seccionFijados = document.getElementById('seccion-fijados');
         const correoBaseInput = document.getElementById('correoBase');
         const numBaseInput = document.getElementById('numeroBase');
+        const toast = document.getElementById('toast');
+        const modal = document.getElementById('custom-modal');
         
-        // Diccionarios para el modo temático
-        const palabrasTematicas = ['edu', 'campus', 'curso', 'suscripcion', 'news', 'update', 'foro', 'compra', 'test', 'web'];
+        const palabrasTematicas = ['edu', 'campus', 'sub', 'news', 'update', 'foro', 'compra', 'test', 'web', 'reg'];
 
         // --- INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
-            cargarHistorial();
+            migrarYCargarHistorial();
             configurarBotonesModo();
         });
 
@@ -160,10 +288,7 @@
                     botones.forEach(b => b.classList.remove('active'));
                     e.currentTarget.classList.add('active');
                     modoActual = e.currentTarget.dataset.mode;
-                    
-                    // Mostrar/Ocultar input numérico
-                    document.getElementById('config-numerica').style.display = 
-                        (modoActual === 'numerico') ? 'block' : 'none';
+                    document.getElementById('config-numerica').style.display = (modoActual === 'numerico') ? 'block' : 'none';
                 });
             });
         }
@@ -171,26 +296,21 @@
         // --- MOTOR GENERADOR ---
         document.getElementById('btn-generar').addEventListener('click', () => {
             const correoBase = correoBaseInput.value.trim().toLowerCase();
-            
-            // Validaciones básicas
             if (!correoBase || !correoBase.includes('@gmail.com')) {
-                alert('Por favor, ingresa un correo de @gmail.com válido.');
+                mostrarToast('Ingresa un correo @gmail.com válido', true);
                 return;
             }
 
             const [usuario, dominio] = correoBase.split('@');
             let aliasGenerado = '';
-            
-            // Generar semilla de tiempo (timestamp en base 36 para hacerlo corto y alfanumérico)
             const semillaTiempo = Date.now().toString(36); 
 
-            // Aplicar la lógica según el modo seleccionado
             if (modoActual === 'tematico') {
                 const palabra = palabrasTematicas[Math.floor(Math.random() * palabrasTematicas.length)];
                 aliasGenerado = `${usuario}+${palabra}.${semillaTiempo}@${dominio}`;
             } 
             else if (modoActual === 'fantasma') {
-                const randomStr = Math.random().toString(36).substring(2, 8); // Cadena aleatoria
+                const randomStr = Math.random().toString(36).substring(2, 8);
                 aliasGenerado = `${usuario}+${randomStr}.${semillaTiempo}@${dominio}`;
             }
             else if (modoActual === 'numerico') {
@@ -198,84 +318,158 @@
                 aliasGenerado = `${usuario}+n${num}.${semillaTiempo}@${dominio}`;
             }
             else if (modoActual === 'puntos') {
-                // Modo puntos: Insertar puntos aleatorios en el nombre de usuario
                 let usuarioConPuntos = '';
                 for (let i = 0; i < usuario.length; i++) {
                     usuarioConPuntos += usuario[i];
-                    // Agrega un punto aleatoriamente entre letras (no al final)
-                    if (i < usuario.length - 1 && Math.random() > 0.5) {
-                        usuarioConPuntos += '.';
-                    }
+                    if (i < usuario.length - 1 && Math.random() > 0.5) { usuarioConPuntos += '.'; }
                 }
-                // Limpiar posibles puntos dobles o al inicio/final por seguridad
                 usuarioConPuntos = usuarioConPuntos.replace(/\.+/g, '.').replace(/^\.|\.$/g, '');
-                // Aunque usemos puntos, agregamos el timestamp con + para asegurar unicidad absoluta en la web destino
                 aliasGenerado = `${usuarioConPuntos}+${semillaTiempo}@${dominio}`;
             }
 
-            guardarYMostrarAlias(aliasGenerado);
+            // Crear objeto de datos en lugar de solo texto
+            const nuevoRegistro = {
+                id: semillaTiempo,
+                alias: aliasGenerado,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+                pinned: false
+            };
+
+            guardarYMostrarAlias(nuevoRegistro);
         });
 
-        // --- ALMACENAMIENTO LOCAL Y RENDERIZADO ---
-        function guardarYMostrarAlias(nuevoAlias) {
-            let historial = JSON.parse(localStorage.getItem('nexus_historial')) || [];
-            
-            // Verificación de unicidad extra (aunque la semilla de tiempo ya lo garantiza matemáticamente)
-            if (historial.includes(nuevoAlias)) {
-                console.log("Colisión detectada, intentando de nuevo..."); // Casi imposible que ocurra
-                return; 
+        // --- ALMACENAMIENTO Y LÓGICA DE DATOS ---
+        function migrarYCargarHistorial() {
+            const dataRaw = localStorage.getItem('nexus_historial_v2');
+            if (dataRaw) {
+                historialDatos = JSON.parse(dataRaw);
+            } else {
+                // Compatibilidad con la versión anterior si existe
+                const dataAntigua = JSON.parse(localStorage.getItem('nexus_historial') || '[]');
+                historialDatos = dataAntigua.map((str, index) => ({
+                    id: Date.now().toString(36) + index,
+                    alias: str,
+                    time: 'Anterior',
+                    pinned: false
+                }));
             }
-
-            // Agregar al principio del historial
-            historial.unshift(nuevoAlias);
-            localStorage.setItem('nexus_historial', JSON.stringify(historial));
-            
-            renderizarLista();
+            renderizarListas();
         }
 
-        function cargarHistorial() {
-            renderizarLista();
+        function guardarYMostrarAlias(nuevoRegistro) {
+            historialDatos.unshift(nuevoRegistro);
+            guardarDatos();
+            renderizarListas();
         }
 
-        function renderizarLista() {
-            let historial = JSON.parse(localStorage.getItem('nexus_historial')) || [];
+        function guardarDatos() {
+            localStorage.setItem('nexus_historial_v2', JSON.stringify(historialDatos));
+        }
+
+        // --- ACCIONES INDIVIDUALES (FIJAR Y ELIMINAR) ---
+        window.togglePin = function(id) {
+            const index = historialDatos.findIndex(item => item.id === id);
+            if (index > -1) {
+                historialDatos[index].pinned = !historialDatos[index].pinned;
+                guardarDatos();
+                renderizarListas();
+            }
+        }
+
+        window.eliminarAlias = function(id) {
+            historialDatos = historialDatos.filter(item => item.id !== id);
+            guardarDatos();
+            renderizarListas();
+        }
+
+        // --- RENDERIZADO VISUAL ---
+        function renderizarListas() {
             listaCorreosUI.innerHTML = '';
+            listaFijadosUI.innerHTML = '';
+            
+            let tieneFijados = false;
+            let tieneRecientes = false;
 
-            historial.forEach(alias => {
+            historialDatos.forEach(item => {
                 const li = document.createElement('li');
-                li.className = 'alias-item';
+                li.className = `alias-item ${item.pinned ? 'pinned' : ''}`;
                 
-                // Fecha legible para la UI
-                const fecha = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
                 li.innerHTML = `
-                    <div>
-                        <span class="alias-text">${alias}</span>
-                        <span class="tag-time"><i class="fa-regular fa-clock"></i> Generado</span>
+                    <div class="alias-info">
+                        <span class="alias-text">${item.alias}</span>
+                        <span class="tag-time"><i class="fa-regular fa-clock"></i> Creado: ${item.time}</span>
                     </div>
-                    <button class="btn-copy" onclick="copiarTexto('${alias}')" title="Copiar">
-                        <i class="fa-regular fa-copy"></i>
-                    </button>
+                    <div class="alias-actions">
+                        <button class="btn-action copy" onclick="copiarTexto('${item.alias}')" title="Copiar">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button class="btn-action pin ${item.pinned ? 'active' : ''}" onclick="togglePin('${item.id}')" title="${item.pinned ? 'Desfijar' : 'Fijar/Proteger'}">
+                            <i class="fa-solid fa-thumbtack"></i>
+                        </button>
+                        <button class="btn-action delete" onclick="eliminarAlias('${item.id}')" title="Eliminar">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
                 `;
-                listaCorreosUI.appendChild(li);
+
+                if (item.pinned) {
+                    listaFijadosUI.appendChild(li);
+                    tieneFijados = true;
+                } else {
+                    listaCorreosUI.appendChild(li);
+                    tieneRecientes = true;
+                }
             });
+
+            // Mostrar/Ocultar secciones según el contenido
+            seccionFijados.style.display = tieneFijados ? 'block' : 'none';
+            
+            const tituloRecientes = document.getElementById('titulo-recientes');
+            if(!tieneRecientes && !tieneFijados) {
+                listaCorreosUI.innerHTML = '<li style="text-align:center; color: var(--text-muted); padding: 20px 0; font-size: 14px;">No hay correos generados aún.</li>';
+            }
         }
 
-        // --- UTILIDADES ---
+        // --- UTILIDADES UI PROPIAS (TOAST Y MODAL) ---
         window.copiarTexto = function(texto) {
             navigator.clipboard.writeText(texto).then(() => {
-                // Pequeño feedback visual (opcional)
-                alert('Correo copiado: ' + texto);
-            }).catch(err => {
-                console.error('Error al copiar: ', err);
-            });
+                mostrarToast('Copiado al portapapeles');
+            }).catch(err => console.error('Error al copiar: ', err));
         }
 
-        document.getElementById('btn-limpiar').addEventListener('click', () => {
-            if(confirm('¿Estás seguro de borrar el historial local?')) {
-                localStorage.removeItem('nexus_historial');
-                renderizarLista();
+        function mostrarToast(mensaje, esError = false) {
+            toast.querySelector('span').innerText = mensaje;
+            toast.style.color = esError ? 'var(--danger)' : 'var(--success)';
+            toast.querySelector('i').className = esError ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-check';
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Lógica del Modal Propio
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        const btnModalCancelar = document.getElementById('modal-cancel');
+        const btnModalConfirmar = document.getElementById('modal-confirm');
+
+        btnLimpiar.addEventListener('click', () => {
+            // Solo abrimos el modal si hay algo que borrar (elementos no fijados)
+            const hayBorrables = historialDatos.some(item => !item.pinned);
+            if(hayBorrables) {
+                modal.classList.add('active');
+            } else {
+                mostrarToast('No hay historial reciente para borrar', true);
             }
+        });
+
+        btnModalCancelar.addEventListener('click', () => modal.classList.remove('active'));
+
+        btnModalConfirmar.addEventListener('click', () => {
+            // Filtramos y conservamos ÚNICAMENTE los fijados (pinned === true)
+            historialDatos = historialDatos.filter(item => item.pinned === true);
+            guardarDatos();
+            renderizarListas();
+            modal.classList.remove('active');
+            mostrarToast('Historial reciente limpiado');
         });
     </script>
 </body>
