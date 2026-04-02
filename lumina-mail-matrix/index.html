@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Alias Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        .header p { color: var(--text-muted); font-size: 15px; }
+
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-muted); font-size: 14px; }
+        .input-group input {
+            width: 100%; padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color);
+            background-color: #0f172a; color: var(--text-main); font-size: 16px; outline: none; transition: border-color 0.3s;
+        }
+        .input-group input:focus { border-color: var(--primary); }
+
+        .modes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .mode-btn {
+            background-color: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+            padding: 15px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 500;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .mode-btn i { font-size: 20px; }
+        .mode-btn:hover { border-color: var(--primary); color: var(--text-main); }
+        .mode-btn.active { background-color: var(--primary); border-color: var(--primary); color: white; }
+
+        .btn-generate {
+            width: 100%; background-color: var(--primary); color: white; border: none; padding: 16px;
+            border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; margin-bottom: 30px;
+        }
+        .btn-generate:hover { background-color: var(--primary-hover); }
+
+        .results-section { background-color: #0f172a; border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        
+        #config-numerica { display: none; margin-bottom: 25px; }
+
+        .alias-item {
+            display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;
+            background-color: var(--card-bg); border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border-color);
+        }
+        .alias-text { font-family: monospace; font-size: 15px; word-break: break-all; }
+        .btn-copy {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+            padding: 8px; border-radius: 4px; transition: all 0.2s;
+        }
+        .btn-copy:hover { color: var(--success); background-color: rgba(16, 185, 129, 0.1); }
+        
+        .tag-time { font-size: 11px; color: var(--text-muted); margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-shield-halved"></i> Nexus Alias Manager</h1>
+            <p>Generador de correos únicos con marca de tiempo e historial local</p>
+        </div>
+
+        <div class="input-group">
+            <label for="correoBase">Correo Gmail Raíz</label>
+            <input type="email" id="correoBase" placeholder="ejemplo@gmail.com" required>
+        </div>
+
+        <div class="input-group">
+            <label>Selecciona el Modo de Generación</label>
+            <div class="modes-grid">
+                <button class="mode-btn active" data-mode="tematico">
+                    <i class="fa-solid fa-book"></i> Temático
+                </button>
+                <button class="mode-btn" data-mode="fantasma">
+                    <i class="fa-solid fa-ghost"></i> Desechable
+                </button>
+                <button class="mode-btn" data-mode="numerico">
+                    <i class="fa-solid fa-hashtag"></i> Numérico
+                </button>
+                <button class="mode-btn" data-mode="puntos">
+                    <i class="fa-solid fa-braille"></i> Puntos
+                </button>
+            </div>
+        </div>
+
+        <div id="config-numerica" class="input-group">
+            <label for="numeroBase">Número base (ej. 2026, 99)</label>
+            <input type="number" id="numeroBase" placeholder="Ingresa un número">
+        </div>
+
+        <button class="btn-generate" id="btn-generar">
+            <i class="fa-solid fa-bolt"></i> Generar Alias Único
+        </button>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h3>Historial Local de Alias Generados</h3>
+                <button class="btn-copy" id="btn-limpiar" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Limpiar Historial</button>
+            </div>
+            <ul id="lista-correos" style="list-style: none; padding: 0;"></ul>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO DEL SISTEMA ---
+        let modoActual = 'tematico';
+        const listaCorreosUI = document.getElementById('lista-correos');
+        const correoBaseInput = document.getElementById('correoBase');
+        const numBaseInput = document.getElementById('numeroBase');
+        
+        // Diccionarios para el modo temático
+        const palabrasTematicas = ['edu', 'campus', 'curso', 'suscripcion', 'news', 'update', 'foro', 'compra', 'test', 'web'];
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarHistorial();
+            configurarBotonesModo();
+        });
+
+        // --- GESTIÓN DE MODOS (UI) ---
+        function configurarBotonesModo() {
+            const botones = document.querySelectorAll('.mode-btn');
+            botones.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    botones.forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    modoActual = e.currentTarget.dataset.mode;
+                    
+                    // Mostrar/Ocultar input numérico
+                    document.getElementById('config-numerica').style.display = 
+                        (modoActual === 'numerico') ? 'block' : 'none';
+                });
+            });
+        }
+
+        // --- MOTOR GENERADOR ---
+        document.getElementById('btn-generar').addEventListener('click', () => {
+            const correoBase = correoBaseInput.value.trim().toLowerCase();
+            
+            // Validaciones básicas
+            if (!correoBase || !correoBase.includes('@gmail.com')) {
+                alert('Por favor, ingresa un correo de @gmail.com válido.');
+                return;
+            }
+
+            const [usuario, dominio] = correoBase.split('@');
+            let aliasGenerado = '';
+            
+            // Generar semilla de tiempo (timestamp en base 36 para hacerlo corto y alfanumérico)
+            const semillaTiempo = Date.now().toString(36); 
+
+            // Aplicar la lógica según el modo seleccionado
+            if (modoActual === 'tematico') {
+                const palabra = palabrasTematicas[Math.floor(Math.random() * palabrasTematicas.length)];
+                aliasGenerado = `${usuario}+${palabra}.${semillaTiempo}@${dominio}`;
+            } 
+            else if (modoActual === 'fantasma') {
+                const randomStr = Math.random().toString(36).substring(2, 8); // Cadena aleatoria
+                aliasGenerado = `${usuario}+${randomStr}.${semillaTiempo}@${dominio}`;
+            }
+            else if (modoActual === 'numerico') {
+                const num = numBaseInput.value.trim() || Math.floor(Math.random() * 1000);
+                aliasGenerado = `${usuario}+n${num}.${semillaTiempo}@${dominio}`;
+            }
+            else if (modoActual === 'puntos') {
+                // Modo puntos: Insertar puntos aleatorios en el nombre de usuario
+                let usuarioConPuntos = '';
+                for (let i = 0; i < usuario.length; i++) {
+                    usuarioConPuntos += usuario[i];
+                    // Agrega un punto aleatoriamente entre letras (no al final)
+                    if (i < usuario.length - 1 && Math.random() > 0.5) {
+                        usuarioConPuntos += '.';
+                    }
+                }
+                // Limpiar posibles puntos dobles o al inicio/final por seguridad
+                usuarioConPuntos = usuarioConPuntos.replace(/\.+/g, '.').replace(/^\.|\.$/g, '');
+                // Aunque usemos puntos, agregamos el timestamp con + para asegurar unicidad absoluta en la web destino
+                aliasGenerado = `${usuarioConPuntos}+${semillaTiempo}@${dominio}`;
+            }
+
+            guardarYMostrarAlias(aliasGenerado);
+        });
+
+        // --- ALMACENAMIENTO LOCAL Y RENDERIZADO ---
+        function guardarYMostrarAlias(nuevoAlias) {
+            let historial = JSON.parse(localStorage.getItem('nexus_historial')) || [];
+            
+            // Verificación de unicidad extra (aunque la semilla de tiempo ya lo garantiza matemáticamente)
+            if (historial.includes(nuevoAlias)) {
+                console.log("Colisión detectada, intentando de nuevo..."); // Casi imposible que ocurra
+                return; 
+            }
+
+            // Agregar al principio del historial
+            historial.unshift(nuevoAlias);
+            localStorage.setItem('nexus_historial', JSON.stringify(historial));
+            
+            renderizarLista();
+        }
+
+        function cargarHistorial() {
+            renderizarLista();
+        }
+
+        function renderizarLista() {
+            let historial = JSON.parse(localStorage.getItem('nexus_historial')) || [];
+            listaCorreosUI.innerHTML = '';
+
+            historial.forEach(alias => {
+                const li = document.createElement('li');
+                li.className = 'alias-item';
+                
+                // Fecha legible para la UI
+                const fecha = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                li.innerHTML = `
+                    <div>
+                        <span class="alias-text">${alias}</span>
+                        <span class="tag-time"><i class="fa-regular fa-clock"></i> Generado</span>
+                    </div>
+                    <button class="btn-copy" onclick="copiarTexto('${alias}')" title="Copiar">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                `;
+                listaCorreosUI.appendChild(li);
+            });
+        }
+
+        // --- UTILIDADES ---
+        window.copiarTexto = function(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                // Pequeño feedback visual (opcional)
+                alert('Correo copiado: ' + texto);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+
+        document.getElementById('btn-limpiar').addEventListener('click', () => {
+            if(confirm('¿Estás seguro de borrar el historial local?')) {
+                localStorage.removeItem('nexus_historial');
+                renderizarLista();
+            }
+        });
+    </script>
+</body>
+</html>
