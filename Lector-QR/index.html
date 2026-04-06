@@ -7,7 +7,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
     <style>
         :root {
             --primary: #10b981; 
@@ -70,13 +74,13 @@
     <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
         <h3 style="color: var(--primary);" id="loaderStatus">Procesando...</h3>
-        <p style="color: var(--text-muted);">Por favor, espera un momento</p>
+        <p style="color: var(--text-muted);">Analizando con arquitectura de doble motor</p>
     </div>
 
     <div class="container">
         <header class="header">
             <h1>Escáner QR Avanzado</h1>
-            <p>Motor de procesamiento pesado: Decodifica imágenes borrosas, oscuras o invertidas.</p>
+            <p>Motor de procesamiento pesado Dual: Decodifica imágenes borrosas, oscuras o invertidas.</p>
         </header>
 
         <div class="main-grid">
@@ -135,12 +139,10 @@
     <canvas id="processingCanvas" style="display:none;"></canvas>
 
     <script>
-        // TU NUEVO ENLACE
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz63NmvhyshhQaZGkxrh9ucCQ0j4J7QfC9fKxaZCZnPYnGumvMQAqf4RG4-YBtOx6Tq/exec';
         
         const codeReader = new ZXing.BrowserQRCodeReader();
 
-        // Funciones de Drag & Drop y Selección de archivo (CORREGIDAS)
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -148,12 +150,7 @@
             reader.onload = function(e) {
                 document.getElementById('uploadPlaceholder').style.display = 'none';
                 const preview = document.getElementById('preview');
-                
-                // Asegurar que la imagen se dibuja antes de soltarla
-                preview.onload = function() {
-                    preview.style.display = 'block';
-                };
-                
+                preview.onload = function() { preview.style.display = 'block'; };
                 preview.src = e.target.result;
             };
             reader.readAsDataURL(file);
@@ -176,48 +173,11 @@
         }
 
         // ==========================================
-        // EL NÚCLEO DEL CÓDIGO PESADO
+        // ARQUITECTURA DE DOBLE MOTOR
         // ==========================================
-        async function procesarImagenMatricial(imgElement, tipo) {
-            return new Promise((resolve) => {
-                const canvas = document.getElementById('processingCanvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = imgElement.naturalWidth;
-                canvas.height = imgElement.naturalHeight;
-                ctx.drawImage(imgElement, 0, 0);
-
-                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                let data = imageData.data;
-
-                for (let i = 0; i < data.length; i += 4) {
-                    let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                    
-                    if (tipo === 'binarizar') {
-                        let threshold = 128;
-                        let finalColor = avg > threshold ? 255 : 0;
-                        data[i] = finalColor;     
-                        data[i+1] = finalColor;   
-                        data[i+2] = finalColor;   
-                    } else if (tipo === 'invertir') {
-                        data[i] = 255 - data[i];
-                        data[i+1] = 255 - data[i+1];
-                        data[i+2] = 255 - data[i+2];
-                    }
-                }
-
-                ctx.putImageData(imageData, 0, 0);
-                
-                let processedImg = new Image();
-                processedImg.onload = () => resolve(processedImg);
-                processedImg.src = canvas.toDataURL('image/png');
-            });
-        }
-
         async function iniciarEscaneoPesado() {
             const imgElement = document.getElementById('preview');
             
-            // Verificación segura de que hay una imagen válida
             if (imgElement.style.display === 'none' || !imgElement.src || imgElement.src === window.location.href) {
                 Swal.fire('Atención', 'Por favor, sube una imagen primero.', 'warning');
                 return;
@@ -226,32 +186,39 @@
             document.getElementById('loader').style.display = 'flex';
             let resultadoFinal = null;
 
+            // MOTOR 1: ZXing (Estándar de Google)
+            updateLoaderMsg("Motor 1: Escaneo Base...");
             try {
-                // FASE 1: Intento Normal
-                updateLoaderMsg("Fase 1: Análisis Estándar...");
                 const result1 = await codeReader.decodeFromImageElement(imgElement);
                 resultadoFinal = result1.text;
             } catch (e1) {
-                console.log("Fase 1 falló. Iniciando algoritmo pesado.");
+                console.log("Motor 1 falló. Activando Motor Pesado...");
                 
+                // MOTOR 2: jsQR con intento de inversión matricial agresiva
+                updateLoaderMsg("Motor 2: Inversión Adaptativa...");
                 try {
-                    // FASE 2: Binarización
-                    updateLoaderMsg("Fase 2: Binarización de Píxeles...");
-                    const imgBinarizada = await procesarImagenMatricial(imgElement, 'binarizar');
-                    const result2 = await codeReader.decodeFromImageElement(imgBinarizada);
-                    resultadoFinal = result2.text;
-                } catch (e2) {
-                    console.log("Fase 2 falló. Intentando inversión matricial.");
+                    const canvas = document.getElementById('processingCanvas');
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    
+                    canvas.width = imgElement.naturalWidth;
+                    canvas.height = imgElement.naturalHeight;
+                    ctx.drawImage(imgElement, 0, 0);
 
-                    try {
-                        // FASE 3: Inversión
-                        updateLoaderMsg("Fase 3: Inversión Matricial...");
-                        const imgInvertida = await procesarImagenMatricial(imgElement, 'invertir');
-                        const result3 = await codeReader.decodeFromImageElement(imgInvertida);
-                        resultadoFinal = result3.text;
-                    } catch (e3) {
-                        console.error("Todas las fases fallaron.");
+                    // Extraemos los píxeles puros
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    // Pasamos la data pura al motor jsQR indicándole que busque códigos invertidos
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "attemptBoth",
+                    });
+
+                    if (code) {
+                        resultadoFinal = code.data;
+                    } else {
+                        throw new Error("Ambos motores fallaron.");
                     }
+                } catch (e2) {
+                    console.error("Todas las fases del escaneo pesado fallaron.", e2);
                 }
             }
 
@@ -261,51 +228,34 @@
                 document.getElementById('resultText').value = resultadoFinal;
                 Swal.fire({ icon: 'success', title: '¡Código decodificado!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
             } else {
-                Swal.fire('Lectura Fallida', 'El código QR está demasiado dañado o no se detectó ningún patrón válido.', 'error');
+                Swal.fire('Lectura Fallida', 'El código es demasiado complejo o no tiene la resolución suficiente.', 'error');
             }
         }
 
         // ==========================================
-        // COMUNICACIÓN CON APPS SCRIPT (CORREGIDA)
+        // COMUNICACIÓN CON APPS SCRIPT
         // ==========================================
         async function fetchAPI(data) {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                redirect: 'follow', // <-- ESTO SOLUCIONA EL BLOQUEO DE GOOGLE
+                redirect: 'follow',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(data)
             });
-            
-            if (!response.ok) {
-                throw new Error("Error de red o conexión bloqueada");
-            }
-            
+            if (!response.ok) throw new Error("Error de red");
             return await response.json();
         }
 
         async function guardarTexto() {
             const texto = document.getElementById('resultText').value.trim();
-            if (!texto) {
-                Swal.fire('Atención', 'No hay contenido para guardar.', 'warning');
-                return;
-            }
+            if (!texto) { Swal.fire('Atención', 'No hay contenido para guardar.', 'warning'); return; }
             document.getElementById('loader').style.display = 'flex';
-            updateLoaderMsg("Guardando en base de datos...");
             try {
                 const res = await fetchAPI({ accion: 'guardar', texto: texto });
-                if (res.status === 'success') { 
-                    Swal.fire('Guardado', 'Registro exitoso.', 'success'); 
-                    cargarHistorial(); 
-                } else {
-                    Swal.fire('Error', res.message || 'Error del servidor', 'error');
-                }
-            } catch (e) { 
-                Swal.fire('Error', 'Fallo al guardar en Sheets. Revisa la consola.', 'error'); 
-                console.error(e);
-            } 
-            finally { 
-                document.getElementById('loader').style.display = 'none'; 
-            }
+                if (res.status === 'success') { Swal.fire('Guardado', 'Registro exitoso.', 'success'); cargarHistorial(); }
+                else { Swal.fire('Error', res.message, 'error'); }
+            } catch (e) { Swal.fire('Error', 'Fallo al guardar en Sheets.', 'error'); } 
+            finally { document.getElementById('loader').style.display = 'none'; }
         }
 
         async function cargarHistorial() {
@@ -322,48 +272,24 @@
                                 <div class="history-date"><i class="fa-regular fa-clock"></i> ${item.fecha}</div>
                                 <div class="history-text" id="hist-${item.id}">${safeText}</div>
                                 <div class="history-actions">
-                                    <button class="btn btn-secondary" onclick="copiarTexto('hist-${item.id}', true)">
-                                        <i class="fa-regular fa-copy"></i> Copiar
-                                    </button>
-                                    <button class="btn btn-danger" onclick="eliminarRegistro('${item.id}')">
-                                        <i class="fa-regular fa-trash-can"></i> Eliminar
-                                    </button>
+                                    <button class="btn btn-secondary" onclick="copiarTexto('hist-${item.id}', true)"><i class="fa-regular fa-copy"></i> Copiar</button>
+                                    <button class="btn btn-danger" onclick="eliminarRegistro('${item.id}')"><i class="fa-regular fa-trash-can"></i> Eliminar</button>
                                 </div>
                             </div>`;
                     });
-                } else {
-                    container.innerHTML = `<p style="color:var(--danger);">Error del servidor: ${res.message}</p>`;
-                }
-            } catch (e) { 
-                container.innerHTML = '<p style="color:var(--danger);">Error al conectar con Google Sheets.</p>'; 
-                console.error(e);
-            }
+                } else { container.innerHTML = `<p style="color:var(--danger);">Error: ${res.message}</p>`; }
+            } catch (e) { container.innerHTML = '<p style="color:var(--danger);">Error al conectar con Google Sheets.</p>'; }
         }
 
         async function eliminarRegistro(id) {
-            const conf = await Swal.fire({ 
-                title: '¿Eliminar registro?', 
-                icon: 'warning', 
-                showCancelButton: true, 
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            });
+            const conf = await Swal.fire({ title: '¿Eliminar registro?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (conf.isConfirmed) {
                 document.getElementById('loader').style.display = 'flex';
-                updateLoaderMsg("Eliminando registro...");
                 try {
                     const res = await fetchAPI({ accion: 'eliminar', id: id });
-                    if (res.status === 'success') { 
-                        Swal.fire('Eliminado', 'Se borró de la base de datos.', 'success'); 
-                        cargarHistorial(); 
-                    }
-                } catch (e) {
-                    Swal.fire('Error', 'Fallo al eliminar', 'error');
-                } 
-                finally { 
-                    document.getElementById('loader').style.display = 'none'; 
-                }
+                    if (res.status === 'success') { Swal.fire('Eliminado', 'Se borró de la base de datos.', 'success'); cargarHistorial(); }
+                } catch (e) { Swal.fire('Error', 'Fallo al eliminar', 'error'); } 
+                finally { document.getElementById('loader').style.display = 'none'; }
             }
         }
 
@@ -376,7 +302,6 @@
         function limpiarInterfaz() {
             document.getElementById('resultText').value = '';
             document.getElementById('preview').style.display = 'none';
-            document.getElementById('preview').src = '';
             document.getElementById('uploadPlaceholder').style.display = 'block';
             document.getElementById('fileInput').value = '';
         }
