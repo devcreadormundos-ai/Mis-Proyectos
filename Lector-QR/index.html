@@ -3,469 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector QR Premium</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <title>Escáner QR de Alta Potencia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
     <style>
         :root {
-            --bg-color: #0b1120;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --primary-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            --success-gradient: linear-gradient(135deg, #10b981, #047857);
-            --danger-gradient: linear-gradient(135deg, #ef4444, #b91c1c);
+            --primary: #10b981; 
+            --primary-hover: #059669;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        header {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 8px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        /* Zona de Carga Mejorada */
-        .upload-section {
-            background-color: var(--card-bg);
-            border: 2px dashed var(--card-border);
-            border-radius: 20px;
-            padding: 50px 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        }
-
-        .upload-section:hover {
-            border-color: var(--primary);
-            background-color: #1e293bcf;
-            transform: translateY(-2px);
-        }
-
-        .upload-label {
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .upload-label i {
-            font-size: 3.5rem;
-            color: var(--primary);
-            filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.3));
-        }
-
-        /* Tarjeta de Resultado Premium */
-        .result-section {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .result-section h3 {
-            margin-bottom: 20px;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .result-box {
-            background-color: #0f172a;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 25px;
-            word-break: break-all;
-            font-size: 1.2rem;
-            color: #fff;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        /* Botones Profesionales */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            flex: 1;
-            min-width: 140px;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: white;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn i { font-size: 1.2rem; }
-
-        .btn-primary { background: var(--primary-gradient); }
-        .btn-success { background: var(--success-gradient); }
-        .btn-danger { background: var(--danger-gradient); }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            filter: brightness(1.1);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .hidden { display: none !important; }
-
-        .status-msg {
-            margin-top: 20px;
-            text-align: center;
-            font-weight: 600;
-            min-height: 24px;
-            font-size: 1.1rem;
-        }
-
-        /* Historial */
-        .history-section {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .history-header h2 { font-size: 1.5rem; }
-
-        .btn-icon {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border);
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-icon:hover { 
-            color: var(--text-main); 
-            background: rgba(255,255,255,0.1);
-        }
-
-        .table-container { overflow-x: auto; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        tbody tr { transition: background-color 0.2s; }
-        tbody tr:hover { background-color: rgba(255, 255, 255, 0.03); }
-
-        .btn-delete {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-        }
-
-        .btn-delete:hover {
-            background-color: #ef4444;
-            color: white;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { font-size: 2.5rem; color: var(--text-main); font-weight: 600; letter-spacing: -0.5px; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem; }
+        
+        .card { background: var(--card-bg); border-radius: 16px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid var(--border-color); }
+        .card-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .upload-area { border: 2px dashed var(--border-color); border-radius: 12px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; background-color: #f8fafc; position: relative; }
+        .upload-area:hover { border-color: var(--primary); background-color: #f0fdf4; }
+        .upload-area i { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; }
+        #fileInput { display: none; }
+        
+        .image-preview { max-width: 100%; max-height: 300px; border-radius: 8px; display: none; margin: 0 auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        textarea { width: 100%; height: 300px; padding: 1rem; border: 1px solid var(--border-color); border-radius: 12px; resize: none; font-size: 1rem; color: var(--text-main); background-color: #f8fafc; transition: border-color 0.3s; }
+        textarea:focus { outline: none; border-color: var(--primary); background-color: #fff; }
+        
+        .btn-group { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 8px; border: none; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background-color: var(--primary); color: white; flex: 1; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: #f1f5f9; }
+        .btn-danger { background-color: var(--danger); color: white; padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-danger:hover { background-color: #dc2626; }
+        
+        .history-section { margin-top: 3rem; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .history-card { background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .history-date { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .history-text { font-size: 0.95rem; color: var(--text-main); white-space: pre-wrap; height: 100px; overflow-y: auto; margin-bottom: 1rem; word-break: break-all; }
+        .history-actions { display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem; }
+        
+        .loader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fa-solid fa-qrcode"></i> Escáner QR Pro</h1>
-            <p>Sube una imagen y extrae la información al instante.</p>
-        </header>
 
-        <section class="upload-section" id="drop-zone">
-            <input type="file" id="file-input" accept="image/*" hidden>
-            <label for="file-input" class="upload-label">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                <span>Haz clic o arrastra la imagen del QR aquí</span>
-            </label>
-            <canvas id="canvas" hidden></canvas>
-        </section>
-
-        <section class="result-section hidden" id="result-card">
-            <h3>Resultado del Escaneo</h3>
-            <div class="result-box">
-                <p id="qr-result-text">Cargando...</p>
-            </div>
-            <div class="action-buttons">
-                <button id="btn-copy" class="btn btn-primary"><i class="fa-solid fa-copy"></i> Copiar</button>
-                <button id="btn-save" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
-                <button id="btn-clear" class="btn btn-danger"><i class="fa-solid fa-eraser"></i> Limpiar</button>
-            </div>
-            <p id="status-msg" class="status-msg"></p>
-        </section>
-
-        <section class="history-section">
-            <div class="history-header">
-                <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial Guardado</h2>
-                <button id="btn-refresh" class="btn-icon" title="Actualizar Historial"><i class="fa-solid fa-rotate-right"></i></button>
-            </div>
-            <div class="table-container">
-                <table id="history-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Contenido Extraído</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-body">
-                        <tr><td colspan="3" style="text-align:center;">Cargando historial...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary);" id="loaderStatus">Iniciando Escaneo Pesado...</h3>
+        <p style="color: var(--text-muted);">Por favor, no cierres la pestaña</p>
     </div>
 
+    <div class="container">
+        <header class="header">
+            <h1>Escáner QR Avanzado</h1>
+            <p>Motor de procesamiento pesado: Decodifica imágenes borrosas, oscuras o invertidas.</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2 class="card-title"><i class="fa-solid fa-qrcode"></i> Código QR Original</h2>
+                
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div id="uploadPlaceholder">
+                        <i class="fa-solid fa-camera-retro"></i>
+                        <h3>Sube o arrastra el código QR</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Soporta JPG, PNG, WEBP</p>
+                    </div>
+                    <img id="preview" class="image-preview" alt="Vista previa del QR">
+                </div>
+                <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+
+                <div class="btn-group" style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="iniciarEscaneoPesado()" style="width: 100%; justify-content: center;">
+                        <i class="fa-solid fa-microchip"></i> Ejecutar Escaneo Pesado
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fa-solid fa-link"></i> Contenido Extraído</h2>
+                <textarea id="resultText" placeholder="El enlace o texto oculto en el código QR aparecerá aquí."></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="guardarTexto()">
+                        <i class="fa-solid fa-database"></i> Guardar en Sheets
+                    </button>
+                    <button class="btn btn-secondary" onclick="copiarTexto('resultText')">
+                        <i class="fa-regular fa-copy"></i> Copiar
+                    </button>
+                    <button class="btn btn-secondary" onclick="limpiarInterfaz()">
+                        <i class="fa-solid fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section card">
+            <div class="history-header">
+                <h2 class="card-title" style="margin: 0;"><i class="fa-solid fa-server"></i> Historial de Escaneos</h2>
+                <button class="btn btn-secondary" onclick="cargarHistorial()">
+                    <i class="fa-solid fa-rotate-right"></i> Actualizar
+                </button>
+            </div>
+            
+            <div class="history-grid" id="historyContainer">
+                <p style="color: var(--text-muted);">Presiona "Actualizar" para ver tus enlaces guardados.</p>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="processingCanvas" style="display:none;"></canvas>
+
     <script>
-        // ATENCIÓN: Si actualizas tu Apps Script a "Cualquier Persona", pega la NUEVA URL aquí
-        const API_URL = "https://script.google.com/macros/s/AKfycbzrAfIiJBlGTopIH4zjcWJNxoILem7yW_0gp-uCZST0FuJa_QICrYtOvTs_PH3FDfLr/exec";
+        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwApHzbnB3-0LjlgJP2SDgJORG5QTlDMQamd7AN96UHfJ2kbrJGY5NZqcjCyIoQ2XiB/exec';
+        
+        const codeReader = new ZXing.BrowserQRCodeReader();
 
-        const fileInput = document.getElementById('file-input');
-        const canvasElement = document.getElementById('canvas');
-        const canvas = canvasElement.getContext('2d', { willReadFrequently: true });
-        const resultCard = document.getElementById('result-card');
-        const qrResultText = document.getElementById('qr-result-text');
-        const statusMsg = document.getElementById('status-msg');
-        const historyBody = document.getElementById('history-body');
-
-        let currentScanResult = "";
-
-        // 1. EVENTO: Cargar Imagen y Escanear
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        // Funciones de Drag & Drop y Selección de archivo
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    canvasElement.width = img.width;
-                    canvasElement.height = img.height;
-                    canvas.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
-                    
-                    const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert",
-                    });
-
-                    if (code) {
-                        currentScanResult = code.data;
-                        qrResultText.textContent = currentScanResult;
-                        resultCard.classList.remove('hidden'); // Aquí es donde aparecen los botones
-                        showMessage("¡Código detectado con éxito!", "var(--success)");
-                    } else {
-                        alert("No se detectó ningún código QR. Intenta con una imagen más clara.");
-                        clearUI();
-                    }
-                };
-                img.src = event.target.result;
+            reader.onload = function(e) {
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
             };
             reader.readAsDataURL(file);
-        });
-
-        // 2. BOTÓN: Copiar
-        document.getElementById('btn-copy').addEventListener('click', () => {
-            navigator.clipboard.writeText(currentScanResult).then(() => {
-                showMessage("¡Copiado al portapapeles!", "var(--primary)");
-            }).catch(err => {
-                showMessage("Error al copiar", "var(--danger)");
-            });
-        });
-
-        // 3. BOTÓN: Guardar
-        document.getElementById('btn-save').addEventListener('click', () => {
-            if (!currentScanResult) return;
-            
-            showMessage("Guardando...", "var(--text-muted)");
-            document.getElementById('btn-save').disabled = true;
-
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'save',
-                    contenido: currentScanResult
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    showMessage("¡Guardado exitosamente!", "var(--success)");
-                    loadHistory();
-                } else {
-                    showMessage("Error al guardar", "var(--danger)");
-                }
-            })
-            .catch(error => showMessage("Error de conexión", "var(--danger)"))
-            .finally(() => document.getElementById('btn-save').disabled = false);
-        });
-
-        // 4. BOTÓN: Limpiar
-        document.getElementById('btn-clear').addEventListener('click', clearUI);
-
-        function clearUI() {
-            fileInput.value = "";
-            currentScanResult = "";
-            resultCard.classList.add('hidden'); // Oculta los botones de nuevo
-            statusMsg.textContent = "";
         }
 
-        function showMessage(msg, color) {
-            statusMsg.textContent = msg;
-            statusMsg.style.color = color;
-            setTimeout(() => statusMsg.textContent = "", 4000);
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
+        dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--border-color)'; });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border-color)';
+            if(e.dataTransfer.files.length > 0) {
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                handleFileSelect({target: {files: e.dataTransfer.files}});
+            }
+        });
+
+        function updateLoaderMsg(msg) {
+            document.getElementById('loaderStatus').innerText = msg;
         }
 
-        // 5. HISTORIAL: Cargar datos
-        function loadHistory() {
-            historyBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando historial...</td></tr>';
-            
-            fetch(API_URL)
-            .then(response => {
-                if(!response.ok) throw new Error("Error de red");
-                return response.json();
-            })
-            .then(data => {
-                historyBody.innerHTML = "";
+        // ==========================================
+        // EL NÚCLEO DEL CÓDIGO PESADO
+        // ==========================================
+        async function procesarImagenMatricial(imgElement, tipo) {
+            return new Promise((resolve) => {
+                const canvas = document.getElementById('processingCanvas');
+                const ctx = canvas.getContext('2d');
                 
-                if (data.length === 0) {
-                    historyBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay códigos guardados aún.</td></tr>';
-                    return;
+                canvas.width = imgElement.naturalWidth;
+                canvas.height = imgElement.naturalHeight;
+                ctx.drawImage(imgElement, 0, 0);
+
+                let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let data = imageData.data;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    // Obtener la luminosidad del píxel
+                    let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    
+                    if (tipo === 'binarizar') {
+                        // Forzar a blanco o negro puro (aumenta brutalmente el contraste)
+                        let threshold = 128;
+                        let finalColor = avg > threshold ? 255 : 0;
+                        data[i] = finalColor;     // Rojo
+                        data[i+1] = finalColor;   // Verde
+                        data[i+2] = finalColor;   // Azul
+                    } else if (tipo === 'invertir') {
+                        // Invertir los colores para códigos QR negativos
+                        data[i] = 255 - data[i];
+                        data[i+1] = 255 - data[i+1];
+                        data[i+2] = 255 - data[i+2];
+                    }
                 }
 
-                data.forEach(item => {
-                    const tr = document.createElement('tr');
-                    
-                    let contentHTML = item.contenido;
-                    if (contentHTML.startsWith('http://') || contentHTML.startsWith('https://')) {
-                        contentHTML = `<a href="${contentHTML}" target="_blank" style="color:var(--primary); text-decoration:none;">${contentHTML}</a>`;
-                    }
-
-                    tr.innerHTML = `
-                        <td>${item.fecha}</td>
-                        <td style="word-break: break-all;">${contentHTML}</td>
-                        <td>
-                            <button class="btn-delete" onclick="deleteRecord('${item.id}')">
-                                <i class="fa-solid fa-trash"></i> Eliminar
-                            </button>
-                        </td>
-                    `;
-                    historyBody.appendChild(tr);
-                });
-            })
-            .catch(error => {
-                historyBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--danger); font-weight:bold;">Error al cargar el historial. Revisa los permisos del Apps Script.</td></tr>';
+                ctx.putImageData(imageData, 0, 0);
+                
+                let processedImg = new Image();
+                processedImg.onload = () => resolve(processedImg);
+                processedImg.src = canvas.toDataURL('image/png');
             });
         }
 
-        // 6. HISTORIAL: Eliminar
-        window.deleteRecord = function(id) {
-            if (!confirm("¿Estás seguro de eliminar este registro?")) return;
+        async function iniciarEscaneoPesado() {
+            const imgElement = document.getElementById('preview');
+            
+            if (imgElement.style.display === 'none' || !imgElement.src) {
+                Swal.fire('Atención', 'Sube una imagen primero.', 'warning');
+                return;
+            }
 
-            fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'delete',
-                    id: id
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    loadHistory();
-                } else {
-                    alert("Hubo un error al eliminar.");
+            document.getElementById('loader').style.display = 'flex';
+            let resultadoFinal = null;
+
+            try {
+                // FASE 1: Intento Normal (Ligero)
+                updateLoaderMsg("Fase 1: Análisis Estándar...");
+                const result1 = await codeReader.decodeFromImageElement(imgElement);
+                resultadoFinal = result1.text;
+            } catch (e1) {
+                console.log("Fase 1 falló. Iniciando algoritmo pesado.");
+                
+                try {
+                    // FASE 2: Binarización Extrema (Blanco/Negro puro)
+                    updateLoaderMsg("Fase 2: Binarización de Píxeles...");
+                    const imgBinarizada = await procesarImagenMatricial(imgElement, 'binarizar');
+                    const result2 = await codeReader.decodeFromImageElement(imgBinarizada);
+                    resultadoFinal = result2.text;
+                } catch (e2) {
+                    console.log("Fase 2 falló. Intentando inversión matricial.");
+
+                    try {
+                        // FASE 3: Inversión de color (QR en negativo)
+                        updateLoaderMsg("Fase 3: Inversión Matricial...");
+                        const imgInvertida = await procesarImagenMatricial(imgElement, 'invertir');
+                        const result3 = await codeReader.decodeFromImageElement(imgInvertida);
+                        resultadoFinal = result3.text;
+                    } catch (e3) {
+                        // Si falla las 3 fases de procesamiento pesado
+                        throw new Error("Imposible de leer incluso con procesamiento pesado.");
+                    }
                 }
-            })
-            .catch(error => alert("Error de conexión al eliminar."));
-        };
+            }
 
-        document.getElementById('btn-refresh').addEventListener('click', loadHistory);
-        window.onload = loadHistory;
+            // Si llegamos aquí, tuvimos éxito en alguna de las fases
+            if (resultadoFinal) {
+                document.getElementById('resultText').value = resultadoFinal;
+                Swal.fire({ icon: 'success', title: '¡Código decodificado!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            }
+
+            document.getElementById('loader').style.display = 'none';
+        } catch(errorFinal) {
+            document.getElementById('loader').style.display = 'none';
+            Swal.fire('Lectura Fallida', 'El código QR está demasiado dañado o distorsionado para ser recuperado.', 'error');
+        }
+        }
+
+        // ==========================================
+        // COMUNICACIÓN CON APPS SCRIPT (MANTENIDA)
+        // ==========================================
+        async function fetchAPI(data) {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        async function guardarTexto() {
+            const texto = document.getElementById('resultText').value.trim();
+            if (!texto) return Swal.fire('Atención', 'No hay contenido para guardar.', 'warning');
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                const res = await fetchAPI({ accion: 'guardar', texto: texto });
+                if (res.status === 'success') { Swal.fire('Guardado', 'Registro exitoso.', 'success'); cargarHistorial(); }
+            } catch (e) { Swal.fire('Error', 'Fallo al guardar.', 'error'); } 
+            finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        async function cargarHistorial() {
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '<p style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p>';
+            try {
+                const res = await fetchAPI({ accion: 'obtener' });
+                if (res.status === 'success') {
+                    container.innerHTML = res.data.length === 0 ? '<p>No hay códigos guardados.</p>' : '';
+                    res.data.forEach(item => {
+                        const safeText = item.texto.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        container.innerHTML += `
+                            <div class="history-card">
+                                <div class="history-date"><i class="fa-regular fa-clock"></i> ${item.fecha}</div>
+                                <div class="history-text" id="hist-${item.id}">${safeText}</div>
+                                <div class="history-actions">
+                                    <button class="btn btn-secondary" onclick="copiarTexto('hist-${item.id}', true)">Copiar</button>
+                                    <button class="btn btn-danger" onclick="eliminarRegistro('${item.id}')">Eliminar</button>
+                                </div>
+                            </div>`;
+                    });
+                }
+            } catch (e) { container.innerHTML = '<p style="color:var(--danger);">Error al cargar.</p>'; }
+        }
+
+        async function eliminarRegistro(id) {
+            const conf = await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' });
+            if (conf.isConfirmed) {
+                document.getElementById('loader').style.display = 'flex';
+                try {
+                    const res = await fetchAPI({ accion: 'eliminar', id: id });
+                    if (res.status === 'success') { Swal.fire('Eliminado', '', 'success'); cargarHistorial(); }
+                } catch (e) {} finally { document.getElementById('loader').style.display = 'none'; }
+            }
+        }
+
+        function copiarTexto(id, isDiv=false) {
+            const txt = isDiv ? document.getElementById(id).innerText : document.getElementById(id).value;
+            if(!txt.trim()) return;
+            navigator.clipboard.writeText(txt).then(() => Swal.fire({icon:'success', title:'Copiado', toast:true, position:'top-end', timer:2000, showConfirmButton:false}));
+        }
+
+        function limpiarInterfaz() {
+            document.getElementById('resultText').value = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
+            document.getElementById('fileInput').value = '';
+        }
+
+        window.onload = cargarHistorial;
     </script>
 </body>
 </html>
