@@ -146,6 +146,12 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            // REINICIO AUTOMÁTICO: Limpiar memoria al subir nuevo archivo
+            codeReader.reset(); // Borra el caché del motor ZXing
+            document.getElementById('resultText').value = ''; // Limpia el texto anterior
+            updateLoaderMsg("Procesando..."); // Restaura el texto del loader
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('uploadPlaceholder').style.display = 'none';
@@ -300,10 +306,21 @@
         }
 
         function limpiarInterfaz() {
+            // REINICIO MANUAL: Limpieza profunda total
+            codeReader.reset(); // Apaga el motor por completo
+            
+            // Limpia el lienzo invisible del motor 2
+            const canvas = document.getElementById('processingCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Limpia la interfaz visual
             document.getElementById('resultText').value = '';
             document.getElementById('preview').style.display = 'none';
+            document.getElementById('preview').src = '';
             document.getElementById('uploadPlaceholder').style.display = 'block';
             document.getElementById('fileInput').value = '';
+            updateLoaderMsg("Procesando...");
         }
 
         window.onload = cargarHistorial;
