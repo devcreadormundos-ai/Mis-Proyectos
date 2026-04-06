@@ -69,8 +69,8 @@
 
     <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
-        <h3 style="color: var(--primary);" id="loaderStatus">Iniciando Escaneo Pesado...</h3>
-        <p style="color: var(--text-muted);">Por favor, no cierres la pestaña</p>
+        <h3 style="color: var(--primary);" id="loaderStatus">Procesando...</h3>
+        <p style="color: var(--text-muted);">Por favor, espera un momento</p>
     </div>
 
     <div class="container">
@@ -135,12 +135,12 @@
     <canvas id="processingCanvas" style="display:none;"></canvas>
 
     <script>
-        // AQUÍ ESTÁ TU NUEVA URL DE GOOGLE APPS SCRIPT
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwApHzbnB3-0LjlgJP2SDgJORG5QTlDMQamd7AN96UHfJ2kbrJGY5NZqcjCyIoQ2XiB/exec';
+        // TU NUEVO ENLACE
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz63NmvhyshhQaZGkxrh9ucCQ0j4J7QfC9fKxaZCZnPYnGumvMQAqf4RG4-YBtOx6Tq/exec';
         
         const codeReader = new ZXing.BrowserQRCodeReader();
 
-        // Funciones de Drag & Drop y Selección de archivo
+        // Funciones de Drag & Drop y Selección de archivo (CORREGIDAS)
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -148,8 +148,13 @@
             reader.onload = function(e) {
                 document.getElementById('uploadPlaceholder').style.display = 'none';
                 const preview = document.getElementById('preview');
+                
+                // Asegurar que la imagen se dibuja antes de soltarla
+                preview.onload = function() {
+                    preview.style.display = 'block';
+                };
+                
                 preview.src = e.target.result;
-                preview.style.display = 'block';
             };
             reader.readAsDataURL(file);
         }
@@ -186,18 +191,15 @@
                 let data = imageData.data;
 
                 for (let i = 0; i < data.length; i += 4) {
-                    // Obtener la luminosidad del píxel
                     let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
                     
                     if (tipo === 'binarizar') {
-                        // Forzar a blanco o negro puro
                         let threshold = 128;
                         let finalColor = avg > threshold ? 255 : 0;
                         data[i] = finalColor;     
                         data[i+1] = finalColor;   
                         data[i+2] = finalColor;   
                     } else if (tipo === 'invertir') {
-                        // Invertir los colores 
                         data[i] = 255 - data[i];
                         data[i+1] = 255 - data[i+1];
                         data[i+2] = 255 - data[i+2];
@@ -215,7 +217,7 @@
         async function iniciarEscaneoPesado() {
             const imgElement = document.getElementById('preview');
             
-            // VALIDACIÓN CORREGIDA: Verifica si la imagen existe o no se ha subido nada
+            // Verificación segura de que hay una imagen válida
             if (imgElement.style.display === 'none' || !imgElement.src || imgElement.src === window.location.href) {
                 Swal.fire('Atención', 'Por favor, sube una imagen primero.', 'warning');
                 return;
@@ -255,7 +257,6 @@
 
             document.getElementById('loader').style.display = 'none';
 
-            // EVALUACIÓN FINAL CORREGIDA
             if (resultadoFinal) {
                 document.getElementById('resultText').value = resultadoFinal;
                 Swal.fire({ icon: 'success', title: '¡Código decodificado!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
@@ -265,14 +266,20 @@
         }
 
         // ==========================================
-        // COMUNICACIÓN CON APPS SCRIPT
+        // COMUNICACIÓN CON APPS SCRIPT (CORREGIDA)
         // ==========================================
         async function fetchAPI(data) {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
+                redirect: 'follow', // <-- ESTO SOLUCIONA EL BLOQUEO DE GOOGLE
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(data)
             });
+            
+            if (!response.ok) {
+                throw new Error("Error de red o conexión bloqueada");
+            }
+            
             return await response.json();
         }
 
@@ -283,14 +290,18 @@
                 return;
             }
             document.getElementById('loader').style.display = 'flex';
+            updateLoaderMsg("Guardando en base de datos...");
             try {
                 const res = await fetchAPI({ accion: 'guardar', texto: texto });
                 if (res.status === 'success') { 
                     Swal.fire('Guardado', 'Registro exitoso.', 'success'); 
                     cargarHistorial(); 
+                } else {
+                    Swal.fire('Error', res.message || 'Error del servidor', 'error');
                 }
             } catch (e) { 
-                Swal.fire('Error', 'Fallo al guardar en Sheets.', 'error'); 
+                Swal.fire('Error', 'Fallo al guardar en Sheets. Revisa la consola.', 'error'); 
+                console.error(e);
             } 
             finally { 
                 document.getElementById('loader').style.display = 'none'; 
@@ -320,9 +331,12 @@
                                 </div>
                             </div>`;
                     });
+                } else {
+                    container.innerHTML = `<p style="color:var(--danger);">Error del servidor: ${res.message}</p>`;
                 }
             } catch (e) { 
                 container.innerHTML = '<p style="color:var(--danger);">Error al conectar con Google Sheets.</p>'; 
+                console.error(e);
             }
         }
 
@@ -337,13 +351,16 @@
             });
             if (conf.isConfirmed) {
                 document.getElementById('loader').style.display = 'flex';
+                updateLoaderMsg("Eliminando registro...");
                 try {
                     const res = await fetchAPI({ accion: 'eliminar', id: id });
                     if (res.status === 'success') { 
                         Swal.fire('Eliminado', 'Se borró de la base de datos.', 'success'); 
                         cargarHistorial(); 
                     }
-                } catch (e) {} 
+                } catch (e) {
+                    Swal.fire('Error', 'Fallo al eliminar', 'error');
+                } 
                 finally { 
                     document.getElementById('loader').style.display = 'none'; 
                 }
