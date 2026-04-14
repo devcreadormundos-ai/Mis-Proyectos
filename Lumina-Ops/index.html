@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control | Infraestructura</title>
+    <title>Lumina Vault | Gestor de Infraestructura</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -13,237 +13,100 @@
             --text-main: #334155;
             --text-muted: #64748b;
             --primary: #2563eb;
+            --primary-hover: #1d4ed8;
             --border-color: #e2e8f0;
             --success: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
+            --input-bg: #ffffff;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 2rem;
-        }
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        h1 { font-size: 1.5rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem; }
+        .controls { display: flex; gap: 1rem; }
+        .search-bar { padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; width: 350px; outline: none; transition: border 0.2s; }
+        .search-bar:focus { border-color: var(--primary); }
+        
+        /* Botones */
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500; border: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s; font-size: 0.9rem; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { background: #f8fafc; }
+        .btn-small { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+        .btn-danger-text { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.8rem; padding: 0.2rem; }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            color: #1e293b;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .search-bar {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            width: 300px;
-            outline: none;
-        }
-
-        .search-bar:focus {
-            border-color: var(--primary);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
+        /* Grid y Tarjetas */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 1.5rem; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; padding-right: 2rem;}
+        .card-title { font-size: 1.2rem; font-weight: 600; color: #0f172a; margin-bottom: 0.3rem;}
+        .card-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+        .badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;}
         .badge.active { background-color: #d1fae5; color: var(--success); }
         .badge.paused { background-color: #fef3c7; color: var(--warning); }
+        .edit-btn { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; transition: color 0.2s; }
+        .edit-btn:hover { color: var(--primary); }
 
-        .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin: 1rem 0 0.5rem 0;
-            font-weight: 600;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 0.25rem;
-        }
-
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #f8fafc;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
+        /* Secciones Internas Tarjeta */
+        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 1.2rem 0 0.5rem 0; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2rem; }
+        .data-row { display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; padding: 0.6rem; border-radius: 4px; margin-bottom: 0.4rem; font-size: 0.85rem; border: 1px solid #f1f5f9; }
+        .data-row span { display: flex; align-items: center; gap: 0.5rem; }
+        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
         .icon-btn:hover { color: var(--primary); }
+        .hidden-data { font-family: monospace; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; cursor: pointer; letter-spacing: 1px;}
 
-        .ecosystem-icons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 0.5rem;
-        }
+        /* Ecosistema Logos */
+        .ecosystem-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.5rem; }
+        .ecosystem-item { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; text-decoration: none; color: var(--text-main); font-size: 0.75rem; width: 60px; text-align: center;}
+        .ecosystem-item img { width: 32px; height: 32px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border-color); padding: 2px; background: white; transition: transform 0.2s, border-color 0.2s;}
+        .ecosystem-item:hover img { transform: translateY(-2px); border-color: var(--primary); }
 
-        .ecosystem-icons a {
-            color: var(--text-main);
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
+        /* API Block */
+        .api-block { background: white; border: 1px solid var(--border-color); border-left: 3px solid var(--primary); padding: 0.8rem; border-radius: 4px; margin-bottom: 0.5rem; font-size: 0.85rem; }
+        .api-header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.4rem; }
+        .api-header a { color: var(--primary); text-decoration: none; }
+        .api-desc { color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; }
+        .api-token { display: flex; justify-content: space-between; background: #f8fafc; padding: 0.4rem; border-radius: 4px; }
 
-        .ecosystem-icons a:hover {
-            transform: scale(1.1);
-            color: var(--primary);
-        }
+        /* Mantenimiento Block */
+        .maint-block { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; background: #f8fafc; padding: 0.8rem; border-radius: 4px; border: 1px solid var(--border-color); }
+        
+        /* Changelog */
+        .log-entry { font-size: 0.8rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--border-color); }
+        .log-entry:last-child { border-bottom: none; }
+        .log-date { font-weight: 600; color: var(--primary); margin-right: 0.5rem; }
 
-        .edit-btn {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-        }
+        /* Modal Formularios */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); justify-content: center; align-items: flex-start; z-index: 1000; padding: 2rem; overflow-y: auto; }
+        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 800px; max-width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin: auto; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text-main); font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 6px; outline: none; background: var(--input-bg); font-size: 0.9rem;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+        
+        /* Dynamic Lists in Modal */
+        .dynamic-list { background: #f8fafc; border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
+        .dynamic-item { background: white; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px; margin-bottom: 0.8rem; position: relative; }
+        .dynamic-item-remove { position: absolute; top: 0.5rem; right: 0.5rem; }
+        .dynamic-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 
-        .hidden-data {
-            font-family: monospace;
-            background: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            width: 500px;
-            max-width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            outline: none;
-        }
-
-        .form-group input:focus { border-color: var(--primary); }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn-outline {
-            background: white;
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><i class="fa-solid fa-server"></i> Panel de Gestión</h1>
+        <h1><i class="fa-solid fa-layer-group" style="color: var(--primary)"></i> Lumina Ops Vault</h1>
         <div class="controls">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Buscar proyecto o correo...">
-            <button class="btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> Nuevo Proyecto</button>
+            <input type="text" id="searchInput" class="search-bar" placeholder="Buscar por nombre, correo, servicio...">
+            <button class="btn btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> Nuevo Proyecto</button>
         </div>
     </header>
 
@@ -252,163 +115,275 @@
 
     <div class="modal" id="projectModal">
         <div class="modal-content">
-            <h2 id="modalTitle" style="margin-bottom: 1rem;">Agregar Proyecto</h2>
+            <h2 id="modalTitle" style="margin-bottom: 1.5rem; color: #0f172a;">Agregar Nuevo Proyecto</h2>
             
-            <div class="form-group">
-                <label>Nombre del Proyecto</label>
-                <input type="text" id="p_name">
-            </div>
-            <div class="form-group">
-                <label>Estado</label>
-                <select id="p_status">
-                    <option value="active">Activo (24/7)</option>
-                    <option value="paused">En Mantenimiento</option>
-                </select>
-            </div>
-            
-            <h3 class="section-title">Bóveda de Credenciales</h3>
-            <div class="form-group">
-                <label>Correo Asignado</label>
-                <input type="text" id="p_email">
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="p_pass">
+            <div class="section-title" style="margin-top:0;">1. Identidad del Proyecto</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre del Proyecto</label>
+                    <input type="text" id="p_name" placeholder="Ej: Bot Scraper Telegram">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="p_status">
+                        <option value="active">Activo (24/7)</option>
+                        <option value="paused">En Mantenimiento / Pausado</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Descripción / Objetivo</label>
+                    <textarea id="p_desc" rows="2" placeholder="Describe qué hace este sistema..."></textarea>
+                </div>
             </div>
 
-            <h3 class="section-title">Enlaces (Ecosistema)</h3>
-            <div class="form-group">
-                <label>Link Servidor (Render/VPS)</label>
-                <input type="text" id="p_server_link" placeholder="https://...">
-            </div>
-            <div class="form-group">
-                <label>Link Github</label>
-                <input type="text" id="p_github_link" placeholder="https://github.com/...">
+            <div class="section-title">2. Bóveda de Credenciales</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Correo Asignado</label>
+                    <input type="text" id="p_email" placeholder="correo@aislado.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña del Correo</label>
+                    <input type="text" id="p_pass" placeholder="Contraseña">
+                </div>
             </div>
 
-            <h3 class="section-title">Mantenimiento y APIs</h3>
-            <div class="form-group">
-                <label>UptimeRobot Ping URL</label>
-                <input type="text" id="p_uptime">
+            <div class="section-title">3. Ecosistema (Páginas y Logos)</div>
+            <div class="dynamic-list">
+                <div class="dynamic-header">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Páginas utilizadas en este proyecto</span>
+                    <button type="button" class="btn btn-outline btn-small" onclick="addEcosystemLink()"><i class="fa-solid fa-plus"></i> Agregar Enlace</button>
+                </div>
+                <div id="ecosystem_container"></div>
             </div>
-            <div class="form-group">
-                <label>Registro de Bitácora / Nueva Modificación</label>
-                <textarea id="p_changelog" rows="3" placeholder="Ej: Se agregó reinicio cada 6 hrs..."></textarea>
+
+            <div class="section-title">4. Bóveda de APIs y Tokens</div>
+            <div class="dynamic-list">
+                <div class="dynamic-header">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Credenciales de servicios externos</span>
+                    <button type="button" class="btn btn-outline btn-small" onclick="addApiField()"><i class="fa-solid fa-plus"></i> Agregar API</button>
+                </div>
+                <div id="apis_container"></div>
+            </div>
+
+            <div class="section-title">5. Mantenimiento y Vitalidad (Triggers)</div>
+            <div class="form-grid" style="background: #f8fafc; padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                <div class="form-group">
+                    <label>Servicio Activador</label>
+                    <input type="text" id="p_maint_service" placeholder="Ej: UptimeRobot">
+                </div>
+                <div class="form-group">
+                    <label>Frecuencia</label>
+                    <input type="text" id="p_maint_freq" placeholder="Ej: Cada 5 min">
+                </div>
+                <div class="form-group">
+                    <label>URL de Monitoreo (Dashboard)</label>
+                    <input type="text" id="p_maint_monitor" placeholder="https://uptimerobot.com/dashboard...">
+                </div>
+                <div class="form-group">
+                    <label>URL a Despertar (Ping URL)</label>
+                    <input type="text" id="p_maint_ping" placeholder="https://mi-sistema.onrender.com">
+                </div>
+            </div>
+
+            <div class="section-title">6. Bitácora de Modificaciones</div>
+            <div class="dynamic-list">
+                <div class="dynamic-header">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Historial de cambios y arreglos</span>
+                    <button type="button" class="btn btn-outline btn-small" onclick="addChangelogField()"><i class="fa-solid fa-plus"></i> Agregar Registro</button>
+                </div>
+                <div id="changelog_container"></div>
             </div>
 
             <div class="modal-actions">
-                <button class="btn-outline" onclick="closeModal()">Cancelar</button>
-                <button class="btn-primary" onclick="saveProject()">Guardar Cambios</button>
+                <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> Guardar Sistema</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Datos de prueba (Estructura base que luego vendrá de Google Apps Script)
+        // Array principal que simula la base de datos temporalmente
         let projects = [
             {
                 id: 1,
-                name: "Sistema Bot Telegram",
+                name: "Gestor de Scraping Python",
+                description: "Automatización alojada en VPS para extraer datos y enviarlos por Telegram. Código base en Colab.",
                 status: "active",
-                email: "bot_aislado_01@gmail.com",
-                password: "Password123!",
-                links: {
-                    server: "https://render.com",
-                    github: "https://github.com"
+                email: "dev.scraper01@gmail.com",
+                password: "SecurePass123!",
+                links: [
+                    { name: "Render", url: "https://render.com", logo: "https://img.icons8.com/color/48/render-api.png" },
+                    { name: "GitHub", url: "https://github.com", logo: "https://img.icons8.com/fluency/48/github.png" }
+                ],
+                apis: [
+                    { name: "Telegram Bot", url: "https://core.telegram.org/bots", token: "123456:ABCDEF123456789", comment: "Token maestro del bot administrador." }
+                ],
+                maintenance: {
+                    service: "UptimeRobot",
+                    frequency: "5 Minutos",
+                    monitorUrl: "https://uptimerobot.com/dashboard",
+                    pingUrl: "https://scraper-web-vps.onrender.com"
                 },
-                api: { name: "Telegram API Token", key: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" },
-                uptime: "Ping cada 5 min - UptimeRobot",
-                changelog: "2026-04-14: Implementación de script de vaciado de RAM."
+                changelog: [
+                    { date: "14/04/2026", comment: "Se configuró el trigger de UptimeRobot." },
+                    { date: "10/04/2026", comment: "Despliegue inicial del VPS en Render." }
+                ]
             }
         ];
 
-        const grid = document.getElementById('projectGrid');
-        const searchInput = document.getElementById('searchInput');
+        let currentEditingId = null;
 
-        // Función para renderizar las tarjetas
+        // ==========================================
+        // RENDERIZADO DE LA INTERFAZ PRINCIPAL
+        // ==========================================
         function renderProjects(filter = "") {
+            const grid = document.getElementById('projectGrid');
             grid.innerHTML = "";
+            const lowerFilter = filter.toLowerCase();
+
             const filtered = projects.filter(p => 
-                p.name.toLowerCase().includes(filter.toLowerCase()) || 
-                p.email.toLowerCase().includes(filter.toLowerCase())
+                p.name.toLowerCase().includes(lowerFilter) || 
+                p.email.toLowerCase().includes(lowerFilter) ||
+                (p.description && p.description.toLowerCase().includes(lowerFilter))
             );
 
             filtered.forEach(p => {
                 const statusBadge = p.status === 'active' 
-                    ? '<span class="badge active">Activo</span>' 
-                    : '<span class="badge paused">Pausado</span>';
+                    ? '<span class="badge active"><i class="fa-solid fa-circle-check"></i> Activo</span>' 
+                    : '<span class="badge paused"><i class="fa-solid fa-triangle-exclamation"></i> Pausado</span>';
+
+                // Generar HTML de Links
+                let linksHTML = p.links.map(l => `
+                    <a href="${l.url}" target="_blank" class="ecosystem-item" title="Ir a ${l.name}">
+                        <img src="${l.logo || 'https://img.icons8.com/ios-filled/50/domain.png'}" alt="${l.name}" onerror="this.src='https://img.icons8.com/ios-filled/50/domain.png'">
+                        ${l.name}
+                    </a>
+                `).join('');
+
+                // Generar HTML de APIs
+                let apisHTML = p.apis.map(api => `
+                    <div class="api-block">
+                        <div class="api-header">
+                            <span>${api.name}</span>
+                            <a href="${api.url}" target="_blank" title="Ir a la página de la API"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                        <div class="api-desc">${api.comment}</div>
+                        <div class="api-token">
+                            <span class="hidden-data" onclick="toggleVisibility(this, '${api.token}')">••••••••••••••••</span>
+                            <button class="icon-btn" onclick="copyText('${api.token}')" title="Copiar Token"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Generar HTML de Changelog
+                let logsHTML = p.changelog.map(log => `
+                    <div class="log-entry"><span class="log-date">${log.date}</span> ${log.comment}</div>
+                `).join('');
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <div class="card-header">
-                        <div class="card-title">${p.name}</div>
+                        <div>
+                            <div class="card-title">${p.name}</div>
+                            <div class="card-desc">${p.description}</div>
+                        </div>
                         ${statusBadge}
                     </div>
+                    <button class="edit-btn" onclick="openModal(${p.id})" title="Editar Proyecto"><i class="fa-solid fa-pen"></i></button>
                     
-                    <div class="section-title">Credenciales</div>
+                    <div class="section-title">Credenciales Bases</div>
                     <div class="data-row">
-                        <span><i class="fa-regular fa-envelope"></i> ${p.email}</span>
-                        <button class="icon-btn" onclick="copyText('${p.email}')" title="Copiar Correo"><i class="fa-regular fa-copy"></i></button>
+                        <span><i class="fa-regular fa-envelope" style="color: var(--primary)"></i> ${p.email}</span>
+                        <button class="icon-btn" onclick="copyText('${p.email}')"><i class="fa-regular fa-copy"></i></button>
                     </div>
                     <div class="data-row">
-                        <span><i class="fa-solid fa-key"></i> <span class="hidden-data" onclick="toggleVisibility(this, '${p.password}')">••••••••</span></span>
-                        <button class="icon-btn" onclick="copyText('${p.password}')" title="Copiar Contraseña"><i class="fa-regular fa-copy"></i></button>
+                        <span><i class="fa-solid fa-key" style="color: var(--primary)"></i> <span class="hidden-data" onclick="toggleVisibility(this, '${p.password}')">••••••••</span></span>
+                        <button class="icon-btn" onclick="copyText('${p.password}')"><i class="fa-regular fa-copy"></i></button>
                     </div>
 
-                    <div class="section-title">Ecosistema & APIs</div>
-                    <div class="ecosystem-icons">
-                        <a href="${p.links.github}" target="_blank" title="Repositorio Base"><i class="fa-brands fa-github"></i></a>
-                        <a href="${p.links.server}" target="_blank" title="Servidor VPS"><i class="fa-solid fa-server"></i></a>
-                    </div>
-                    <div class="data-row" style="margin-top: 10px;">
-                        <span style="font-size: 0.8rem;"><b>${p.api.name}:</b> <span class="hidden-data" onclick="toggleVisibility(this, '${p.api.key}')">Ver Token</span></span>
-                        <button class="icon-btn" onclick="copyText('${p.api.key}')"><i class="fa-regular fa-copy"></i></button>
-                    </div>
+                    ${p.links.length > 0 ? `
+                    <div class="section-title">Ecosistema</div>
+                    <div class="ecosystem-grid">${linksHTML}</div>
+                    ` : ''}
 
-                    <div class="section-title">Vitalidad & Historial</div>
-                    <div style="font-size: 0.8rem; margin-bottom: 5px;"><i class="fa-solid fa-bolt" style="color:var(--warning)"></i> ${p.uptime}</div>
-                    <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 4px; border-left: 3px solid var(--primary);">
-                        <i class="fa-solid fa-clock-rotate-left"></i> ${p.changelog}
-                    </div>
+                    ${p.apis.length > 0 ? `
+                    <div class="section-title">APIs y Tokens</div>
+                    ${apisHTML}
+                    ` : ''}
 
-                    <button class="icon-btn edit-btn" onclick="openModal(${p.id})" title="Editar Proyecto"><i class="fa-solid fa-pen"></i></button>
+                    ${p.maintenance.service ? `
+                    <div class="section-title">Vitalidad 24/7</div>
+                    <div class="maint-block">
+                        <div><b><i class="fa-solid fa-bolt" style="color: var(--warning)"></i> ${p.maintenance.service}</b> (${p.maintenance.frequency})</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);"><b>Ping URL:</b> ${p.maintenance.pingUrl}</div>
+                        <div style="margin-top: 4px;"><a href="${p.maintenance.monitorUrl}" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 0.8rem;"><i class="fa-solid fa-chart-line"></i> Ver Dashboard</a></div>
+                    </div>
+                    ` : ''}
+
+                    ${p.changelog.length > 0 ? `
+                    <div class="section-title">Bitácora</div>
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; max-height: 120px; overflow-y: auto;">
+                        ${logsHTML}
+                    </div>
+                    ` : ''}
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Buscador
-        searchInput.addEventListener('input', (e) => {
-            renderProjects(e.target.value);
-        });
+        document.getElementById('searchInput').addEventListener('input', (e) => renderProjects(e.target.value));
 
-        // Utilidades de la interfaz
+        // ==========================================
+        // UTILIDADES Y PORTAPAPELES
+        // ==========================================
         function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Copiado al portapapeles: " + text);
-            });
+            navigator.clipboard.writeText(text);
+            // Pequeña notificación visual podría ir aquí
         }
 
         function toggleVisibility(element, realText) {
-            if (element.innerText === '••••••••' || element.innerText === 'Ver Token') {
+            if (element.innerText.includes('••••')) {
                 element.innerText = realText;
+                element.style.background = "#dbeafe";
             } else {
-                element.innerText = realText.length > 15 ? 'Ver Token' : '••••••••';
+                element.innerText = '••••••••••••••••';
+                element.style.background = "var(--border-color)";
             }
         }
 
-        // Control del Modal
+        // ==========================================
+        // CONTROL DEL MODAL Y FORMULARIOS DINÁMICOS
+        // ==========================================
         const modal = document.getElementById('projectModal');
-        
+
         function openModal(id = null) {
+            currentEditingId = id;
+            clearForm();
             modal.style.display = 'flex';
+
             if(id) {
-                document.getElementById('modalTitle').innerText = "Editar Proyecto";
-                // Aquí en el futuro cargaremos los datos para editar
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar Proyecto';
+                const p = projects.find(x => x.id === id);
+                
+                // Cargar datos fijos
+                document.getElementById('p_name').value = p.name;
+                document.getElementById('p_status').value = p.status;
+                document.getElementById('p_desc').value = p.description;
+                document.getElementById('p_email').value = p.email;
+                document.getElementById('p_pass').value = p.password;
+                document.getElementById('p_maint_service').value = p.maintenance.service;
+                document.getElementById('p_maint_freq').value = p.maintenance.frequency;
+                document.getElementById('p_maint_monitor').value = p.maintenance.monitorUrl;
+                document.getElementById('p_maint_ping').value = p.maintenance.pingUrl;
+
+                // Cargar arrays dinámicos
+                p.links.forEach(l => addEcosystemLink(l.name, l.url, l.logo));
+                p.apis.forEach(a => addApiField(a.name, a.url, a.token, a.comment));
+                p.changelog.forEach(c => addChangelogField(c.date, c.comment));
             } else {
-                document.getElementById('modalTitle').innerText = "Nuevo Proyecto";
-                // Limpiar campos
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> Nuevo Proyecto';
             }
         }
 
@@ -416,13 +391,112 @@
             modal.style.display = 'none';
         }
 
-        function saveProject() {
-            // En el siguiente paso, aquí conectaremos el fetch() hacia Google Apps Script
-            alert("En el futuro, esto enviará los datos a Google Sheets.");
-            closeModal();
+        function clearForm() {
+            document.querySelectorAll('#projectModal input, #projectModal textarea').forEach(el => el.value = '');
+            document.getElementById('ecosystem_container').innerHTML = '';
+            document.getElementById('apis_container').innerHTML = '';
+            document.getElementById('changelog_container').innerHTML = '';
+            document.getElementById('p_status').value = 'active';
         }
 
-        // Inicializar renderizado
+        // Funciones para inyectar HTML de campos dinámicos
+        function addEcosystemLink(name = '', url = '', logo = '') {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item form-grid';
+            div.innerHTML = `
+                <button type="button" class="btn-danger-text dynamic-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="form-group"><label>Nombre (Ej: Render)</label><input type="text" class="link-name" value="${name}"></div>
+                <div class="form-group"><label>URL de la Página</label><input type="text" class="link-url" value="${url}"></div>
+                <div class="form-group full-width"><label>URL del Logo (Opcional, termina en .png/jpg)</label><input type="text" class="link-logo" value="${logo}"></div>
+            `;
+            document.getElementById('ecosystem_container').appendChild(div);
+        }
+
+        function addApiField(name = '', url = '', token = '', comment = '') {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item form-grid';
+            div.innerHTML = `
+                <button type="button" class="btn-danger-text dynamic-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="form-group"><label>Nombre de API</label><input type="text" class="api-name" value="${name}"></div>
+                <div class="form-group"><label>Link de la Página</label><input type="text" class="api-url" value="${url}"></div>
+                <div class="form-group full-width"><label>Token / API Key</label><input type="text" class="api-token-val" value="${token}"></div>
+                <div class="form-group full-width"><label>Descripción / Para qué sirve</label><input type="text" class="api-comment" value="${comment}"></div>
+            `;
+            document.getElementById('apis_container').appendChild(div);
+        }
+
+        function addChangelogField(date = '', comment = '') {
+            if(!date) {
+                const today = new Date();
+                date = today.toLocaleDateString('es-ES');
+            }
+            const div = document.createElement('div');
+            div.className = 'dynamic-item form-grid';
+            div.innerHTML = `
+                <button type="button" class="btn-danger-text dynamic-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="form-group"><label>Fecha</label><input type="text" class="log-date-val" value="${date}"></div>
+                <div class="form-group"><label>Modificación / Arreglo</label><input type="text" class="log-comment" value="${comment}"></div>
+            `;
+            document.getElementById('changelog_container').appendChild(div);
+        }
+
+        // ==========================================
+        // GUARDADO DE DATOS (LECTURA DEL DOM)
+        // ==========================================
+        function saveProject() {
+            // Recolectar Links
+            const links = Array.from(document.getElementById('ecosystem_container').children).map(el => ({
+                name: el.querySelector('.link-name').value,
+                url: el.querySelector('.link-url').value,
+                logo: el.querySelector('.link-logo').value
+            })).filter(l => l.name !== "");
+
+            // Recolectar APIs
+            const apis = Array.from(document.getElementById('apis_container').children).map(el => ({
+                name: el.querySelector('.api-name').value,
+                url: el.querySelector('.api-url').value,
+                token: el.querySelector('.api-token-val').value,
+                comment: el.querySelector('.api-comment').value
+            })).filter(a => a.name !== "");
+
+            // Recolectar Changelog
+            const changelog = Array.from(document.getElementById('changelog_container').children).map(el => ({
+                date: el.querySelector('.log-date-val').value,
+                comment: el.querySelector('.log-comment').value
+            })).filter(c => c.comment !== "");
+
+            // Objeto completo
+            const projectData = {
+                id: currentEditingId || Date.now(),
+                name: document.getElementById('p_name').value || "Proyecto Sin Nombre",
+                description: document.getElementById('p_desc').value,
+                status: document.getElementById('p_status').value,
+                email: document.getElementById('p_email').value,
+                password: document.getElementById('p_pass').value,
+                links: links,
+                apis: apis,
+                maintenance: {
+                    service: document.getElementById('p_maint_service').value,
+                    frequency: document.getElementById('p_maint_freq').value,
+                    monitorUrl: document.getElementById('p_maint_monitor').value,
+                    pingUrl: document.getElementById('p_maint_ping').value
+                },
+                changelog: changelog
+            };
+
+            if (currentEditingId) {
+                const index = projects.findIndex(x => x.id === currentEditingId);
+                projects[index] = projectData;
+            } else {
+                projects.push(projectData);
+            }
+
+            // Nota mental: En la Fase 2, aquí enviaremos 'projectData' a Google Apps Script usando fetch()
+            closeModal();
+            renderProjects();
+        }
+
+        // Inicializar
         renderProjects();
     </script>
 </body>
