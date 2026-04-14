@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control | Infraestructura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-bar {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 300px;
+            outline: none;
+        }
+
+        .search-bar:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.active { background-color: #d1fae5; color: var(--success); }
+        .badge.paused { background-color: #fef3c7; color: var(--warning); }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 1rem 0 0.5rem 0;
+            font-weight: 600;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 0.25rem;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .icon-btn:hover { color: var(--primary); }
+
+        .ecosystem-icons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .ecosystem-icons a {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .ecosystem-icons a:hover {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+        }
+
+        .hidden-data {
+            font-family: monospace;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .form-group input:focus { border-color: var(--primary); }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-server"></i> Panel de Gestión</h1>
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Buscar proyecto o correo...">
+            <button class="btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> Nuevo Proyecto</button>
+        </div>
+    </header>
+
+    <main class="grid-container" id="projectGrid">
+        </main>
+
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <h2 id="modalTitle" style="margin-bottom: 1rem;">Agregar Proyecto</h2>
+            
+            <div class="form-group">
+                <label>Nombre del Proyecto</label>
+                <input type="text" id="p_name">
+            </div>
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="p_status">
+                    <option value="active">Activo (24/7)</option>
+                    <option value="paused">En Mantenimiento</option>
+                </select>
+            </div>
+            
+            <h3 class="section-title">Bóveda de Credenciales</h3>
+            <div class="form-group">
+                <label>Correo Asignado</label>
+                <input type="text" id="p_email">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="p_pass">
+            </div>
+
+            <h3 class="section-title">Enlaces (Ecosistema)</h3>
+            <div class="form-group">
+                <label>Link Servidor (Render/VPS)</label>
+                <input type="text" id="p_server_link" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Link Github</label>
+                <input type="text" id="p_github_link" placeholder="https://github.com/...">
+            </div>
+
+            <h3 class="section-title">Mantenimiento y APIs</h3>
+            <div class="form-group">
+                <label>UptimeRobot Ping URL</label>
+                <input type="text" id="p_uptime">
+            </div>
+            <div class="form-group">
+                <label>Registro de Bitácora / Nueva Modificación</label>
+                <textarea id="p_changelog" rows="3" placeholder="Ej: Se agregó reinicio cada 6 hrs..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-outline" onclick="closeModal()">Cancelar</button>
+                <button class="btn-primary" onclick="saveProject()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de prueba (Estructura base que luego vendrá de Google Apps Script)
+        let projects = [
+            {
+                id: 1,
+                name: "Sistema Bot Telegram",
+                status: "active",
+                email: "bot_aislado_01@gmail.com",
+                password: "Password123!",
+                links: {
+                    server: "https://render.com",
+                    github: "https://github.com"
+                },
+                api: { name: "Telegram API Token", key: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" },
+                uptime: "Ping cada 5 min - UptimeRobot",
+                changelog: "2026-04-14: Implementación de script de vaciado de RAM."
+            }
+        ];
+
+        const grid = document.getElementById('projectGrid');
+        const searchInput = document.getElementById('searchInput');
+
+        // Función para renderizar las tarjetas
+        function renderProjects(filter = "") {
+            grid.innerHTML = "";
+            const filtered = projects.filter(p => 
+                p.name.toLowerCase().includes(filter.toLowerCase()) || 
+                p.email.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filtered.forEach(p => {
+                const statusBadge = p.status === 'active' 
+                    ? '<span class="badge active">Activo</span>' 
+                    : '<span class="badge paused">Pausado</span>';
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">${p.name}</div>
+                        ${statusBadge}
+                    </div>
+                    
+                    <div class="section-title">Credenciales</div>
+                    <div class="data-row">
+                        <span><i class="fa-regular fa-envelope"></i> ${p.email}</span>
+                        <button class="icon-btn" onclick="copyText('${p.email}')" title="Copiar Correo"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="data-row">
+                        <span><i class="fa-solid fa-key"></i> <span class="hidden-data" onclick="toggleVisibility(this, '${p.password}')">••••••••</span></span>
+                        <button class="icon-btn" onclick="copyText('${p.password}')" title="Copiar Contraseña"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+
+                    <div class="section-title">Ecosistema & APIs</div>
+                    <div class="ecosystem-icons">
+                        <a href="${p.links.github}" target="_blank" title="Repositorio Base"><i class="fa-brands fa-github"></i></a>
+                        <a href="${p.links.server}" target="_blank" title="Servidor VPS"><i class="fa-solid fa-server"></i></a>
+                    </div>
+                    <div class="data-row" style="margin-top: 10px;">
+                        <span style="font-size: 0.8rem;"><b>${p.api.name}:</b> <span class="hidden-data" onclick="toggleVisibility(this, '${p.api.key}')">Ver Token</span></span>
+                        <button class="icon-btn" onclick="copyText('${p.api.key}')"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+
+                    <div class="section-title">Vitalidad & Historial</div>
+                    <div style="font-size: 0.8rem; margin-bottom: 5px;"><i class="fa-solid fa-bolt" style="color:var(--warning)"></i> ${p.uptime}</div>
+                    <div style="font-size: 0.8rem; background: #f8fafc; padding: 8px; border-radius: 4px; border-left: 3px solid var(--primary);">
+                        <i class="fa-solid fa-clock-rotate-left"></i> ${p.changelog}
+                    </div>
+
+                    <button class="icon-btn edit-btn" onclick="openModal(${p.id})" title="Editar Proyecto"><i class="fa-solid fa-pen"></i></button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Buscador
+        searchInput.addEventListener('input', (e) => {
+            renderProjects(e.target.value);
+        });
+
+        // Utilidades de la interfaz
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copiado al portapapeles: " + text);
+            });
+        }
+
+        function toggleVisibility(element, realText) {
+            if (element.innerText === '••••••••' || element.innerText === 'Ver Token') {
+                element.innerText = realText;
+            } else {
+                element.innerText = realText.length > 15 ? 'Ver Token' : '••••••••';
+            }
+        }
+
+        // Control del Modal
+        const modal = document.getElementById('projectModal');
+        
+        function openModal(id = null) {
+            modal.style.display = 'flex';
+            if(id) {
+                document.getElementById('modalTitle').innerText = "Editar Proyecto";
+                // Aquí en el futuro cargaremos los datos para editar
+            } else {
+                document.getElementById('modalTitle').innerText = "Nuevo Proyecto";
+                // Limpiar campos
+            }
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function saveProject() {
+            // En el siguiente paso, aquí conectaremos el fetch() hacia Google Apps Script
+            alert("En el futuro, esto enviará los datos a Google Sheets.");
+            closeModal();
+        }
+
+        // Inicializar renderizado
+        renderProjects();
+    </script>
+</body>
+</html>
