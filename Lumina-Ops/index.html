@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina Vault | Gestor de Infraestructura</title>
+    <title>Lumina Ops Vault</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -98,6 +98,9 @@
         .dynamic-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 
         .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+        
+        /* Loading y Alertas */
+        .loading-state { grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted); font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -111,7 +114,11 @@
     </header>
 
     <main class="grid-container" id="projectGrid">
-        </main>
+        <div class="loading-state">
+            <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary); margin-bottom: 1rem;"></i>
+            <p>Conectando con la Base de Datos...</p>
+        </div>
+    </main>
 
     <div class="modal" id="projectModal">
         <div class="modal-content">
@@ -189,53 +196,51 @@
             <div class="section-title">6. Bitácora de Modificaciones</div>
             <div class="dynamic-list">
                 <div class="dynamic-header">
-                    <span style="font-size: 0.85rem; color: var(--text-muted);">Historial de cambios y arreglos</span>
-                    <button type="button" class="btn btn-outline btn-small" onclick="addChangelogField()"><i class="fa-solid fa-plus"></i> Agregar Registro</button>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Añadir nuevo arreglo o modificación (Opcional)</span>
                 </div>
-                <div id="changelog_container"></div>
+                <div class="form-group full-width" style="margin-bottom:0;">
+                    <input type="text" id="p_new_log" placeholder="Ej: Se actualizó el token de la API hoy...">
+                </div>
             </div>
 
             <div class="modal-actions">
                 <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-                <button class="btn btn-primary" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> Guardar Sistema</button>
+                <button class="btn btn-primary" id="saveBtn" onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> Guardar Sistema</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Array principal que simula la base de datos temporalmente
-        let projects = [
-            {
-                id: 1,
-                name: "Gestor de Scraping Python",
-                description: "Automatización alojada en VPS para extraer datos y enviarlos por Telegram. Código base en Colab.",
-                status: "active",
-                email: "dev.scraper01@gmail.com",
-                password: "SecurePass123!",
-                links: [
-                    { name: "Render", url: "https://render.com", logo: "https://img.icons8.com/color/48/render-api.png" },
-                    { name: "GitHub", url: "https://github.com", logo: "https://img.icons8.com/fluency/48/github.png" }
-                ],
-                apis: [
-                    { name: "Telegram Bot", url: "https://core.telegram.org/bots", token: "123456:ABCDEF123456789", comment: "Token maestro del bot administrador." }
-                ],
-                maintenance: {
-                    service: "UptimeRobot",
-                    frequency: "5 Minutos",
-                    monitorUrl: "https://uptimerobot.com/dashboard",
-                    pingUrl: "https://scraper-web-vps.onrender.com"
-                },
-                changelog: [
-                    { date: "14/04/2026", comment: "Se configuró el trigger de UptimeRobot." },
-                    { date: "10/04/2026", comment: "Despliegue inicial del VPS en Render." }
-                ]
-            }
-        ];
-
+        // ==========================================
+        // CONFIGURACIÓN DE LA BASE DE DATOS
+        // ==========================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_23UqsfjDYVymUd48pFi8lgLaGSsqexhrALbNDDB4mhuXWLF5iHUxeyrIxze73nsp/exec';
+        
+        let projects = [];
         let currentEditingId = null;
 
         // ==========================================
-        // RENDERIZADO DE LA INTERFAZ PRINCIPAL
+        // COMUNICACIÓN CON GOOGLE SHEETS
+        // ==========================================
+        
+        // Cargar datos al iniciar la página
+        async function loadData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                projects = await response.json();
+                renderProjects();
+            } catch (error) {
+                console.error("Error al cargar la base de datos:", error);
+                document.getElementById('projectGrid').innerHTML = `
+                    <div class="loading-state" style="color: var(--danger)">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
+                        <p>Error de conexión. Verifica la URL de Google Apps Script o tus permisos.</p>
+                    </div>`;
+            }
+        }
+
+        // ==========================================
+        // RENDERIZADO DE LA INTERFAZ
         // ==========================================
         function renderProjects(filter = "") {
             const grid = document.getElementById('projectGrid');
@@ -243,26 +248,34 @@
             const lowerFilter = filter.toLowerCase();
 
             const filtered = projects.filter(p => 
-                p.name.toLowerCase().includes(lowerFilter) || 
-                p.email.toLowerCase().includes(lowerFilter) ||
+                (p.name && p.name.toLowerCase().includes(lowerFilter)) || 
+                (p.email && p.email.toLowerCase().includes(lowerFilter)) ||
                 (p.description && p.description.toLowerCase().includes(lowerFilter))
             );
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="loading-state"><p>No hay proyectos almacenados o no coinciden con la búsqueda.</p></div>`;
+                return;
+            }
 
             filtered.forEach(p => {
                 const statusBadge = p.status === 'active' 
                     ? '<span class="badge active"><i class="fa-solid fa-circle-check"></i> Activo</span>' 
                     : '<span class="badge paused"><i class="fa-solid fa-triangle-exclamation"></i> Pausado</span>';
 
-                // Generar HTML de Links
-                let linksHTML = p.links.map(l => `
+                // Evitar errores si un campo viene vacío desde Sheets
+                const safeLinks = p.links || [];
+                const safeApis = p.apis || [];
+                const safeLogs = p.changelog || [];
+
+                let linksHTML = safeLinks.map(l => `
                     <a href="${l.url}" target="_blank" class="ecosystem-item" title="Ir a ${l.name}">
                         <img src="${l.logo || 'https://img.icons8.com/ios-filled/50/domain.png'}" alt="${l.name}" onerror="this.src='https://img.icons8.com/ios-filled/50/domain.png'">
                         ${l.name}
                     </a>
                 `).join('');
 
-                // Generar HTML de APIs
-                let apisHTML = p.apis.map(api => `
+                let apisHTML = safeApis.map(api => `
                     <div class="api-block">
                         <div class="api-header">
                             <span>${api.name}</span>
@@ -276,8 +289,7 @@
                     </div>
                 `).join('');
 
-                // Generar HTML de Changelog
-                let logsHTML = p.changelog.map(log => `
+                let logsHTML = safeLogs.map(log => `
                     <div class="log-entry"><span class="log-date">${log.date}</span> ${log.comment}</div>
                 `).join('');
 
@@ -286,8 +298,8 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <div>
-                            <div class="card-title">${p.name}</div>
-                            <div class="card-desc">${p.description}</div>
+                            <div class="card-title">${p.name || 'Sin Nombre'}</div>
+                            <div class="card-desc">${p.description || ''}</div>
                         </div>
                         ${statusBadge}
                     </div>
@@ -295,7 +307,7 @@
                     
                     <div class="section-title">Credenciales Bases</div>
                     <div class="data-row">
-                        <span><i class="fa-regular fa-envelope" style="color: var(--primary)"></i> ${p.email}</span>
+                        <span><i class="fa-regular fa-envelope" style="color: var(--primary)"></i> ${p.email || '-'}</span>
                         <button class="icon-btn" onclick="copyText('${p.email}')"><i class="fa-regular fa-copy"></i></button>
                     </div>
                     <div class="data-row">
@@ -303,17 +315,10 @@
                         <button class="icon-btn" onclick="copyText('${p.password}')"><i class="fa-regular fa-copy"></i></button>
                     </div>
 
-                    ${p.links.length > 0 ? `
-                    <div class="section-title">Ecosistema</div>
-                    <div class="ecosystem-grid">${linksHTML}</div>
-                    ` : ''}
+                    ${safeLinks.length > 0 ? `<div class="section-title">Ecosistema</div><div class="ecosystem-grid">${linksHTML}</div>` : ''}
+                    ${safeApis.length > 0 ? `<div class="section-title">APIs y Tokens</div>${apisHTML}` : ''}
 
-                    ${p.apis.length > 0 ? `
-                    <div class="section-title">APIs y Tokens</div>
-                    ${apisHTML}
-                    ` : ''}
-
-                    ${p.maintenance.service ? `
+                    ${p.maintenance && p.maintenance.service ? `
                     <div class="section-title">Vitalidad 24/7</div>
                     <div class="maint-block">
                         <div><b><i class="fa-solid fa-bolt" style="color: var(--warning)"></i> ${p.maintenance.service}</b> (${p.maintenance.frequency})</div>
@@ -322,7 +327,7 @@
                     </div>
                     ` : ''}
 
-                    ${p.changelog.length > 0 ? `
+                    ${safeLogs.length > 0 ? `
                     <div class="section-title">Bitácora</div>
                     <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; max-height: 120px; overflow-y: auto;">
                         ${logsHTML}
@@ -339,8 +344,8 @@
         // UTILIDADES Y PORTAPAPELES
         // ==========================================
         function copyText(text) {
+            if(!text) return;
             navigator.clipboard.writeText(text);
-            // Pequeña notificación visual podría ir aquí
         }
 
         function toggleVisibility(element, realText) {
@@ -365,23 +370,23 @@
 
             if(id) {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar Proyecto';
-                const p = projects.find(x => x.id === id);
+                const p = projects.find(x => x.id == id);
                 
-                // Cargar datos fijos
-                document.getElementById('p_name').value = p.name;
-                document.getElementById('p_status').value = p.status;
-                document.getElementById('p_desc').value = p.description;
-                document.getElementById('p_email').value = p.email;
-                document.getElementById('p_pass').value = p.password;
-                document.getElementById('p_maint_service').value = p.maintenance.service;
-                document.getElementById('p_maint_freq').value = p.maintenance.frequency;
-                document.getElementById('p_maint_monitor').value = p.maintenance.monitorUrl;
-                document.getElementById('p_maint_ping').value = p.maintenance.pingUrl;
+                document.getElementById('p_name').value = p.name || '';
+                document.getElementById('p_status').value = p.status || 'active';
+                document.getElementById('p_desc').value = p.description || '';
+                document.getElementById('p_email').value = p.email || '';
+                document.getElementById('p_pass').value = p.password || '';
+                
+                if(p.maintenance) {
+                    document.getElementById('p_maint_service').value = p.maintenance.service || '';
+                    document.getElementById('p_maint_freq').value = p.maintenance.frequency || '';
+                    document.getElementById('p_maint_monitor').value = p.maintenance.monitorUrl || '';
+                    document.getElementById('p_maint_ping').value = p.maintenance.pingUrl || '';
+                }
 
-                // Cargar arrays dinámicos
-                p.links.forEach(l => addEcosystemLink(l.name, l.url, l.logo));
-                p.apis.forEach(a => addApiField(a.name, a.url, a.token, a.comment));
-                p.changelog.forEach(c => addChangelogField(c.date, c.comment));
+                if(p.links) p.links.forEach(l => addEcosystemLink(l.name, l.url, l.logo));
+                if(p.apis) p.apis.forEach(a => addApiField(a.name, a.url, a.token, a.comment));
             } else {
                 document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus"></i> Nuevo Proyecto';
             }
@@ -395,11 +400,9 @@
             document.querySelectorAll('#projectModal input, #projectModal textarea').forEach(el => el.value = '');
             document.getElementById('ecosystem_container').innerHTML = '';
             document.getElementById('apis_container').innerHTML = '';
-            document.getElementById('changelog_container').innerHTML = '';
             document.getElementById('p_status').value = 'active';
         }
 
-        // Funciones para inyectar HTML de campos dinámicos
         function addEcosystemLink(name = '', url = '', logo = '') {
             const div = document.createElement('div');
             div.className = 'dynamic-item form-grid';
@@ -407,7 +410,7 @@
                 <button type="button" class="btn-danger-text dynamic-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
                 <div class="form-group"><label>Nombre (Ej: Render)</label><input type="text" class="link-name" value="${name}"></div>
                 <div class="form-group"><label>URL de la Página</label><input type="text" class="link-url" value="${url}"></div>
-                <div class="form-group full-width"><label>URL del Logo (Opcional, termina en .png/jpg)</label><input type="text" class="link-logo" value="${logo}"></div>
+                <div class="form-group full-width"><label>URL del Logo (.png/jpg)</label><input type="text" class="link-logo" value="${logo}"></div>
             `;
             document.getElementById('ecosystem_container').appendChild(div);
         }
@@ -420,38 +423,25 @@
                 <div class="form-group"><label>Nombre de API</label><input type="text" class="api-name" value="${name}"></div>
                 <div class="form-group"><label>Link de la Página</label><input type="text" class="api-url" value="${url}"></div>
                 <div class="form-group full-width"><label>Token / API Key</label><input type="text" class="api-token-val" value="${token}"></div>
-                <div class="form-group full-width"><label>Descripción / Para qué sirve</label><input type="text" class="api-comment" value="${comment}"></div>
+                <div class="form-group full-width"><label>Descripción</label><input type="text" class="api-comment" value="${comment}"></div>
             `;
             document.getElementById('apis_container').appendChild(div);
         }
 
-        function addChangelogField(date = '', comment = '') {
-            if(!date) {
-                const today = new Date();
-                date = today.toLocaleDateString('es-ES');
-            }
-            const div = document.createElement('div');
-            div.className = 'dynamic-item form-grid';
-            div.innerHTML = `
-                <button type="button" class="btn-danger-text dynamic-item-remove" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
-                <div class="form-group"><label>Fecha</label><input type="text" class="log-date-val" value="${date}"></div>
-                <div class="form-group"><label>Modificación / Arreglo</label><input type="text" class="log-comment" value="${comment}"></div>
-            `;
-            document.getElementById('changelog_container').appendChild(div);
-        }
+        // ==========================================
+        // GUARDADO DE DATOS (ENVIAR A SHEETS)
+        // ==========================================
+        async function saveProject() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+            saveBtn.disabled = true;
 
-        // ==========================================
-        // GUARDADO DE DATOS (LECTURA DEL DOM)
-        // ==========================================
-        function saveProject() {
-            // Recolectar Links
             const links = Array.from(document.getElementById('ecosystem_container').children).map(el => ({
                 name: el.querySelector('.link-name').value,
                 url: el.querySelector('.link-url').value,
                 logo: el.querySelector('.link-logo').value
             })).filter(l => l.name !== "");
 
-            // Recolectar APIs
             const apis = Array.from(document.getElementById('apis_container').children).map(el => ({
                 name: el.querySelector('.api-name').value,
                 url: el.querySelector('.api-url').value,
@@ -459,16 +449,9 @@
                 comment: el.querySelector('.api-comment').value
             })).filter(a => a.name !== "");
 
-            // Recolectar Changelog
-            const changelog = Array.from(document.getElementById('changelog_container').children).map(el => ({
-                date: el.querySelector('.log-date-val').value,
-                comment: el.querySelector('.log-comment').value
-            })).filter(c => c.comment !== "");
-
-            // Objeto completo
             const projectData = {
-                id: currentEditingId || Date.now(),
-                name: document.getElementById('p_name').value || "Proyecto Sin Nombre",
+                id: currentEditingId || Date.now(), // ID único basado en el tiempo si es nuevo
+                name: document.getElementById('p_name').value,
                 description: document.getElementById('p_desc').value,
                 status: document.getElementById('p_status').value,
                 email: document.getElementById('p_email').value,
@@ -481,23 +464,30 @@
                     monitorUrl: document.getElementById('p_maint_monitor').value,
                     pingUrl: document.getElementById('p_maint_ping').value
                 },
-                changelog: changelog
+                newLog: document.getElementById('p_new_log').value // Envía el comentario a la bitácora
             };
 
-            if (currentEditingId) {
-                const index = projects.findIndex(x => x.id === currentEditingId);
-                projects[index] = projectData;
-            } else {
-                projects.push(projectData);
+            try {
+                // Enviar datos al Script
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(projectData)
+                });
+                
+                // Recargar toda la data limpia desde Sheets para evitar desincronización
+                await loadData();
+                closeModal();
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Hubo un error al guardar. Revisa la consola.");
+            } finally {
+                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar Sistema';
+                saveBtn.disabled = false;
             }
-
-            // Nota mental: En la Fase 2, aquí enviaremos 'projectData' a Google Apps Script usando fetch()
-            closeModal();
-            renderProjects();
         }
 
-        // Inicializar
-        renderProjects();
+        // Arrancar el sistema
+        loadData();
     </script>
 </body>
 </html>
