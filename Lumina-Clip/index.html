@@ -166,7 +166,7 @@
             text-align: center;
         }
 
-        b { color: var(--accent-color); }
+        b { color: var(--accent-color); font-size: 14px;}
     </style>
 </head>
 <body>
@@ -194,7 +194,7 @@
             </button>
         </div>
 
-        <p class="marker-hint">Usa <b>**</b> al inicio y al final del texto que deseas aislar.</p>
+        <p class="marker-hint">Usa <b>[</b> al inicio y <b>]</b> al final del texto que deseas aislar.</p>
     </div>
 
     <div id="toast" class="toast">¡Copiado con éxito!</div>
@@ -203,18 +203,18 @@
         const textInput = document.getElementById('textInput');
         const toast = document.getElementById('toast');
 
-        // Función para extraer texto entre marcadores **
+        // Función para extraer texto entre marcadores [ ]
         function extractText() {
             const content = textInput.value;
-            // Busca texto entre los símbolos **
-            const regex = /\*\*(.*?)\*\*/s;
+            // Busca texto entre los corchetes [ ]
+            const regex = /\[(.*?)\]/s;
             const match = content.match(regex);
 
             if (match && match[1]) {
                 textInput.value = match[1].trim();
                 showToast("Texto extraído y limpio");
             } else {
-                alert("No se encontraron marcadores ** en el texto.");
+                alert("No se encontraron los corchetes [ ] en el texto.");
             }
         }
 
@@ -250,8 +250,7 @@
             }, 2500);
         }
 
-        // Prevenir selección accidental fuera del contenedor (Opcional)
-        // Esto ayuda a que en móvil el foco se mantenga en el input
+        // Prevenir selección accidental fuera del contenedor
         textInput.addEventListener('click', () => {
             textInput.focus();
         });
