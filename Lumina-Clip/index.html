@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina-Clip | Sistema de Extracción Profesional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Globales - Modo Oscuro Lumina */
+        :root {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Contenedor Principal */
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Área de Texto Inteligente */
+        .clip-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            background-color: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--text-primary);
+            font-size: 16px;
+            resize: none;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* Panel de Acciones */
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        /* Botón Copiar Maestro */
+        .btn-copy {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            grid-column: span 2; /* Ocupa todo el ancho */
+            font-size: 16px;
+        }
+
+        .btn-copy:active {
+            transform: scale(0.98);
+            background-color: var(--accent-hover);
+        }
+
+        /* Botón Extraer/Limpiar */
+        .btn-clean {
+            background-color: #334155;
+            color: white;
+        }
+
+        /* Botón Borrar */
+        .btn-clear {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Notificación Flotante */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Indicador de Marcador */
+        .marker-hint {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        b { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>Lumina-Clip</h1>
+            <p>Extracción y Copiado Seguro</p>
+        </header>
+
+        <div class="clip-box">
+            <textarea id="textInput" placeholder="Pega tu texto aquí..."></textarea>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-copy" onclick="copyText()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                Copiar Todo el Contenedor
+            </button>
+            <button class="btn btn-clean" onclick="extractText()">
+                Extraer Marcado
+            </button>
+            <button class="btn btn-clear" onclick="clearAll()">
+                Borrar Todo
+            </button>
+        </div>
+
+        <p class="marker-hint">Usa <b>**</b> al inicio y al final del texto que deseas aislar.</p>
+    </div>
+
+    <div id="toast" class="toast">¡Copiado con éxito!</div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const toast = document.getElementById('toast');
+
+        // Función para extraer texto entre marcadores **
+        function extractText() {
+            const content = textInput.value;
+            // Busca texto entre los símbolos **
+            const regex = /\*\*(.*?)\*\*/s;
+            const match = content.match(regex);
+
+            if (match && match[1]) {
+                textInput.value = match[1].trim();
+                showToast("Texto extraído y limpio");
+            } else {
+                alert("No se encontraron marcadores ** en el texto.");
+            }
+        }
+
+        // Función para copiar el contenido del contenedor al portapapeles
+        function copyText() {
+            if (textInput.value.trim() === "") {
+                return;
+            }
+
+            textInput.select();
+            textInput.setSelectionRange(0, 99999); // Para móviles
+
+            navigator.clipboard.writeText(textInput.value).then(() => {
+                showToast("¡Copiado al portapapeles!");
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+
+        // Función para limpiar todo
+        function clearAll() {
+            if (confirm("¿Estás seguro de borrar todo el contenido?")) {
+                textInput.value = "";
+            }
+        }
+
+        // Función para mostrar la notificación elegante
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Prevenir selección accidental fuera del contenedor (Opcional)
+        // Esto ayuda a que en móvil el foco se mantenga en el input
+        textInput.addEventListener('click', () => {
+            textInput.focus();
+        });
+    </script>
+</body>
+</html>
