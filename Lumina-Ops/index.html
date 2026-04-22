@@ -101,6 +101,27 @@
         
         /* Loading y Alertas */
         .loading-state { grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted); font-size: 1.1rem; }
+
+        /* ==========================================
+           ADAPTACIÓN PARA TELÉFONOS (MÓVILES)
+           ========================================== */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .controls { width: 100%; flex-direction: column; }
+            .search-bar { width: 100%; }
+            .controls .btn { width: 100%; justify-content: center; }
+            .grid-container { grid-template-columns: 1fr; }
+            .card-header { flex-direction: column; gap: 0.8rem; padding-right: 0; }
+            .edit-btn { top: 1rem; right: 1rem; }
+            .modal { padding: 1rem; }
+            .modal-content { padding: 1.5rem 1rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: auto; }
+            .api-token { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .data-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .data-row button { align-self: flex-end; margin-top: -30px; }
+        }
     </style>
 </head>
 <body>
